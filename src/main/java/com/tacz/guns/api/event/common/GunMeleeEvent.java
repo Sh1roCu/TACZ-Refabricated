@@ -18,9 +18,20 @@ public class GunMeleeEvent extends BaseEvent implements KubeJSGunEventPoster<Gun
 
     public static final Event<Callback> CALLBACK = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
         for (Callback callback : callbacks) {
-            callback.post(event);
+            try {
+                callback.post(event);
+            } catch (AbstractMethodError e) {
+                // 兼容 YSM 等 mod 注册的 callback 不兼容时，避免崩溃，直接跳过
+                System.err.println("[TACZ] 跳过不兼容的GunMeleeEvent.Callback: " + callback.getClass() + ", " + e);
+            } catch (Throwable t) {
+                // 其他异常
+                t.printStackTrace();
+            }
         }
     });
+
+    // 兼容 YSM: 添加EVENT字段
+    public static final Event<Callback> EVENT = CALLBACK;
 
     public interface Callback {
         void post(GunMeleeEvent event);
