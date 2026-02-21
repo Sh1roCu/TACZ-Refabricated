@@ -2,14 +2,14 @@ package com.tacz.guns.client.resource.manager;
 
 import com.google.common.collect.Maps;
 import com.google.gson.JsonParseException;
+import com.google.gson.stream.JsonReader;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.client.resource.pojo.PackInfo;
 import com.tacz.guns.resource.CommonAssetsManager;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
@@ -28,9 +28,11 @@ public class PackInfoManager extends SimplePreparableReloadListener<Map<String, 
         Map<String, PackInfo> output = Maps.newHashMap();
 
         for (String namespaces : manager.getNamespaces()) {
-            manager.getResource(ResourceLocation.fromNamespaceAndPath(namespaces, PACK_INFO_NAME)).ifPresent(rl -> {
+            manager.getResource(Identifier.fromNamespaceAndPath(namespaces, PACK_INFO_NAME)).ifPresent(rl -> {
                 try (Reader reader = rl.openAsReader()) {
-                    PackInfo packInfo = GsonHelper.fromJson(CommonAssetsManager.GSON, reader, PackInfo.class, true);
+                    JsonReader jsonReader = new JsonReader(reader);
+                    jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+                    PackInfo packInfo = CommonAssetsManager.GSON.fromJson(jsonReader, PackInfo.class);
                     PackInfo packInfo1 = output.put(namespaces, packInfo);
                     if (packInfo1 != null) {
                         throw new IllegalStateException("Duplicate data file ignored with namespace " + namespaces);
@@ -53,10 +55,10 @@ public class PackInfoManager extends SimplePreparableReloadListener<Map<String, 
         return dataMap.get(namespace);
     }
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "packinfo_manager");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "packinfo_manager");
 
     @Override
-    public ResourceLocation getFabricId() {
+    public Identifier getFabricId() {
         return ID;
     }
 }

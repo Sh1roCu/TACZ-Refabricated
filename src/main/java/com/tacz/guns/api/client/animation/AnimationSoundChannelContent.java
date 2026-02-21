@@ -1,12 +1,12 @@
 package com.tacz.guns.api.client.animation;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Arrays;
 
 public class AnimationSoundChannelContent {
     public double[] keyframeTimeS;
-    public ResourceLocation[] keyframeSoundName;
+    public Identifier[] keyframeSoundName;
 
     public AnimationSoundChannelContent() {
     }

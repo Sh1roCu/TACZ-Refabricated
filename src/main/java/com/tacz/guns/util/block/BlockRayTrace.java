@@ -5,7 +5,7 @@ import com.tacz.guns.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -30,7 +30,7 @@ public final class BlockRayTrace {
             BlockState blockState = level.getBlockState(blockPos);
             // 这里添加判断方块是否可以穿透，如果可以穿透则返回 null
             List<String> ids = AmmoConfig.PASS_THROUGH_BLOCKS.get();
-            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(blockState.getBlock());
+            Identifier blockId = BuiltInRegistries.BLOCK.getKey(blockState.getBlock());
             if (blockId != null && ids.contains(blockId.toString())) {
                 return null;
             }
@@ -41,7 +41,7 @@ public final class BlockRayTrace {
             return getBlockHitResult(level, rayTraceContext, blockPos, blockState);
         }, (rayTraceContext) -> {
             Vec3 vec3 = rayTraceContext.getFrom().subtract(rayTraceContext.getTo());
-            return BlockHitResult.miss(rayTraceContext.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(rayTraceContext.getTo()));
+            return BlockHitResult.miss(rayTraceContext.getTo(), Direction.getApproximateNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(rayTraceContext.getTo()));
         });
     }
 

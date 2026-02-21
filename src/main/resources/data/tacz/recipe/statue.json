@@ -9,14 +9,8 @@
     " C "
   ],
   "key": {
-    "_": {
-      "item": "minecraft:quartz_slab"
-    },
-    "Q": {
-      "item": "minecraft:quartz_stairs"
-    },
-    "C": {
-      "item": "minecraft:chiseled_quartz_block"
-    }
+    "_": "minecraft:quartz_slab",
+    "Q": "minecraft:quartz_stairs",
+    "C": "minecraft:chiseled_quartz_block"
   }
 }

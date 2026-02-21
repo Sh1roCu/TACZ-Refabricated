@@ -11,11 +11,6 @@ public class GunModSubtype {
         return new ISubtypeInterpreter<>() {
             @Override
             public @Nullable Object getSubtypeData(ItemStack stack, UidContext uidContext) {
-                return getLegacyStringSubtypeInfo(stack, uidContext);
-            }
-
-            @Override
-            public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext uidContext) {
                 if (stack.getItem() instanceof IAmmo iAmmo) {
                     return iAmmo.getAmmoId(stack).toString();
                 }
@@ -28,11 +23,6 @@ public class GunModSubtype {
         return new ISubtypeInterpreter<>() {
             @Override
             public @Nullable Object getSubtypeData(ItemStack stack, UidContext uidContext) {
-                return getLegacyStringSubtypeInfo(stack, uidContext);
-            }
-
-            @Override
-            public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext uidContext) {
                 if (stack.getItem() instanceof IGun iGun) {
                     return iGun.getGunId(stack).toString();
                 }
@@ -45,11 +35,6 @@ public class GunModSubtype {
         return new ISubtypeInterpreter<>() {
             @Override
             public @Nullable Object getSubtypeData(ItemStack stack, UidContext uidContext) {
-                return getLegacyStringSubtypeInfo(stack, uidContext);
-            }
-
-            @Override
-            public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext uidContext) {
                 if (stack.getItem() instanceof IAttachment iAttachment) {
                     return iAttachment.getAttachmentId(stack).toString();
                 }
@@ -62,11 +47,6 @@ public class GunModSubtype {
         return new ISubtypeInterpreter<>() {
             @Override
             public @Nullable Object getSubtypeData(ItemStack stack, UidContext uidContext) {
-                return getLegacyStringSubtypeInfo(stack, uidContext);
-            }
-
-            @Override
-            public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext uidContext) {
                 if (stack.getItem() instanceof IBlock iBlock) {
                     return iBlock.getBlockId(stack).toString();
                 }
@@ -79,11 +59,6 @@ public class GunModSubtype {
         return new ISubtypeInterpreter<>() {
             @Override
             public @Nullable Object getSubtypeData(ItemStack stack, UidContext uidContext) {
-                return getLegacyStringSubtypeInfo(stack, uidContext);
-            }
-
-            @Override
-            public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext uidContext) {
                 if (stack.getItem() instanceof IAmmoBox iAmmoBox) {
                     if (iAmmoBox.isAllTypeCreative(stack)) {
                         return "all_type_creative";

@@ -6,7 +6,7 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.network.message.ClientMessagePlayerCrawl;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.ItemStack;
 
@@ -40,7 +40,7 @@ public class LocalPlayerCrawl {
         if (player.isSpectator() || player.isPassenger() || !player.onGround()) {
             return;
         }
-        ResourceLocation gunId = iGun.getGunId(mainHandItem);
+        Identifier gunId = iGun.getGunId(mainHandItem);
         TimelessAPI.getClientGunIndex(gunId).ifPresent(gunIndex -> {
             this.isCrawling = isCrawl;
             this.crawCooldownTicks = COOLDOWN_TICKS;
@@ -66,7 +66,7 @@ public class LocalPlayerCrawl {
             return;
         }
         // 如果获取不到 gunIndex，则取消趴下状态
-        ResourceLocation gunId = iGun.getGunId(mainHandItem);
+        Identifier gunId = iGun.getGunId(mainHandItem);
         if (TimelessAPI.getCommonGunIndex(gunId).isEmpty()) {
             isCrawling = false;
             this.setCrawlPose();

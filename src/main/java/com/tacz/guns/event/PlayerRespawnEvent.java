@@ -11,7 +11,7 @@ public class PlayerRespawnEvent {
         // 重生自动换弹
         if (!GunConfig.AUTO_RELOAD_WHEN_RESPAWN.get()) return;
 
-        newPlayer.getInventory().items.forEach(itemStack -> {
+        newPlayer.getInventory().getNonEquipmentItems().forEach(itemStack -> {
             if (!(itemStack.getItem() instanceof IGun)) return;
 
             var api = new ModernKineticGunScriptAPI();

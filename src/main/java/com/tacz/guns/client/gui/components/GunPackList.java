@@ -1,7 +1,7 @@
 package com.tacz.guns.client.gui.components;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.tacz.guns.client.gui.GunSmithTableScreen;
 import com.tacz.guns.client.resource.ClientAssetsManager;
 import com.tacz.guns.client.resource.pojo.PackInfo;
@@ -16,8 +16,9 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.util.*;
@@ -29,17 +30,12 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
     private final Checkbox byHandCheckbox;
     private final EditBox byName;
 
-    /*@Override
-    protected void renderListBackground(GuiGraphics pGuiGraphics) {
-        super.renderListBackground(pGuiGraphics);
-    }*/
-
     public GunPackList(Minecraft pMinecraft, int pWidth, int pHeight, int pY0, int pY1, int pItemHeight,
-                       Map<ResourceLocation, List<ResourceLocation>> recipes, GunSmithTableScreen parent) {
+                       Map<Identifier, List<Identifier>> recipes, GunSmithTableScreen parent) {
         super(pMinecraft, pWidth, pHeight, pY0, pItemHeight);
         this.parent = parent;
         Set<String> namespaces = new HashSet<>();
-        for (List<ResourceLocation> entry : recipes.values()) {
+        for (List<Identifier> entry : recipes.values()) {
             entry.forEach((resourceLocation) -> namespaces.add(resourceLocation.getNamespace()));
         }
 
@@ -53,8 +49,8 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
 
         this.byHandCheckbox = new Checkbox(0, 0, 10, 10, Component.translatable("gui.tacz.gun_smith_table.filter.handgun"), false) {
             @Override
-            public void onPress() {
-                super.onPress();
+            public void onPress(net.minecraft.client.input.InputWithModifiers input) {
+                super.onPress(input);
                 parent.init();
                 parent.setIndexPage(0);
             }
@@ -63,8 +59,8 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
 
         Checkbox checkbox1 = new Checkbox(0, 0, 10, 10, Component.translatable("gui.tacz.gun_smith_table.filter.all"), true) {
             @Override
-            public void onPress() {
-                super.onPress();
+            public void onPress(net.minecraft.client.input.InputWithModifiers input) {
+                super.onPress(input);
                 gunPackList.forEach((checkbox) -> checkbox.selected = this.selected);
                 updateSelectedNamespaces();
             }
@@ -77,8 +73,8 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
 
             Checkbox checkbox = new Checkbox(0, 0, 10, 10, name, namespace, true) {
                 @Override
-                public void onPress() {
-                    super.onPress();
+                public void onPress(net.minecraft.client.input.InputWithModifiers input) {
+                    super.onPress(input);
                     checkbox1.selected = gunPackList.stream().allMatch(Checkbox::selected);
                     updateSelectedNamespaces();
                 }
@@ -128,20 +124,19 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
         pGuiGraphics.disableScissor();
         this.renderListSeparators(pGuiGraphics);
 
-        int i2 = this.getMaxScroll();
+        int i2 = this.maxScrollAmount();
         if (i2 > 0) {
-            int j2 = (int) ((float) ((this.getBottom() - this.getY()) * (this.getBottom() - this.getY())) / (float) this.getMaxPosition());
+            int j2 = (int) ((float) ((this.getBottom() - this.getY()) * (this.getBottom() - this.getY())) / (float) this.contentHeight());
             j2 = Mth.clamp(j2, 32, this.getBottom() - this.getY() - 8);
-            int k1 = (int) this.getScrollAmount() * (this.getBottom() - this.getY() - j2) / i2 + this.getY();
+            int k1 = (int) this.scrollAmount() * (this.getBottom() - this.getY() - j2) / i2 + this.getY();
             if (k1 < this.getY()) {
                 k1 = this.getY();
             }
             pGuiGraphics.fill(i, k1, j, k1 + j2, -8355712);
             pGuiGraphics.fill(i, k1, j - 1, k1 + j2 - 1, -4144960);
         }
-        this.renderDecorations(pGuiGraphics, pMouseX, pMouseY);
 
-        RenderSystem.disableBlend();
+        GlStateManager._disableBlend();
     }
 
     public int getRowLeft() {
@@ -165,9 +160,9 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
         }
 
         @Override
-        public void render(GuiGraphics pGuiGraphics, int pIndex, int pTop, int pLeft, int pWidth, int pHeight, int pMouseX, int pMouseY, boolean pHovering, float pPartialTick) {
-            this.widget.setX(pLeft);
-            this.widget.setY(pTop);
+        public void renderContent(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, boolean pHovering, float pPartialTick) {
+            this.widget.setX(this.getContentX());
+            this.widget.setY(this.getContentY());
             this.widget.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
         }
 
@@ -178,10 +173,10 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
     }
 
     public static class Checkbox extends AbstractButton {
-        private static final ResourceLocation CHECKBOX = ResourceLocation.withDefaultNamespace("textures/gui/sprites/widget/checkbox.png");
-        private static final ResourceLocation CHECKBOX_HIGHLIGHTED = ResourceLocation.withDefaultNamespace("textures/gui/sprites/widget/checkbox_highlighted.png");
-        private static final ResourceLocation CHECKBOX_SELECTED = ResourceLocation.withDefaultNamespace("textures/gui/sprites/widget/checkbox_selected.png");
-        private static final ResourceLocation CHECKBOX_SELECTED_HIGHLIGHTED = ResourceLocation.withDefaultNamespace("textures/gui/sprites/widget/checkbox_selected_highlighted.png");
+        private static final Identifier CHECKBOX = Identifier.withDefaultNamespace("textures/gui/sprites/widget/checkbox.png");
+        private static final Identifier CHECKBOX_HIGHLIGHTED = Identifier.withDefaultNamespace("textures/gui/sprites/widget/checkbox_highlighted.png");
+        private static final Identifier CHECKBOX_SELECTED = Identifier.withDefaultNamespace("textures/gui/sprites/widget/checkbox_selected.png");
+        private static final Identifier CHECKBOX_SELECTED_HIGHLIGHTED = Identifier.withDefaultNamespace("textures/gui/sprites/widget/checkbox_selected_highlighted.png");
         protected boolean selected;
         protected final boolean showLabel;
         private String id;
@@ -205,7 +200,7 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
             return id;
         }
 
-        public void onPress() {
+        public void onPress(net.minecraft.client.input.InputWithModifiers input) {
             this.selected = !this.selected;
         }
 
@@ -225,13 +220,14 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
 
         }
 
-        public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        @Override
+        public void renderContents(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
             Minecraft minecraft = Minecraft.getInstance();
-            RenderSystem.enableDepthTest();
+            GlStateManager._enableDepthTest();
             Font font = minecraft.font;
-            pGuiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-            RenderSystem.enableBlend();
-            ResourceLocation texture;
+            // TODO: In 1.21.11 GuiGraphics.setColor was removed; alpha tinting not applied
+            GlStateManager._enableBlend();
+            Identifier texture;
             if (this.isFocused()) {
                 if (this.selected) {
                     texture = CHECKBOX_SELECTED_HIGHLIGHTED;
@@ -245,8 +241,7 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
                     texture = CHECKBOX;
                 }
             }
-            pGuiGraphics.blit(texture, this.getX(), this.getY(), 0.0F, 0.0F, 10, 10, 10, 10);
-            pGuiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+            pGuiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture, this.getX(), this.getY(), 0.0F, 0.0F, 10, 10, 10, 10);
             if (this.showLabel) {
                 pGuiGraphics.drawString(font, this.getMessage(), this.getX() + 24, this.getY() + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
             }

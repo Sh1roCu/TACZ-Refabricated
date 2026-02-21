@@ -8,13 +8,13 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 public record ClientMessagePlayerCrawl(boolean isCrawl) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<ClientMessagePlayerCrawl> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "client_player_crawl")
+            Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "client_player_crawl")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientMessagePlayerCrawl> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL, message -> message.isCrawl,

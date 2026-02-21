@@ -6,14 +6,14 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 public class ClientMessagePlayerMelee implements CustomPacketPayload {
     public static final ClientMessagePlayerMelee INSTANCE = new ClientMessagePlayerMelee();
     public static final CustomPacketPayload.Type<ClientMessagePlayerMelee> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "client_player_melee")
+            Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "client_player_melee")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientMessagePlayerMelee> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 

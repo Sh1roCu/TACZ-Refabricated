@@ -1,9 +1,9 @@
 package cn.sh1rocu.tacz.api.extension;
 
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 
 public interface IMinecart {
     default boolean tacz$canBeRidden() {
-        return ((AbstractMinecart) this).getMinecartType() == AbstractMinecart.Type.RIDEABLE;
+        return ((AbstractMinecart) this).isRideable();
     }
 }

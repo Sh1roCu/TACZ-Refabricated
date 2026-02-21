@@ -1,21 +1,15 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 4
     },
     {
-      "item": {
-        "tag": "c:dusts/redstone"
-      },
+      "item": "#c:dusts/redstone",
       "count": 4
     },
     {
-      "item": {
-        "tag": "c:glass_blocks"
-      },
+      "item": "#c:glass_blocks",
       "count": 2
     }
   ],

@@ -2,7 +2,7 @@ package com.tacz.guns.resource.pojo;
 
 import com.google.gson.annotations.SerializedName;
 import com.tacz.guns.GunMod;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
 
@@ -11,13 +11,13 @@ public class BlockIndexPOJO {
     private String name;
 
     @SerializedName("display")
-    private ResourceLocation display;
+    private Identifier display;
 
     @SerializedName("data")
-    private ResourceLocation data;
+    private Identifier data;
 
     @SerializedName("id")
-    private ResourceLocation id = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "gun_smith_table");
+    private Identifier id = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "gun_smith_table");
 
     @SerializedName("stack_size")
     private int stackSize;
@@ -30,11 +30,11 @@ public class BlockIndexPOJO {
         return name;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
-    public ResourceLocation getDisplay() {
+    public Identifier getDisplay() {
         return display;
     }
 
@@ -42,7 +42,7 @@ public class BlockIndexPOJO {
         return stackSize;
     }
 
-    public ResourceLocation getData() {
+    public Identifier getData() {
         return data;
     }
 

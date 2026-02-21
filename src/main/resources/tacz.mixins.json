@@ -15,6 +15,7 @@
     "client.GameRendererMixin",
     "client.HumanoidModelMixin",
     "client.ItemInHandLayerMixin",
+    "client.LivingEntityRendererMixin",
     "client.ItemInHandRendererMixin",
     "client.LanguageMixin",
     "client.LocalPlayerMixin",

@@ -84,9 +84,9 @@ public class RangedWrapper implements IItemHandlerModifiable {
         ListTag nbtTagList = new ListTag();
         for (int i = 0; i < getSlots(); i++) {
             if (!getStackInSlot(i).isEmpty()) {
-                CompoundTag itemTag = new CompoundTag();
+                CompoundTag itemTag = (CompoundTag) ItemStack.OPTIONAL_CODEC.encodeStart(provider.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), getStackInSlot(i)).getOrThrow();
                 itemTag.putInt("Slot", i);
-                nbtTagList.add(getStackInSlot(i).save(provider, itemTag));
+                nbtTagList.add(itemTag);
             }
         }
         CompoundTag nbt = new CompoundTag();
@@ -96,14 +96,14 @@ public class RangedWrapper implements IItemHandlerModifiable {
     }
 
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        int size = nbt.contains("Size", Tag.TAG_INT) ? nbt.getInt("Size") : getSlots();
-        ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND);
+        int size = nbt.contains("Size") ? nbt.getIntOr("Size", getSlots()) : getSlots();
+        ListTag tagList = nbt.getListOrEmpty("Items");
         for (int i = 0; i < tagList.size(); i++) {
-            CompoundTag itemTags = tagList.getCompound(i);
-            int slot = itemTags.getInt("Slot");
+            CompoundTag itemTags = tagList.getCompoundOrEmpty(i);
+            int slot = itemTags.getIntOr("Slot", 0);
 
             if (slot >= 0 && slot < size) {
-                ItemStack.parse(provider, itemTags).ifPresent(stack -> setStackInSlot(slot, stack));
+                ItemStack.OPTIONAL_CODEC.parse(provider.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), itemTags).result().ifPresent(stack -> setStackInSlot(slot, stack));
             }
         }
     }

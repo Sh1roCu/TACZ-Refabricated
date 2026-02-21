@@ -23,10 +23,10 @@ public class ReloadKey {
     public static final KeyMapping RELOAD_KEY = new KeyMapping("key.tacz.reload.desc",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_R,
-            "key.category.tacz");
+            com.tacz.guns.util.InputExtraCheck.TACZ_CATEGORY);
 
     public static void onReloadPress(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && RELOAD_KEY.matches(event.getKey(), event.getScanCode())) {
+        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && RELOAD_KEY.matches(new net.minecraft.client.input.KeyEvent(event.getKey(), event.getScanCode(), event.getModifiers()))) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null || player.isSpectator()) {
                 return;
@@ -57,7 +57,7 @@ public class ReloadKey {
 
     @Environment(EnvType.CLIENT)
     public static void autoReload(PlayerTickEvent.Pre event) {
-        if (!event.getEntity().level().isClientSide)
+        if (!event.getEntity().level().isClientSide())
             return;
 
         if (!KeyConfig.AUTO_RELOAD.get()) {

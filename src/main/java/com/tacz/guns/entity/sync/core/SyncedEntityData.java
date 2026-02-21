@@ -8,7 +8,7 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Marker;
@@ -29,13 +29,13 @@ public class SyncedEntityData {
     private static SyncedEntityData INSTANCE;
 
     private final Set<SyncedClassKey<?>> registeredClassKeys = new HashSet<>();
-    private final Object2ObjectMap<ResourceLocation, SyncedClassKey<?>> idToClassKey = new Object2ObjectOpenHashMap<>();
+    private final Object2ObjectMap<Identifier, SyncedClassKey<?>> idToClassKey = new Object2ObjectOpenHashMap<>();
     private final Object2ObjectMap<String, SyncedClassKey<?>> classNameToClassKey = new Object2ObjectOpenHashMap<>();
     private final Map<String, Boolean> clientClassNameCapabilityCache = new ConcurrentHashMap<>();
     private final Map<String, Boolean> serverClassNameCapabilityCache = new ConcurrentHashMap<>();
 
     private final Set<SyncedDataKey<?, ?>> registeredDataKeys = new HashSet<>();
-    private final Reference2ObjectMap<SyncedClassKey<?>, HashMap<ResourceLocation, SyncedDataKey<?, ?>>> classToKeys = new Reference2ObjectOpenHashMap<>();
+    private final Reference2ObjectMap<SyncedClassKey<?>, HashMap<Identifier, SyncedDataKey<?, ?>>> classToKeys = new Reference2ObjectOpenHashMap<>();
     private final Reference2IntMap<SyncedDataKey<?, ?>> internalIds = new Reference2IntOpenHashMap<>();
     private final Int2ReferenceMap<SyncedDataKey<?, ?>> syncedIdToKey = new Int2ReferenceOpenHashMap<>();
 
@@ -67,7 +67,7 @@ public class SyncedEntityData {
      * @param dataKey a synced data key instance
      */
     public synchronized <E extends Entity, T> void registerDataKey(SyncedDataKey<E, T> dataKey) {
-        ResourceLocation keyId = dataKey.id();
+        Identifier keyId = dataKey.id();
         SyncedClassKey<E> classKey = dataKey.classKey();
         if (CommonRegistry.isLoadComplete()) {
             throw new IllegalStateException(String.format("Tried to register synced data key %s for %s after game initialization", keyId, classKey.id()));
@@ -129,7 +129,7 @@ public class SyncedEntityData {
     }
 
     @Nullable
-    public SyncedClassKey<?> getClassKey(ResourceLocation id) {
+    public SyncedClassKey<?> getClassKey(Identifier id) {
         return idToClassKey.get(id);
     }
 
@@ -139,8 +139,8 @@ public class SyncedEntityData {
     }
 
     @Nullable
-    public SyncedDataKey<?, ?> getKey(SyncedClassKey<?> classKey, ResourceLocation dataKey) {
-        Map<ResourceLocation, SyncedDataKey<?, ?>> keys = SyncedEntityData.instance().classToKeys.get(classKey);
+    public SyncedDataKey<?, ?> getKey(SyncedClassKey<?> classKey, Identifier dataKey) {
+        Map<Identifier, SyncedDataKey<?, ?>> keys = SyncedEntityData.instance().classToKeys.get(classKey);
         if (keys == null) {
             return null;
         }
@@ -199,10 +199,10 @@ public class SyncedEntityData {
         return client ? this.clientClassNameCapabilityCache : this.serverClassNameCapabilityCache;
     }
 
-    public boolean updateMappings(Map<ResourceLocation, List<Pair<ResourceLocation, Integer>>> keyMap) {
+    public boolean updateMappings(Map<Identifier, List<Pair<Identifier, Integer>>> keyMap) {
         this.syncedIdToKey.clear();
 
-        List<Pair<ResourceLocation, ResourceLocation>> missingKeys = new ArrayList<>();
+        List<Pair<Identifier, Identifier>> missingKeys = new ArrayList<>();
         keyMap.forEach((classId, list) -> {
             SyncedClassKey<?> classKey = this.idToClassKey.get(classId);
             if (classKey == null || !this.classToKeys.containsKey(classKey)) {
@@ -210,7 +210,7 @@ public class SyncedEntityData {
                 return;
             }
 
-            Map<ResourceLocation, SyncedDataKey<?, ?>> keys = this.classToKeys.get(classKey);
+            Map<Identifier, SyncedDataKey<?, ?>> keys = this.classToKeys.get(classKey);
             list.forEach(pair -> {
                 SyncedDataKey<?, ?> syncedDataKey = keys.get(pair.getLeft());
                 if (syncedDataKey == null) {

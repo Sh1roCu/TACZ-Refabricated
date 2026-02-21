@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,7 +35,7 @@ public class MouseHandlerMixin {
             original.call(player, yaw, pitch);
             return;
         }
-        ResourceLocation scopeId = iGun.getAttachmentId(mainHandItem, AttachmentType.SCOPE);
+        Identifier scopeId = iGun.getAttachmentId(mainHandItem, AttachmentType.SCOPE);
         if (scopeId.equals(DefaultAssets.EMPTY_ATTACHMENT_ID)) {
             scopeId = iGun.getBuiltInAttachmentId(mainHandItem, AttachmentType.SCOPE);
         }

@@ -10,7 +10,11 @@ import net.minecraft.world.level.block.state.BlockState;
  * 单方块的枪械工作台
  */
 public class GunSmithTableBlockA extends AbstractGunSmithTableBlock {
-    public static final MapCodec<GunSmithTableBlockA> CODEC = simpleCodec((properties) -> new GunSmithTableBlockA());
+    public static final MapCodec<GunSmithTableBlockA> CODEC = simpleCodec(GunSmithTableBlockA::new);
+
+    public GunSmithTableBlockA(Properties properties) {
+        super(properties);
+    }
 
     @Override
     protected MapCodec<GunSmithTableBlockA> codec() {

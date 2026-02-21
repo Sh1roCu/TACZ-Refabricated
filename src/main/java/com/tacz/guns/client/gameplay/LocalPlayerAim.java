@@ -8,7 +8,7 @@ import com.tacz.guns.resource.modifier.custom.AdsModifier;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
@@ -27,7 +27,7 @@ public class LocalPlayerAim {
         if (!(mainHandItem.getItem() instanceof IGun iGun)) {
             return;
         }
-        ResourceLocation gunId = iGun.getGunId(mainHandItem);
+        Identifier gunId = iGun.getGunId(mainHandItem);
         TimelessAPI.getClientGunIndex(gunId).ifPresent(gunIndex -> {
             data.clientIsAiming = isAim;
             // 发送切换开火模式的数据包，通知服务器
@@ -55,7 +55,7 @@ public class LocalPlayerAim {
         if (System.currentTimeMillis() - data.clientDrawTimestamp < 0) {
             data.clientIsAiming = false;
         }
-        ResourceLocation gunId = iGun.getGunId(mainHandItem);
+        Identifier gunId = iGun.getGunId(mainHandItem);
         TimelessAPI.getCommonGunIndex(gunId).ifPresentOrElse(index -> {
             float alphaProgress = this.getAlphaProgress(index.getGunData());
             this.aimProgressCalculate(alphaProgress);

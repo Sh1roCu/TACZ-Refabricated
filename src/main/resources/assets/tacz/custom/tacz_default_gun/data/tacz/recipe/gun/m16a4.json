@@ -1,21 +1,15 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 36
     },
     {
-      "item": {
-        "tag": "c:gems/lapis"
-      },
+      "item": "#c:gems/lapis",
       "count": 8
     },
     {
-      "item": {
-        "tag": "minecraft:logs"
-      },
+      "item": "#minecraft:logs",
       "count": 6
     }
   ],

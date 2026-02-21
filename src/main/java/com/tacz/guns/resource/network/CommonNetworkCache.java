@@ -18,7 +18,7 @@ import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
 import com.tacz.guns.resource.pojo.data.block.BlockData;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import com.tacz.guns.util.AllowAttachmentTagMatcher;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.luaj.vm2.LuaTable;
 
@@ -31,98 +31,98 @@ import java.util.*;
 public enum CommonNetworkCache implements ICommonResourceProvider {
     INSTANCE;
 
-    public Map<ResourceLocation, GunData> gunData = new HashMap<>();
-    public Map<ResourceLocation, AttachmentData> attachmentData = new HashMap<>();
-    public Map<ResourceLocation, RecipeFilter> recipeFilter = new HashMap<>();
-    public Map<ResourceLocation, BlockData> blockData = new HashMap<>();
-    public Map<ResourceLocation, CommonGunIndex> gunIndex = new HashMap<>();
-    public Map<ResourceLocation, CommonAmmoIndex> ammoIndex = new HashMap<>();
-    public Map<ResourceLocation, CommonAttachmentIndex> attachmentIndex = new HashMap<>();
-    public Map<ResourceLocation, CommonBlockIndex> blockIndex = new HashMap<>();
-    public Map<ResourceLocation, Set<String>> attachmentTags = new HashMap<>();
-    public Map<ResourceLocation, Set<String>> allowAttachmentTags = new HashMap<>();
+    public Map<Identifier, GunData> gunData = new HashMap<>();
+    public Map<Identifier, AttachmentData> attachmentData = new HashMap<>();
+    public Map<Identifier, RecipeFilter> recipeFilter = new HashMap<>();
+    public Map<Identifier, BlockData> blockData = new HashMap<>();
+    public Map<Identifier, CommonGunIndex> gunIndex = new HashMap<>();
+    public Map<Identifier, CommonAmmoIndex> ammoIndex = new HashMap<>();
+    public Map<Identifier, CommonAttachmentIndex> attachmentIndex = new HashMap<>();
+    public Map<Identifier, CommonBlockIndex> blockIndex = new HashMap<>();
+    public Map<Identifier, Set<String>> attachmentTags = new HashMap<>();
+    public Map<Identifier, Set<String>> allowAttachmentTags = new HashMap<>();
 
     @Nullable
     @Override
-    public GunData getGunData(ResourceLocation id) {
+    public GunData getGunData(Identifier id) {
         return gunData.get(id);
     }
 
     @Nullable
     @Override
-    public AttachmentData getAttachmentData(ResourceLocation attachmentId) {
+    public AttachmentData getAttachmentData(Identifier attachmentId) {
         return attachmentData.get(attachmentId);
     }
 
     @Nullable
     @Override
-    public BlockData getBlockData(ResourceLocation id) {
+    public BlockData getBlockData(Identifier id) {
         return blockData.get(id);
     }
 
     @Nullable
     @Override
-    public RecipeFilter getRecipeFilter(ResourceLocation id) {
+    public RecipeFilter getRecipeFilter(Identifier id) {
         return recipeFilter.get(id);
     }
 
     @Nullable
     @Override
-    public CommonGunIndex getGunIndex(ResourceLocation id) {
+    public CommonGunIndex getGunIndex(Identifier id) {
         return gunIndex.get(id);
     }
 
     @Override
-    public @Nullable CommonAmmoIndex getAmmoIndex(ResourceLocation ammoId) {
+    public @Nullable CommonAmmoIndex getAmmoIndex(Identifier ammoId) {
         return ammoIndex.get(ammoId);
     }
 
     @Override
-    public @Nullable CommonAttachmentIndex getAttachmentIndex(ResourceLocation attachmentId) {
+    public @Nullable CommonAttachmentIndex getAttachmentIndex(Identifier attachmentId) {
         return attachmentIndex.get(attachmentId);
     }
 
     @Override
-    public @Nullable CommonBlockIndex getBlockIndex(ResourceLocation blockId) {
+    public @Nullable CommonBlockIndex getBlockIndex(Identifier blockId) {
         return blockIndex.get(blockId);
     }
 
     @Override
-    public @Nullable LuaTable getScript(ResourceLocation scriptId) {
+    public @Nullable LuaTable getScript(Identifier scriptId) {
         return null; // 脚本不需要同步
     }
 
     @Override
-    public Set<Map.Entry<ResourceLocation, CommonGunIndex>> getAllGuns() {
+    public Set<Map.Entry<Identifier, CommonGunIndex>> getAllGuns() {
         return gunIndex.entrySet();
     }
 
     @Override
-    public Set<Map.Entry<ResourceLocation, CommonAmmoIndex>> getAllAmmos() {
+    public Set<Map.Entry<Identifier, CommonAmmoIndex>> getAllAmmos() {
         return ammoIndex.entrySet();
     }
 
     @Override
-    public Set<Map.Entry<ResourceLocation, CommonAttachmentIndex>> getAllAttachments() {
+    public Set<Map.Entry<Identifier, CommonAttachmentIndex>> getAllAttachments() {
         return attachmentIndex.entrySet();
     }
 
     @Override
-    public Set<Map.Entry<ResourceLocation, CommonBlockIndex>> getAllBlocks() {
+    public Set<Map.Entry<Identifier, CommonBlockIndex>> getAllBlocks() {
         return blockIndex.entrySet();
     }
 
     @Override
-    public Set<String> getAttachmentTags(ResourceLocation registryName) {
+    public Set<String> getAttachmentTags(Identifier registryName) {
         return attachmentTags.get(registryName);
     }
 
     @Override
-    public Set<String> getAllowAttachmentTags(ResourceLocation registryName) {
+    public Set<String> getAllowAttachmentTags(Identifier registryName) {
         return allowAttachmentTags.get(registryName);
     }
 
-    public void fromNetwork(Map<DataType, Map<ResourceLocation, String>> cache) {
+    public void fromNetwork(Map<DataType, Map<Identifier, String>> cache) {
         gunData.clear();
         attachmentData.clear();
         gunIndex.clear();
@@ -135,8 +135,8 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
         attachmentTags.clear();
         allowAttachmentTags.clear();
         // 延后处理
-        Map<DataType, Map<ResourceLocation, String>> delayed = new HashMap<>();
-        for (Map.Entry<DataType, Map<ResourceLocation, String>> entry : cache.entrySet()) {
+        Map<DataType, Map<Identifier, String>> delayed = new HashMap<>();
+        for (Map.Entry<DataType, Map<Identifier, String>> entry : cache.entrySet()) {
             switch (entry.getKey()) {
                 case GUN_INDEX:
                 case AMMO_INDEX:
@@ -148,7 +148,7 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
                     fromNetwork(entry.getKey(), entry.getValue());
             }
         }
-        for (Map.Entry<DataType, Map<ResourceLocation, String>> entry : delayed.entrySet()) {
+        for (Map.Entry<DataType, Map<Identifier, String>> entry : delayed.entrySet()) {
             fromNetwork(entry.getKey(), entry.getValue());
         }
         AllowAttachmentTagMatcher.resetCache();
@@ -183,12 +183,12 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
         return data;
     }
 
-    private void resolveAttachmentTags(Map<ResourceLocation, String> data) {
-        for (Map.Entry<ResourceLocation, String> entry : data.entrySet()) {
+    private void resolveAttachmentTags(Map<Identifier, String> data) {
+        for (Map.Entry<Identifier, String> entry : data.entrySet()) {
             List<String> tags = CommonAssetsManager.GSON.fromJson(entry.getValue(), new TypeToken<>() {
             });
             if (entry.getKey().getPath().startsWith("allow_attachments/") && entry.getKey().getPath().length() > 18) {
-                ResourceLocation gunId = entry.getKey().withPath(entry.getKey().getPath().substring(18));
+                Identifier gunId = entry.getKey().withPath(entry.getKey().getPath().substring(18));
                 allowAttachmentTags.computeIfAbsent(gunId, (v) -> new HashSet<>()).addAll(tags);
             } else {
                 attachmentTags.computeIfAbsent(entry.getKey(), (v) -> new HashSet<>()).addAll(tags);
@@ -197,8 +197,8 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
     }
 
 
-    private void fromNetwork(DataType type, Map<ResourceLocation, String> data) {
-        for (Map.Entry<ResourceLocation, String> entry : data.entrySet()) {
+    private void fromNetwork(DataType type, Map<Identifier, String> data) {
+        for (Map.Entry<Identifier, String> entry : data.entrySet()) {
             try {
                 switch (type) {
                     case GUN_DATA -> gunData.put(entry.getKey(), parse(entry.getValue(), GunData.class));

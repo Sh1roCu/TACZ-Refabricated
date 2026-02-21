@@ -2,7 +2,7 @@ package com.tacz.guns.resource.filter;
 
 import com.google.gson.*;
 import com.tacz.guns.GunMod;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
@@ -12,23 +12,23 @@ import java.util.function.Function;
 import java.util.regex.PatternSyntaxException;
 
 public class RecipeFilter {
-    private final List<IFilter<ResourceLocation>> whitelist = new ArrayList<>();
-    private final List<IFilter<ResourceLocation>> blacklist = new ArrayList<>();
+    private final List<IFilter<Identifier>> whitelist = new ArrayList<>();
+    private final List<IFilter<Identifier>> blacklist = new ArrayList<>();
 
     public void merge(RecipeFilter other) {
         this.whitelist.addAll(other.whitelist);
         this.blacklist.addAll(other.blacklist);
     }
 
-    public boolean contains(ResourceLocation location) {
+    public boolean contains(Identifier location) {
         boolean allowed = whitelist.isEmpty();
-        for (IFilter<ResourceLocation> filter : this.whitelist) {
+        for (IFilter<Identifier> filter : this.whitelist) {
             if (filter.test(location)) {
                 allowed = true;
                 break;
             }
         }
-        for (IFilter<ResourceLocation> filter : this.blacklist) {
+        for (IFilter<Identifier> filter : this.blacklist) {
             if (filter.test(location)) {
                 allowed = false;
                 break;
@@ -37,9 +37,9 @@ public class RecipeFilter {
         return allowed;
     }
 
-    public List<ResourceLocation> filter(List<ResourceLocation> input) {
-        List<ResourceLocation> output = new ArrayList<>();
-        for (ResourceLocation location : input) {
+    public List<Identifier> filter(List<Identifier> input) {
+        List<Identifier> output = new ArrayList<>();
+        for (Identifier location : input) {
             if (contains(location)) {
                 output.add(location);
             }
@@ -47,7 +47,7 @@ public class RecipeFilter {
         return output;
     }
 
-    public <T> List<T> filter(List<T> input, Function<T, ResourceLocation> getter) {
+    public <T> List<T> filter(List<T> input, Function<T, Identifier> getter) {
         List<T> output = new ArrayList<>();
         for (T entry : input) {
             if (contains(getter.apply(entry))) {
@@ -73,8 +73,8 @@ public class RecipeFilter {
             return filter;
         }
 
-        private void loadFilters(JsonArray array, @NotNull List<IFilter<ResourceLocation>> list) {
-            LiteralFilter.Builder<ResourceLocation> builder = new LiteralFilter.Builder<>();
+        private void loadFilters(JsonArray array, @NotNull List<IFilter<Identifier>> list) {
+            LiteralFilter.Builder<Identifier> builder = new LiteralFilter.Builder<>();
             for (JsonElement element : array) {
                 if (element.isJsonPrimitive()) {
                     String entry = element.getAsString();
@@ -85,7 +85,7 @@ public class RecipeFilter {
                             GunMod.LOGGER.error("Failed to parse regex filter: {}", entry, e);
                         }
                     } else {
-                        ResourceLocation rl = ResourceLocation.tryParse(entry);
+                        Identifier rl = Identifier.tryParse(entry);
                         if (rl != null) {
                             builder.add(rl);
                         }
@@ -106,12 +106,12 @@ public class RecipeFilter {
             return json;
         }
 
-        private List<String> toList(List<IFilter<ResourceLocation>> filter) {
+        private List<String> toList(List<IFilter<Identifier>> filter) {
             List<String> list = new ArrayList<>();
             for (var f : filter) {
-                if (f instanceof LiteralFilter<ResourceLocation> literalFilter) {
-                    list.addAll(literalFilter.getSet().stream().map(ResourceLocation::toString).toList());
-                } else if (f instanceof RegexFilter<ResourceLocation> regexFilter) {
+                if (f instanceof LiteralFilter<Identifier> literalFilter) {
+                    list.addAll(literalFilter.getSet().stream().map(Identifier::toString).toList());
+                } else if (f instanceof RegexFilter<Identifier> regexFilter) {
                     list.add(regexFilter.getPattern().pattern());
                 }
             }

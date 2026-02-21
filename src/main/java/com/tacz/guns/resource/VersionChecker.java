@@ -54,7 +54,9 @@ public final class VersionChecker {
             return true;
         }
         try (InputStream stream = Files.newInputStream(packInfoFilePath)) {
-            Info info = CommonAssetsManager.GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Info.class);
+            com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+            Info info = CommonAssetsManager.GSON.fromJson(jsonReader, Info.class);
             return modVersionAllMatch(info);
         } catch (IOException | JsonSyntaxException | JsonIOException | VersionParsingException exception) {
             GunMod.LOGGER.warn(MARKER, "Failed to read info json: {}", packInfoFilePath);
@@ -77,7 +79,9 @@ public final class VersionChecker {
                 return true;
             }
             try (InputStream stream = zipFile.getInputStream(entry)) {
-                Info info = CommonAssetsManager.GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Info.class);
+                com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+                jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+                Info info = CommonAssetsManager.GSON.fromJson(jsonReader, Info.class);
                 // 只要有一个不符，那么就不加载
                 if (!modVersionAllMatch(info)) {
                     return false;

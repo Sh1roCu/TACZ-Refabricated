@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
@@ -15,7 +15,7 @@ public class AcknowledgeC2SPacket implements IHandshakeMessage.IResponsePacket {
     public static final AcknowledgeC2SPacket INSTANCE = new AcknowledgeC2SPacket();
     public static final Marker ACKNOWLEDGE = MarkerFactory.getMarker("HANDSHAKE_ACKNOWLEDGE");
     public static final CustomPacketPayload.Type<AcknowledgeC2SPacket> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "acknowledge")
+            Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "acknowledge")
     );
     public static final StreamCodec<FriendlyByteBuf, AcknowledgeC2SPacket> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 

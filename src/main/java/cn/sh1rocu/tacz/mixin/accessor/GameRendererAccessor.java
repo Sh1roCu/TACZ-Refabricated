@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(GameRenderer.class)
 public interface GameRendererAccessor {
     @Invoker("getFov")
-    double tacz$getFov(Camera camera, float tickDelta, boolean useFovSetting);
+    float tacz$getFov(Camera camera, float tickDelta, boolean useFovSetting);
 
     @Invoker("bobHurt")
     void tacz$bobHurt(PoseStack poseStack, float tickDelta);

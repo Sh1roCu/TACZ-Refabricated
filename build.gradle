@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.11-SNAPSHOT'
+    id 'fabric-loom' version '1.14.10'
     id 'maven-publish'
 }
 
@@ -90,6 +90,10 @@ repositories {
         name "KosmX's maven"
         url 'https://maven.kosmx.dev/'
     }
+    maven {
+        name = "RedlanceMinecraft"
+        url = "https://repo.redlance.org/public"
+    }
     maven {// CCA
         name = "Ladysnake Mods"
         url = 'https://maven.ladysnake.org/releases'
@@ -147,34 +151,36 @@ dependencies {
     }
 
     // compile against the JEI API but do not include it at runtime
-    modCompileOnly("mezz.jei:jei-1.21.1-common-api:${jei_version}")
-    modCompileOnly("mezz.jei:jei-1.21.1-fabric-api:${jei_version}")
+    modCompileOnly("mezz.jei:jei-1.21.11-common-api:${jei_version}")
+    modCompileOnly("mezz.jei:jei-1.21.11-fabric-api:${jei_version}")
     // at runtime, use the full JEI jar for Fabric
-    modRuntimeOnly("mezz.jei:jei-1.21.1-fabric:${jei_version}")
+    modRuntimeOnly("mezz.jei:jei-1.21.11-fabric:${jei_version}")
 
-    // 假人，测试近战伤害
-    modRuntimeOnly "curse.maven:selene-499980:6914081"
-    modRuntimeOnly "curse.maven:mmmmmmmmmmmm-225738:6826532"
-    // 手柄按键支持
-    modCompileOnly "curse.maven:framework-549225:6531437"
-    modCompileOnly("curse.maven:controllable-317269:6850103")
+    // 假人，测试近战伤害 (commented out - no 1.21.11 build yet)
+    // modRuntimeOnly "curse.maven:selene-499980:6914081"
+    // modRuntimeOnly "curse.maven:mmmmmmmmmmmm-225738:6826532"
+    // 手柄按键支持 (commented out - no 1.21.11 build yet)
+    // modCompileOnly "curse.maven:framework-549225:6531437"
+    // modCompileOnly("curse.maven:controllable-317269:6850103")
 
-    // 越肩视角，用来兼容第三人称准星
-    modImplementation "curse.maven:shoulder-surfing-reloaded-243190:6784174"
+    // 越肩视角，用来兼容第三人称准星 (commented out - no 1.21.11 build yet)
+    // modImplementation "curse.maven:shoulder-surfing-reloaded-243190:6784174"
 
     modImplementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
 
     // emb暂无fabric1.21
     // modCompileOnly "curse.maven:embeddium-908741:${embeddedt_id}"
-    // 使用sodium
-    modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.5-fabric"
+    // 使用sodium (commented out - version needs updating for 1.21.11)
+    // modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.5-fabric"
 
-    // Iris
-    modCompileOnly 'maven.modrinth:iris:1.8.1+1.21.1-fabric'
+    // Iris (commented out - version needs updating for 1.21.11)
+    // modCompileOnly 'maven.modrinth:iris:1.8.1+1.21.1-fabric'
 
-    modCompileOnly "curse.maven:carry-on-274259:${carry_on_id}"
+    // Carry On (commented out - no 1.21.11 build yet)
+    // modCompileOnly "curse.maven:carry-on-274259:${carry_on_id}"
 
-    modImplementation "dev.kosmx.player-anim:player-animation-lib-fabric:${player_animation_lib}"
+    modImplementation "maven.modrinth:player-animation-library:97vS1xaQ"
+    implementation(include('com.zigythebird:mochafloats:4.1.5'))
 
     // kjs暂无Fabric1.21
     // kubejs开发环境引入
@@ -185,45 +191,67 @@ dependencies {
     modCompileOnly "dev.architectury:architectury-fabric:${architectury_version}"
 
     // CCA
-    modImplementation(include("org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.2"))
-    modImplementation(include("org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.2"))
+    modImplementation(include("org.ladysnake.cardinal-components-api:cardinal-components-base:7.3.0"))
+    modImplementation(include("org.ladysnake.cardinal-components-api:cardinal-components-entity:7.3.0"))
 
     // MKB
     // 1.21存在不能单独设置alt, ctrl, shift的bug，暂时弃用
     // modImplementation(include("curse.maven:modern-keybinding-fabric-695433:6016136"))
-    // dev环境使用全键无冲
-    modImplementation "curse.maven:nonconflictkeys-fabric-865546:4572953"
+    // dev环境使用全键无冲 (commented out - no 1.21.11 build yet)
+    // modImplementation "curse.maven:nonconflictkeys-fabric-865546:4572953"
 
 
     // Forge Config API Port
-    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.1.4"
+    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.11.1"
 
     // ModMenu
-    modImplementation("com.terraformersmc:modmenu:11.0.3")
+    modImplementation("com.terraformersmc:modmenu:17.0.0-beta.2")
 
-    // Zoomify
-    modCompileOnly "maven.modrinth:zoomify:2.14.4+1.21.1"
+    // Zoomify (commented out - version needs updating for 1.21.11)
+    // modCompileOnly "maven.modrinth:zoomify:2.14.4+1.21.1"
 
-    modCompileOnly "maven.modrinth:immediatelyfast:1.6.6+1.21.1-fabric"
+    // ImmediatelyFast (commented out - version needs updating for 1.21.11)
+    // modCompileOnly "maven.modrinth:immediatelyfast:1.6.6+1.21.1-fabric"
 
-    modRuntimeOnly "maven.modrinth:tweakeroo:0.21.59"
-    modRuntimeOnly "maven.modrinth:malilib:0.21.9"
+    // Tweakeroo (commented out - version needs updating for 1.21.11)
+    // modRuntimeOnly "maven.modrinth:tweakeroo:0.21.59"
+    // modRuntimeOnly "maven.modrinth:malilib:0.21.9"
 
     // REI
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:$rei_version"
 
-    modRuntimeOnly "maven.modrinth:flashback:pOGQFvgK"
-    runtimeOnly("com.moulberry:mixinconstraints:1.0.8")
-    modRuntimeOnly("com.moulberry:lattice:1.2.18") {
-        attributes {
-            attribute(Attribute.of("earth.terrarium.cloche.modLoader", String), "fabric")
+    // Flashback (commented out - version needs updating for 1.21.11)
+    // modRuntimeOnly "maven.modrinth:flashback:pOGQFvgK"
+    // runtimeOnly("com.moulberry:mixinconstraints:1.0.8")
+    // modRuntimeOnly("com.moulberry:lattice:1.2.18") {
+    //     attributes {
+    //         attribute(Attribute.of("earth.terrarium.cloche.modLoader", String), "fabric")
+    //     }
+    // }
+
+    // 加速渲染 (commented out - version needs updating for 1.21.11)
+    // modImplementation "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
+}
+
+sourceSets {
+    main {
+        java {
+            // Compat modules excluded until their dependencies have 1.21.11 builds
+            exclude 'com/tacz/guns/compat/controllable/**'
+            exclude 'com/tacz/guns/compat/shouldersurfing/**'
+            exclude 'com/tacz/guns/compat/iris/**'
+            exclude 'com/tacz/guns/compat/immediatelyfast/**'
+            exclude 'com/tacz/guns/compat/zoomify/**'
+            exclude 'com/tacz/guns/compat/ar/**'
+            exclude 'com/tacz/guns/compat/carryon/**'
+            exclude 'com/tacz/guns/mixin/client/ar/**'
+            exclude 'cn/sh1rocu/tacz/mixin/compat/controllable/**'
+            exclude 'cn/sh1rocu/tacz/mixin/compat/carryon/**'
+            exclude 'cn/sh1rocu/tacz/mixin/compat/tweakeroo/**'
         }
     }
-
-    // 加速渲染
-    modImplementation "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
 }
 
 processResources {
@@ -257,7 +285,7 @@ java {
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${project.archives_base_name}" }
     }
 }
 

@@ -1,15 +1,15 @@
 package cn.sh1rocu.tacz.mixin.accessor;
 
 import net.minecraft.client.gui.components.AbstractSliderButton;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(AbstractSliderButton.class)
 public interface AbstractSliderButtonAccessor {
     @Invoker("getSprite")
-    ResourceLocation tacz$getSprite();
+    Identifier tacz$getSprite();
 
     @Invoker("getHandleSprite")
-    ResourceLocation tacz$getHandleSprite();
+    Identifier tacz$getHandleSprite();
 }

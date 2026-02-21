@@ -24,7 +24,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -36,8 +36,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
-    private static final Cache<ResourceLocation, List<ItemStack>> CACHE = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.SECONDS).build();
-    private final ResourceLocation attachmentId;
+    private static final Cache<Identifier, List<ItemStack>> CACHE = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.SECONDS).build();
+    private final Identifier attachmentId;
     private final List<Component> components = Lists.newArrayList();
     private final MutableComponent tips = Component.translatable("tooltip.tacz.attachment.yaw.shift");
     private final MutableComponent support = Component.translatable("tooltip.tacz.attachment.yaw.support");
@@ -60,10 +60,10 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
         }
     }
 
-    private static List<ItemStack> getAllAllowGuns(List<ItemStack> output, ResourceLocation attachmentId) {
+    private static List<ItemStack> getAllAllowGuns(List<ItemStack> output, Identifier attachmentId) {
         ItemStack attachment = AttachmentItemBuilder.create().setId(attachmentId).build();
         TimelessAPI.getAllCommonGunIndex().forEach(entry -> {
-            ResourceLocation gunId = entry.getKey();
+            Identifier gunId = entry.getKey();
             ItemStack gun = GunItemBuilder.create().setId(gunId).build(Minecraft.getInstance().level.registryAccess());
             if (!(gun.getItem() instanceof IGun iGun)) {
                 return;
@@ -75,9 +75,15 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
         return output;
     }
 
+    private static boolean hasShiftDown() {
+        com.mojang.blaze3d.platform.Window window = Minecraft.getInstance().getWindow();
+        return com.mojang.blaze3d.platform.InputConstants.isKeyDown(window, com.mojang.blaze3d.platform.InputConstants.KEY_LSHIFT)
+            || com.mojang.blaze3d.platform.InputConstants.isKeyDown(window, com.mojang.blaze3d.platform.InputConstants.KEY_RSHIFT);
+    }
+
     @Override
-    public int getHeight() {
-        if (!Screen.hasShiftDown()) {
+    public int getHeight(Font font) {
+        if (!hasShiftDown()) {
             return components.size() * 10 + 28;
         }
         return (showGuns.size() - 1) / 16 * 18 + 50 + components.size() * 10;
@@ -90,7 +96,7 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
             width[0] = Math.max(width[0], font.width(packInfo) + 4);
         }
         components.forEach(c -> width[0] = Math.max(width[0], font.width(c)));
-        if (!Screen.hasShiftDown()) {
+        if (!hasShiftDown()) {
             return Math.max(width[0], font.width(tips) + 4);
         } else {
             width[0] = Math.max(width[0], font.width(support) + 4);
@@ -102,27 +108,27 @@ public class ClientAttachmentItemTooltip implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderText(Font font, int pX, int pY, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
+    public void renderText(GuiGraphics guiGraphics, Font font, int pX, int pY) {
         int yOffset = pY;
         for (Component component : this.components) {
-            font.drawInBatch(component, pX, yOffset, 0xffaa00, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, component, pX, yOffset, 0xffaa00);
             yOffset += 10;
         }
-        if (!Screen.hasShiftDown()) {
-            font.drawInBatch(tips, pX, pY + 5 + this.components.size() * 10, 0x9e9e9e, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+        if (!hasShiftDown()) {
+            guiGraphics.drawString(font, tips, pX, pY + 5 + this.components.size() * 10, 0x9e9e9e);
             yOffset += 10;
         } else {
             yOffset += (showGuns.size() - 1) / 16 * 18 + 32;
         }
         // 枪包名
         if (packInfo != null) {
-            font.drawInBatch(this.packInfo, pX, yOffset + 8, 0xffffff, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.packInfo, pX, yOffset + 8, 0xffffff);
         }
     }
 
     @Override
-    public void renderImage(Font font, int mouseX, int mouseY, GuiGraphics gui) {
-        if (!Screen.hasShiftDown()) {
+    public void renderImage(Font font, int mouseX, int mouseY, int imgWidth, int imgHeight, GuiGraphics gui) {
+        if (!hasShiftDown()) {
             return;
         }
         int minY = components.size() * 10 + 3;

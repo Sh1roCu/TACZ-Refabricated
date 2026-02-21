@@ -66,7 +66,8 @@ public class GunSmithTableCategory implements IRecipeCategory<GunSmithTableRecip
     private List<ItemStack> getInput(List<GunSmithTableIngredient> inputs, int index) {
         if (index < inputs.size()) {
             GunSmithTableIngredient ingredient = inputs.get(index);
-            ItemStack[] items = ingredient.getIngredient().getItems();
+            ItemStack[] items = ingredient.getIngredient().items()
+                    .map(holder -> new ItemStack(holder)).toArray(ItemStack[]::new);
             return Arrays.stream(items).map(stack -> stack.copyWithCount(ingredient.getCount())).toList();
         }
         return Collections.singletonList(ItemStack.EMPTY);
@@ -77,11 +78,7 @@ public class GunSmithTableCategory implements IRecipeCategory<GunSmithTableRecip
         return title;
     }
 
-    @Override
-    @SuppressWarnings("removal")
-    public IDrawable getBackground() {
-        return bgDraw;
-    }
+    // getBackground() was removed from JEI IRecipeCategory in JEI 27.x
 
     @Override
     public IDrawable getIcon() {
@@ -91,5 +88,15 @@ public class GunSmithTableCategory implements IRecipeCategory<GunSmithTableRecip
     @Override
     public RecipeType<GunSmithTableRecipe> getRecipeType() {
         return type;
+    }
+
+    @Override
+    public int getWidth() {
+        return 160;
+    }
+
+    @Override
+    public int getHeight() {
+        return 40;
     }
 }

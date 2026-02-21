@@ -1,15 +1,11 @@
 {
   "materials": [
     {
-      "item": {
-        "item": "minecraft:crying_obsidian"
-      },
+      "item": "minecraft:crying_obsidian",
       "count": 3
     },
     {
-      "item": {
-        "tag": "c:ingots/gold"
-      },
+      "item": "#c:ingots/gold",
       "count": 8
     }
   ],

@@ -4,7 +4,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.util.TacPathVisitor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
@@ -33,7 +33,7 @@ public class PlayerAnimatorLoader {
                 return false;
             }
             try (InputStream stream = zipFile.getInputStream(entry)) {
-                ResourceLocation registryName = ResourceLocation.fromNamespaceAndPath(namespace, path);
+                Identifier registryName = Identifier.fromNamespaceAndPath(namespace, path);
                 PlayerAnimatorAssetManager.get().putAnimation(registryName, stream);
                 return true;
             } catch (IOException | JsonSyntaxException | JsonIOException exception) {

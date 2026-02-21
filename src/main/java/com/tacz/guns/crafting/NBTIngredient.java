@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.tacz.guns.GunMod;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
-import net.minecraft.advancements.critereon.NbtPredicate;
+import net.minecraft.advancements.criterion.NbtPredicate;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
@@ -18,7 +18,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.HolderSetCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -79,8 +79,8 @@ public class NBTIngredient implements CustomIngredient {
     }
 
     @Override
-    public List<ItemStack> getMatchingStacks() {
-        return Arrays.stream(this.stacks).toList();
+    public java.util.stream.Stream<net.minecraft.core.Holder<Item>> getMatchingItems() {
+        return this.items.stream();
     }
 
     @Override
@@ -105,18 +105,18 @@ public class NBTIngredient implements CustomIngredient {
         return partial;
     }
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "nbt");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "nbt");
 
     public static class Serializer implements CustomIngredientSerializer<NBTIngredient> {
         public static final Serializer INSTANCE = new Serializer();
 
         @Override
-        public ResourceLocation getIdentifier() {
+        public Identifier getIdentifier() {
             return ID;
         }
 
         @Override
-        public MapCodec<NBTIngredient> getCodec(boolean b) {
+        public MapCodec<NBTIngredient> getCodec() {
             return NBTIngredient.CODEC;
         }
 

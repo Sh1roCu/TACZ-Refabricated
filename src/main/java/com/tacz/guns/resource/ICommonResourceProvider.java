@@ -8,7 +8,7 @@ import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
 import com.tacz.guns.resource.pojo.data.block.BlockData;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.luaj.vm2.LuaTable;
 
@@ -16,34 +16,34 @@ import java.util.Map;
 import java.util.Set;
 
 public interface ICommonResourceProvider {
-    @Nullable GunData getGunData(ResourceLocation id);
+    @Nullable GunData getGunData(Identifier id);
 
-    @Nullable AttachmentData getAttachmentData(ResourceLocation attachmentId);
+    @Nullable AttachmentData getAttachmentData(Identifier attachmentId);
 
-    @Nullable BlockData getBlockData(ResourceLocation id);
+    @Nullable BlockData getBlockData(Identifier id);
 
-    @Nullable RecipeFilter getRecipeFilter(ResourceLocation id);
+    @Nullable RecipeFilter getRecipeFilter(Identifier id);
 
-    @Nullable CommonGunIndex getGunIndex(ResourceLocation gunId);
+    @Nullable CommonGunIndex getGunIndex(Identifier gunId);
 
-    @Nullable CommonAmmoIndex getAmmoIndex(ResourceLocation ammoId);
+    @Nullable CommonAmmoIndex getAmmoIndex(Identifier ammoId);
 
-    @Nullable CommonAttachmentIndex getAttachmentIndex(ResourceLocation attachmentId);
+    @Nullable CommonAttachmentIndex getAttachmentIndex(Identifier attachmentId);
 
-    @Nullable CommonBlockIndex getBlockIndex(ResourceLocation blockId);
+    @Nullable CommonBlockIndex getBlockIndex(Identifier blockId);
 
     @Nullable
-    public LuaTable getScript(ResourceLocation scriptId);
+    public LuaTable getScript(Identifier scriptId);
 
-    Set<Map.Entry<ResourceLocation, CommonGunIndex>> getAllGuns();
+    Set<Map.Entry<Identifier, CommonGunIndex>> getAllGuns();
 
-    Set<Map.Entry<ResourceLocation, CommonAmmoIndex>> getAllAmmos();
+    Set<Map.Entry<Identifier, CommonAmmoIndex>> getAllAmmos();
 
-    Set<Map.Entry<ResourceLocation, CommonAttachmentIndex>> getAllAttachments();
+    Set<Map.Entry<Identifier, CommonAttachmentIndex>> getAllAttachments();
 
-    Set<Map.Entry<ResourceLocation, CommonBlockIndex>> getAllBlocks();
+    Set<Map.Entry<Identifier, CommonBlockIndex>> getAllBlocks();
 
-    Set<String> getAttachmentTags(ResourceLocation registryName);
+    Set<String> getAttachmentTags(Identifier registryName);
 
-    Set<String> getAllowAttachmentTags(ResourceLocation registryName);
+    Set<String> getAllowAttachmentTags(Identifier registryName);
 }

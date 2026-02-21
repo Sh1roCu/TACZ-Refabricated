@@ -1,7 +1,7 @@
 package com.tacz.guns.resource.pojo;
 
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
 
@@ -10,7 +10,7 @@ public class AmmoIndexPOJO {
     private String name;
 
     @SerializedName("display")
-    private ResourceLocation display;
+    private Identifier display;
 
     @SerializedName("stack_size")
     private int stackSize;
@@ -23,7 +23,7 @@ public class AmmoIndexPOJO {
         return name;
     }
 
-    public ResourceLocation getDisplay() {
+    public Identifier getDisplay() {
         return display;
     }
 

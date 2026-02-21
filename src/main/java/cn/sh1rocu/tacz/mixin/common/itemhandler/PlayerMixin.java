@@ -8,7 +8,6 @@ import cn.sh1rocu.tacz.util.itemhandler.entity.player.PlayerInvWrapper;
 import cn.sh1rocu.tacz.util.itemhandler.entity.player.PlayerMainInvWrapper;
 import cn.sh1rocu.tacz.util.itemhandler.entity.player.PlayerOffhandInvWrapper;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,7 +40,7 @@ public abstract class PlayerMixin extends LivingEntity {
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void tacz$initClass(Level world, BlockPos pos, float yaw, GameProfile gameProfile, CallbackInfo ci) {
+    private void tacz$initClass(Level world, GameProfile gameProfile, CallbackInfo ci) {
         this.playerMainHandler = LazyOptional.of(() ->
                 new PlayerMainInvWrapper(this.inventory));
         this.playerEquipmentHandler = LazyOptional.of(() ->

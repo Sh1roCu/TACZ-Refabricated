@@ -7,7 +7,7 @@ import com.tacz.guns.resource.pojo.data.recipe.TableRecipe;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -52,22 +52,22 @@ public class GunSmithTableRecipe implements Recipe<SmithingRecipeInput> {
     }
 
     @Override
-    public boolean canCraftInDimensions(int pWidth, int pHeight) {
-        return true;
+    public net.minecraft.world.item.crafting.PlacementInfo placementInfo() {
+        return net.minecraft.world.item.crafting.PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public ItemStack getResultItem(HolderLookup.Provider provider) {
-        return this.result.getResult().copy();
+    public net.minecraft.world.item.crafting.RecipeBookCategory recipeBookCategory() {
+        return new net.minecraft.world.item.crafting.RecipeBookCategory();
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends Recipe<SmithingRecipeInput>> getSerializer() {
         return ModRecipe.GUN_SMITH_TABLE_RECIPE_SERIALIZER;
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public RecipeType<? extends Recipe<SmithingRecipeInput>> getType() {
         return ModRecipe.GUN_SMITH_TABLE_CRAFTING;
     }
 
@@ -87,7 +87,7 @@ public class GunSmithTableRecipe implements Recipe<SmithingRecipeInput> {
         result.init(provider);
     }
 
-    public ResourceLocation getTab() {
+    public Identifier getTab() {
         return result.getGroup();
     }
 }

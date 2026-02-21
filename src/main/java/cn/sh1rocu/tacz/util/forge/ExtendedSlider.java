@@ -5,11 +5,9 @@
 
 package cn.sh1rocu.tacz.util.forge;
 
-import cn.sh1rocu.tacz.mixin.accessor.AbstractSliderButtonAccessor;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
@@ -123,18 +121,19 @@ public class ExtendedSlider extends AbstractSliderButton {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
-        this.setValueFromMouse(mouseX);
+    public void onClick(MouseButtonEvent event, boolean fromKeyboard) {
+        this.setValueFromMouse(event.x());
     }
 
     @Override
-    protected void onDrag(double mouseX, double mouseY, double dragX, double dragY) {
-        super.onDrag(mouseX, mouseY, dragX, dragY);
-        this.setValueFromMouse(mouseX);
+    protected void onDrag(MouseButtonEvent event, double dragX, double dragY) {
+        super.onDrag(event, dragX, dragY);
+        this.setValueFromMouse(event.x());
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent keyEvent) {
+        int keyCode = keyEvent.key();
         boolean flag = keyCode == GLFW.GLFW_KEY_LEFT;
         if (flag || keyCode == GLFW.GLFW_KEY_RIGHT) {
             if (this.minValue > this.maxValue)
@@ -200,19 +199,5 @@ public class ExtendedSlider extends AbstractSliderButton {
 
     @Override
     protected void applyValue() {
-    }
-
-    @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        Minecraft minecraft = Minecraft.getInstance();
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        guiGraphics.blitSprite(((AbstractSliderButtonAccessor) this).tacz$getSprite(), this.getX(), this.getY(), this.getWidth(), this.getHeight());
-        guiGraphics.blitSprite(((AbstractSliderButtonAccessor) this).tacz$getHandleSprite(), this.getX() + (int) (this.value * (double) (this.width - 8)), this.getY(), 8, this.getHeight());
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-        int i = this.active ? 16777215 : 10526880;
-        this.renderScrollingString(guiGraphics, minecraft.font, 2, i | Mth.ceil(this.alpha * 255.0F) << 24);
     }
 }

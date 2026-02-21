@@ -3,7 +3,7 @@ package com.tacz.guns.sound;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.network.message.ServerMessageSound;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
@@ -94,11 +94,11 @@ public class SoundManager {
      */
     public static String INSTALL_SOUND = "install";
 
-//    public static void sendSoundToNearby(LivingEntity sourceEntity, int distance, ResourceLocation gunId, String soundName, float volume, float pitch) {
+//    public static void sendSoundToNearby(LivingEntity sourceEntity, int distance, Identifier gunId, String soundName, float volume, float pitch) {
 //        sendSoundToNearby(sourceEntity, distance, gunId, DefaultAssets.DEFAULT_GUN_DISPLAY_ID, soundName, volume, pitch);
 //    }
 
-    public static void sendSoundToNearby(LivingEntity sourceEntity, int distance, ResourceLocation gunId, ResourceLocation gunDisplayId, String soundName, float volume, float pitch) {
+    public static void sendSoundToNearby(LivingEntity sourceEntity, int distance, Identifier gunId, Identifier gunDisplayId, String soundName, float volume, float pitch) {
         if (sourceEntity.level() instanceof ServerLevel serverLevel) {
             BlockPos pos = sourceEntity.blockPosition();
             ServerMessageSound soundMessage = new ServerMessageSound(sourceEntity.getId(), gunId, gunDisplayId, new ServerMessageSound.MessageSound(soundName, volume, pitch, distance));

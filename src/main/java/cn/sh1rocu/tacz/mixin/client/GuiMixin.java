@@ -2,7 +2,6 @@ package cn.sh1rocu.tacz.mixin.client;
 
 import com.tacz.guns.client.event.PreventsHotbarEvent;
 import com.tacz.guns.client.event.RenderCrosshairEvent;
-import com.tacz.guns.compat.immediatelyfast.ImmediatelyFastCompat;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -18,14 +17,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(Gui.class)
 public class GuiMixin {
+    // TODO: ImmediatelyFast compat disabled - excluded from compilation
     @Inject(method = "renderSlot", at = @At("HEAD"))
     private void tacz$renderHotbarItemPre(GuiGraphics guiGraphics, int x, int y, DeltaTracker deltaTracker, Player player, ItemStack stack, int seed, CallbackInfo ci) {
-        ImmediatelyFastCompat.renderHotbarItem(stack, true);
     }
 
     @Inject(method = "renderSlot", at = @At("RETURN"))
     private void tacz$renderHotbarItemPost(GuiGraphics guiGraphics, int x, int y, DeltaTracker deltaTracker, Player player, ItemStack stack, int seed, CallbackInfo ci) {
-        ImmediatelyFastCompat.renderHotbarItem(stack, false);
     }
 
     @Inject(method = "renderHotbarAndDecorations", at = @At("HEAD"), cancellable = true)

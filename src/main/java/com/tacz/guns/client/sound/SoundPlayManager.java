@@ -13,7 +13,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,14 +34,14 @@ public class SoundPlayManager {
      */
     private static GunSoundInstance tmpSoundInstance = null;
 
-    public static GunSoundInstance playClientSound(Entity entity, @Nullable ResourceLocation name, float volume, float pitch, int distance, boolean mono) {
+    public static GunSoundInstance playClientSound(Entity entity, @Nullable Identifier name, float volume, float pitch, int distance, boolean mono) {
         Minecraft minecraft = Minecraft.getInstance();
         GunSoundInstance instance = new GunSoundInstance(ModSounds.GUN, SoundSource.PLAYERS, volume, pitch, entity, distance, name, mono);
         minecraft.getSoundManager().play(instance);
         return instance;
     }
 
-    public static GunSoundInstance playClientSound(Entity entity, @Nullable ResourceLocation name, float volume, float pitch, int distance) {
+    public static GunSoundInstance playClientSound(Entity entity, @Nullable Identifier name, float volume, float pitch, int distance) {
         return playClientSound(entity, name, volume, pitch, distance, false);
     }
 
@@ -64,11 +64,11 @@ public class SoundPlayManager {
         if (iAttachment == null) {
             return;
         }
-        ResourceLocation attachmentId = iAttachment.getAttachmentId(attachmentItem);
+        Identifier attachmentId = iAttachment.getAttachmentId(attachmentItem);
         TimelessAPI.getClientAttachmentIndex(attachmentId).ifPresent(index -> {
-            Map<String, ResourceLocation> sounds = index.getSounds();
+            Map<String, Identifier> sounds = index.getSounds();
             if (sounds.containsKey(soundName)) {
-                ResourceLocation resourceLocation = sounds.get(soundName);
+                Identifier resourceLocation = sounds.get(soundName);
                 SoundPlayManager.playClientSound(player, resourceLocation, 1.0f, 1.0f, GunConfig.DEFAULT_GUN_OTHER_SOUND_DISTANCE.get());
             }
         });
@@ -157,12 +157,12 @@ public class SoundPlayManager {
         if (level == null || !(level.getEntity(message.entityId()) instanceof LivingEntity livingEntity)) {
             return;
         }
-        ResourceLocation gunId = message.gunId();
-        ResourceLocation gunDisplayId = message.gunDisplayId();
+        Identifier gunId = message.gunId();
+        Identifier gunDisplayId = message.gunDisplayId();
         TimelessAPI.getGunDisplay(gunDisplayId, gunId).ifPresent(index -> {
             ServerMessageSound.MessageSound messageSound = message.messageSound();
             String soundName = messageSound.soundName();
-            ResourceLocation soundId = index.getSounds(soundName);
+            Identifier soundId = index.getSounds(soundName);
             if (soundId == null) {
                 return;
             }

@@ -1,13 +1,13 @@
 package com.tacz.guns.config;
 
 import com.tacz.guns.GunMod;
-import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
+import fuzs.forgeconfigapiport.fabric.api.v5.ConfigRegistry;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class PreLoadConfig {
     public static void init() {
-        NeoForgeConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.COMMON, spec, "tacz-pre.toml");
+        ConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.COMMON, spec, "tacz-pre.toml");
     }
 
     private static ModConfigSpec spec;

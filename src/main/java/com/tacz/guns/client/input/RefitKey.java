@@ -18,10 +18,10 @@ public class RefitKey {
     public static final KeyMapping REFIT_KEY = new KeyMapping("key.tacz.refit.desc",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_Z,
-            "key.category.tacz");
+            com.tacz.guns.util.InputExtraCheck.TACZ_CATEGORY);
 
     public static void onRefitPress(InputEvent.Key event) {
-        if (event.getAction() == GLFW.GLFW_PRESS && REFIT_KEY.matches(event.getKey(), event.getScanCode())) {
+        if (event.getAction() == GLFW.GLFW_PRESS && REFIT_KEY.matches(new net.minecraft.client.input.KeyEvent(event.getKey(), event.getScanCode(), event.getModifiers()))) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null || player.isSpectator()) {
                 return;

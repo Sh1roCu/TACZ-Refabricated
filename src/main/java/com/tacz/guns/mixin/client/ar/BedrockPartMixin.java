@@ -13,7 +13,7 @@ import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.compat.ar.ARCompat;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -61,7 +61,7 @@ public class BedrockPartMixin implements IAcceleratedRenderer<Void> {
         if (ARCompat.shouldAccelerate() && extension.isAccelerated()) {
             ci.cancel();
 
-            int color = FastColor.ARGB32.color(
+            int color = ARGB.color(
                     (int) (alpha * 255.0f),
                     (int) (red * 255.0f),
                     (int) (green * 255.0f),

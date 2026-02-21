@@ -5,7 +5,7 @@ import me.shedaniel.clothconfig2.gui.entries.DropdownBoxEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 
 public class CrosshairDropdown {
@@ -27,7 +27,7 @@ public class CrosshairDropdown {
                 this.textFieldWidget.setTextColor(this.getPreferredTextColor());
                 this.textFieldWidget.render(graphics, mouseX, mouseY, delta);
 
-                ResourceLocation location = CrosshairType.getTextureLocation(this.value);
+                Identifier location = CrosshairType.getTextureLocation(this.value);
                 graphics.blit(location, x + width - 18, y + 2, 0, 0, 16, 16, 16, 16);
             }
         };
@@ -53,7 +53,7 @@ public class CrosshairDropdown {
                         int color = isHover ? 0xffffff : 0x888888;
                         graphics.drawString(Minecraft.getInstance().font, text, (int) (x + 6 + 18), (int) (y + 6), color, false);
 
-                        ResourceLocation location = CrosshairType.getTextureLocation(this.r);
+                        Identifier location = CrosshairType.getTextureLocation(this.r);
                         graphics.blit(location, x + 4, y + 2, 0, 0, 16, 16, 16, 16);
                     }
                 };

@@ -1,19 +1,19 @@
 package com.tacz.guns.client.resource.pojo.display.ammo;
 
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ShellDisplay {
     @SerializedName("model")
-    private ResourceLocation modelLocation;
+    private Identifier modelLocation;
     @SerializedName("texture")
-    protected ResourceLocation modelTexture;
+    protected Identifier modelTexture;
 
-    public ResourceLocation getModelLocation() {
+    public Identifier getModelLocation() {
         return modelLocation;
     }
 
-    public ResourceLocation getModelTexture() {
+    public Identifier getModelTexture() {
         return modelTexture;
     }
 }

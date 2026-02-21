@@ -30,7 +30,7 @@ import com.tacz.guns.resource.serialize.*;
 import com.tacz.guns.util.AllowAttachmentTagMatcher;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -48,7 +48,7 @@ import java.util.function.Consumer;
 public class CommonAssetsManager implements ICommonResourceProvider {
     private static CommonAssetsManager INSTANCE;
     public static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
+            .registerTypeAdapter(Identifier.class, new com.tacz.guns.util.IdentifierSerializer())
             .registerTypeAdapter(Pair.class, new PairSerializer())
             .registerTypeAdapter(GunSmithTableIngredient.class, new GunSmithTableIngredientSerializer())
             .registerTypeAdapter(GunSmithTableResult.class, new GunSmithTableResultSerializer())
@@ -92,7 +92,7 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         blockIndex = register(new CommonDataManager<>(DataType.BLOCK_INDEX, CommonBlockIndex.class, GSON, "index/blocks", "BlockIndexLoader"));
 
         listeners.forEach(register);
-        register.accept((barrier, resourceManager, preparationProfiler, reloadProfiler, backgroundExecutor, gameExecutor) -> {
+        register.accept((sharedState, backgroundExecutor, barrier, gameExecutor) -> {
             return barrier
                     .wait(Void.TYPE)
                     .thenRunAsync(AllowAttachmentTagMatcher::resetCache, gameExecutor);
@@ -104,8 +104,8 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         return listener;
     }
 
-    public Map<DataType, Map<ResourceLocation, String>> getNetworkCache() {
-        ImmutableMap.Builder<DataType, Map<ResourceLocation, String>> builder = ImmutableMap.builder();
+    public Map<DataType, Map<Identifier, String>> getNetworkCache() {
+        ImmutableMap.Builder<DataType, Map<Identifier, String>> builder = ImmutableMap.builder();
         for (INetworkCacheReloadListener listener : listeners) {
             builder.put(listener.getType(), listener.getNetworkCache());
         }
@@ -114,84 +114,84 @@ public class CommonAssetsManager implements ICommonResourceProvider {
 
     @Nullable
     @Override
-    public GunData getGunData(ResourceLocation id) {
+    public GunData getGunData(Identifier id) {
         return gunData.getData(id);
     }
 
     @Nullable
     @Override
-    public AttachmentData getAttachmentData(ResourceLocation id) {
+    public AttachmentData getAttachmentData(Identifier id) {
         return attachmentData.getData(id);
     }
 
     @Nullable
     @Override
-    public BlockData getBlockData(ResourceLocation id) {
+    public BlockData getBlockData(Identifier id) {
         return blockData.getData(id);
     }
 
     @Override
     @Nullable
-    public RecipeFilter getRecipeFilter(ResourceLocation id) {
+    public RecipeFilter getRecipeFilter(Identifier id) {
         return recipeFilterManager.getFilter(id);
     }
 
     @Nullable
     @Override
-    public CommonGunIndex getGunIndex(ResourceLocation gunId) {
+    public CommonGunIndex getGunIndex(Identifier gunId) {
         return gunIndex.getData(gunId);
     }
 
     @Override
-    public Set<Map.Entry<ResourceLocation, CommonGunIndex>> getAllGuns() {
+    public Set<Map.Entry<Identifier, CommonGunIndex>> getAllGuns() {
         return gunIndex.getAllData().entrySet();
     }
 
     @Nullable
     @Override
-    public CommonAmmoIndex getAmmoIndex(ResourceLocation ammoId) {
+    public CommonAmmoIndex getAmmoIndex(Identifier ammoId) {
         return ammoIndex.getData(ammoId);
     }
 
     @Override
-    public Set<Map.Entry<ResourceLocation, CommonAmmoIndex>> getAllAmmos() {
+    public Set<Map.Entry<Identifier, CommonAmmoIndex>> getAllAmmos() {
         return ammoIndex.getAllData().entrySet();
     }
 
     @Nullable
     @Override
-    public CommonAttachmentIndex getAttachmentIndex(ResourceLocation attachmentId) {
+    public CommonAttachmentIndex getAttachmentIndex(Identifier attachmentId) {
         return attachmentIndex.getData(attachmentId);
     }
 
     @Override
-    public Set<Map.Entry<ResourceLocation, CommonAttachmentIndex>> getAllAttachments() {
+    public Set<Map.Entry<Identifier, CommonAttachmentIndex>> getAllAttachments() {
         return attachmentIndex.getAllData().entrySet();
     }
 
     @Override
-    public LuaTable getScript(ResourceLocation scriptId) {
+    public LuaTable getScript(Identifier scriptId) {
         return scriptManager.getScript(scriptId);
     }
 
     @Nullable
     @Override
-    public CommonBlockIndex getBlockIndex(ResourceLocation blockId) {
+    public CommonBlockIndex getBlockIndex(Identifier blockId) {
         return blockIndex.getData(blockId);
     }
 
     @Override
-    public Set<Map.Entry<ResourceLocation, CommonBlockIndex>> getAllBlocks() {
+    public Set<Map.Entry<Identifier, CommonBlockIndex>> getAllBlocks() {
         return blockIndex.getAllData().entrySet();
     }
 
     @Override
-    public Set<String> getAttachmentTags(ResourceLocation registryName) {
+    public Set<String> getAttachmentTags(Identifier registryName) {
         return attachmentsTagManager.getAttachmentTags(registryName);
     }
 
     @Override
-    public Set<String> getAllowAttachmentTags(ResourceLocation registryName) {
+    public Set<String> getAllowAttachmentTags(Identifier registryName) {
         return attachmentsTagManager.getAllowAttachmentTags(registryName);
     }
 
@@ -234,7 +234,7 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     public static void onReload(RegistryAccess registries, boolean client) {
         if (!client) {
             if (getInstance() != null && getInstance().recipeManager != null) {
-                List<RecipeHolder<GunSmithTableRecipe>> recipes = getInstance().recipeManager.getAllRecipesFor(ModRecipe.GUN_SMITH_TABLE_CRAFTING);
+                List<RecipeHolder<GunSmithTableRecipe>> recipes = new java.util.ArrayList<>(getInstance().recipeManager.getAllOfType(ModRecipe.GUN_SMITH_TABLE_CRAFTING));
                 for (RecipeHolder<GunSmithTableRecipe> recipe : recipes) {
                     recipe.value().init(registries);
                 }

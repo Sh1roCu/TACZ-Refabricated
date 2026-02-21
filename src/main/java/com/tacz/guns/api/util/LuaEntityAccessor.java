@@ -1,13 +1,16 @@
 package com.tacz.guns.api.util;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 @SuppressWarnings("unused")
 public record LuaEntityAccessor(LivingEntity entity) {
     public void sendSystemMessage(Component message) {
-        entity.sendSystemMessage(message);
+        if (entity instanceof ServerPlayer serverPlayer) {
+            serverPlayer.sendSystemMessage(message);
+        }
     }
 
     public void sendActionBar(Component message) {
@@ -21,7 +24,8 @@ public record LuaEntityAccessor(LivingEntity entity) {
     }
 
     public boolean hurt(float amount) {
-        return entity.hurt(entity.level().damageSources().generic(), amount);
+        entity.hurt(entity.level().damageSources().generic(), amount);
+        return true; // Entity.hurt is now void in 1.21.11
     }
 
     public Component literal(String text) {

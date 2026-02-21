@@ -9,11 +9,9 @@ import com.tacz.guns.client.resource.index.ClientBlockIndex;
 import com.tacz.guns.inventory.tooltip.BlockItemTooltip;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -25,13 +23,13 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public class GunSmithTableItem extends BlockItem implements BlockItemDataAccessor, IItem {
-    public GunSmithTableItem(Block block) {
-        super(block, (new Item.Properties()).stacksTo(1));
+    public GunSmithTableItem(Block block, Item.Properties properties) {
+        super(block, properties);
     }
 
     @Environment(EnvType.CLIENT)
     @Override
-    public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+    public Object getCustomRenderer() {
         return GunSmithTableItemRenderer.INSTANCE.get();
     }
 
@@ -48,7 +46,7 @@ public class GunSmithTableItem extends BlockItem implements BlockItemDataAccesso
     @Nonnull
     @Environment(EnvType.CLIENT)
     public Component getName(@Nonnull ItemStack stack) {
-        ResourceLocation blockId = this.getBlockId(stack);
+        Identifier blockId = this.getBlockId(stack);
         Optional<ClientBlockIndex> blockIndex = TimelessAPI.getClientBlockIndex(blockId);
         if (blockIndex.isPresent()) {
             return Component.translatable(blockIndex.get().getName());
@@ -59,7 +57,7 @@ public class GunSmithTableItem extends BlockItem implements BlockItemDataAccesso
 //    @Override
 //    @Environment(EnvType.CLIENT)
 //    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> components, TooltipFlag isAdvanced) {
-//        ResourceLocation blockId = this.getBlockId(stack);
+//        Identifier blockId = this.getBlockId(stack);
 //        TimelessAPI.getClientBlockIndex(blockId).ifPresent(index -> {
 //            String tooltipKey = index.getTooltipKey();
 //            if (tooltipKey != null) {

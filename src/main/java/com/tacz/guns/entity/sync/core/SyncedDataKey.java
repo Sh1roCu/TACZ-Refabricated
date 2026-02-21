@@ -1,6 +1,6 @@
 package com.tacz.guns.entity.sync.core;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,7 +12,7 @@ import java.util.function.Supplier;
  * Author: MrCrayfish.
  * Open source at <a href="https://github.com/MrCrayfish/Framework">Github</a> under LGPL License.
  */
-public record SyncedDataKey<E extends Entity, T>(Pair<ResourceLocation, ResourceLocation> pairKey, ResourceLocation id,
+public record SyncedDataKey<E extends Entity, T>(Pair<Identifier, Identifier> pairKey, Identifier id,
                                                  SyncedClassKey<E> classKey, IDataSerializer<T> serializer,
                                                  Supplier<T> defaultValueSupplier, boolean save, boolean persistent,
                                                  SyncMode syncMode) {
@@ -89,7 +89,7 @@ public record SyncedDataKey<E extends Entity, T>(Pair<ResourceLocation, Resource
     public static class Builder<E extends Entity, T> {
         private final SyncedClassKey<E> classKey;
         private final IDataSerializer<T> serializer;
-        private ResourceLocation id;
+        private Identifier id;
         private Supplier<T> defaultValueSupplier;
         private boolean save = false;
         private boolean persistent = true;
@@ -103,14 +103,14 @@ public record SyncedDataKey<E extends Entity, T>(Pair<ResourceLocation, Resource
         public SyncedDataKey<E, T> build() {
             Validate.notNull(this.id, "Missing 'id' when building synced data key");
             Validate.notNull(this.defaultValueSupplier, "Missing 'defaultValueSupplier' when building synced data key");
-            Pair<ResourceLocation, ResourceLocation> pairKey = Pair.of(this.classKey.id(), this.id);
+            Pair<Identifier, Identifier> pairKey = Pair.of(this.classKey.id(), this.id);
             return new SyncedDataKey<>(pairKey, this.id, this.classKey, this.serializer, this.defaultValueSupplier, this.save, this.persistent, this.syncMode);
         }
 
         /**
          * Sets the id for the synced key. This is a required property.
          */
-        public Builder<E, T> id(ResourceLocation id) {
+        public Builder<E, T> id(Identifier id) {
             this.id = id;
             return this;
         }
@@ -119,7 +119,7 @@ public record SyncedDataKey<E extends Entity, T>(Pair<ResourceLocation, Resource
          * Sets the id for the synced key using a String. This is a required property.
          */
         public Builder<E, T> id(String id) {
-            this.id = ResourceLocation.parse(id);
+            this.id = Identifier.parse(id);
             return this;
         }
 

@@ -17,16 +17,16 @@ public class MeleeKey {
     public static final KeyMapping MELEE_KEY = new KeyMapping("key.tacz.melee.desc",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_V,
-            "key.category.tacz");
+            com.tacz.guns.util.InputExtraCheck.TACZ_CATEGORY);
 
     public static void onMeleeKeyPress(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && MELEE_KEY.matches(event.getKey(), event.getScanCode())) {
+        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && MELEE_KEY.matches(new net.minecraft.client.input.KeyEvent(event.getKey(), event.getScanCode(), event.getModifiers()))) {
             doMeleeLogic();
         }
     }
 
     public static void onMeleeMousePress(InputEvent.MouseButton.Post event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && MELEE_KEY.matchesMouse(event.getButton())) {
+        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && MELEE_KEY.matchesMouse(new net.minecraft.client.input.MouseButtonEvent(0, 0, new net.minecraft.client.input.MouseButtonInfo(event.getButton(), event.getModifiers())))) {
             doMeleeLogic();
         }
     }

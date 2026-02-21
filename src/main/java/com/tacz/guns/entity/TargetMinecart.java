@@ -2,7 +2,6 @@ package com.tacz.guns.entity;
 
 import cn.sh1rocu.tacz.api.LogicalSide;
 import cn.sh1rocu.tacz.api.extension.IMinecart;
-import com.mojang.authlib.properties.PropertyMap;
 import com.tacz.guns.api.entity.ITargetEntity;
 import com.tacz.guns.api.event.common.EntityHurtByGunEvent;
 import com.tacz.guns.config.client.RenderConfig;
@@ -21,11 +20,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ResolvableProfile;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.EntityHitResult;
@@ -33,15 +32,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
-import static net.minecraft.world.entity.vehicle.AbstractMinecart.Type.RIDEABLE;
-
 public class TargetMinecart extends AbstractMinecart implements ITargetEntity, IMinecart {
     public static EntityType<TargetMinecart> TYPE = EntityType.Builder.<TargetMinecart>of(TargetMinecart::new, MobCategory.MISC)
             .sized(0.75F, 2.4F)
             .clientTrackingRange(8)
-            .build("target_minecart");
+            .build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("tacz", "target_minecart")));
 
     private @Nullable ResolvableProfile gameProfile = null;
 
@@ -86,8 +81,11 @@ public class TargetMinecart extends AbstractMinecart implements ITargetEntity, I
     }
 
     @Override
-    public boolean isInvulnerableTo(DamageSource source) {
-        return source.is(DamageTypeTags.IS_EXPLOSION) || super.isInvulnerableTo(source);
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
+        if (source.is(DamageTypeTags.IS_EXPLOSION)) {
+            return false;
+        }
+        return super.hurtServer(serverLevel, source, amount);
     }
 
     @Override
@@ -106,14 +104,14 @@ public class TargetMinecart extends AbstractMinecart implements ITargetEntity, I
     }
 
     @Override
-    public void destroy(DamageSource source) {
+    protected void destroy(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source) {
         this.remove(Entity.RemovalReason.KILLED);
-        if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (serverLevel.getGameRules().get(GameRules.ENTITY_DROPS)) {
             ItemStack itemStack = new ItemStack(ModItems.TARGET_MINECART);
             if (this.hasCustomName()) {
                 itemStack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
             }
-            this.spawnAtLocation(itemStack);
+            this.spawnAtLocation(serverLevel, itemStack);
         }
     }
 
@@ -134,8 +132,7 @@ public class TargetMinecart extends AbstractMinecart implements ITargetEntity, I
     @Nullable
     public ResolvableProfile getGameProfile() {
         if (this.gameProfile == null && this.getCustomName() != null) {
-            this.gameProfile = new ResolvableProfile(Optional.of(this.getCustomName().getString()), Optional.empty(), new PropertyMap());
-            this.gameProfile.resolve().thenAcceptAsync((profile) -> this.gameProfile = profile);
+            this.gameProfile = ResolvableProfile.createUnresolved(this.getCustomName().getString());
         }
         return gameProfile;
     }
@@ -146,14 +143,8 @@ public class TargetMinecart extends AbstractMinecart implements ITargetEntity, I
         return ModBlocks.TARGET.defaultBlockState();
     }
 
-    @NotNull
     @Override
-    public Type getMinecartType() {
-        return RIDEABLE;
-    }
-
-    @Override
-    protected double getMaxSpeed() {
+    protected double getMaxSpeed(net.minecraft.server.level.ServerLevel level) {
         return 0.2F;
     }
 }

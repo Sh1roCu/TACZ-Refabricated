@@ -6,7 +6,7 @@ import com.tacz.guns.client.resource.manager.SoundAssetsManager.SoundData;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.sounds.JOrbisAudioStream;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -21,22 +21,22 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public class SoundAssetsManager extends SimplePreparableReloadListener<Map<ResourceLocation, SoundData>> implements IdentifiableResourceReloadListener {
+public class SoundAssetsManager extends SimplePreparableReloadListener<Map<Identifier, SoundData>> implements IdentifiableResourceReloadListener {
     public record SoundData(ByteBuffer byteBuffer, AudioFormat audioFormat) {
     }
 
     private static final Marker MARKER = MarkerFactory.getMarker("SoundsLoader");
 
-    private final Map<ResourceLocation, SoundData> dataMap = Maps.newHashMap();
+    private final Map<Identifier, SoundData> dataMap = Maps.newHashMap();
     private final FileToIdConverter filetoidconverter = new FileToIdConverter("tacz_sounds", ".ogg");
 
     @Override
     @NotNull
-    protected Map<ResourceLocation, SoundData> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
-        Map<ResourceLocation, SoundData> output = Maps.newHashMap();
-        for (Map.Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
-            ResourceLocation resourcelocation = entry.getKey();
-            ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
+    protected Map<Identifier, SoundData> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+        Map<Identifier, SoundData> output = Maps.newHashMap();
+        for (Map.Entry<Identifier, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
+            Identifier resourcelocation = entry.getKey();
+            Identifier resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
 
             try (InputStream stream = entry.getValue().open(); JOrbisAudioStream audioStream = new JOrbisAudioStream(stream)) {
                 ByteBuffer bytebuffer = audioStream.readAll();
@@ -50,19 +50,19 @@ public class SoundAssetsManager extends SimplePreparableReloadListener<Map<Resou
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, SoundData> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected void apply(Map<Identifier, SoundData> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         dataMap.clear();
         dataMap.putAll(pObject);
     }
 
-    public SoundData getData(ResourceLocation id) {
+    public SoundData getData(Identifier id) {
         return dataMap.get(id);
     }
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "sound_assets_manager");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "sound_assets_manager");
 
     @Override
-    public ResourceLocation getFabricId() {
+    public Identifier getFabricId() {
         return ID;
     }
 }

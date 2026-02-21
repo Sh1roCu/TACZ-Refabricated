@@ -3,6 +3,7 @@ package cn.sh1rocu.tacz.mixin.client;
 import cn.sh1rocu.tacz.api.event.InputEvent;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,9 +18,9 @@ public class KeyboardHandlerMixin {
     private Minecraft minecraft;
 
     @Inject(method = "keyPress", at = @At("TAIL"))
-    private void tacz$onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
-        if (window == this.minecraft.getWindow().getWindow()) {
-            InputEvent.Key.EVENT.invoker().onKey(new InputEvent.Key(key, scancode, action, modifiers));
+    private void tacz$onKey(long window, int action, KeyEvent keyEvent, CallbackInfo ci) {
+        if (window == this.minecraft.getWindow().handle()) {
+            InputEvent.Key.EVENT.invoker().onKey(new InputEvent.Key(keyEvent.key(), keyEvent.scancode(), action, keyEvent.modifiers()));
         }
     }
 }

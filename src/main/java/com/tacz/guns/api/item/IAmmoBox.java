@@ -1,6 +1,6 @@
 package com.tacz.guns.api.item;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -13,7 +13,7 @@ public interface IAmmoBox {
      * @param ammoBox 子弹盒
      * @return 子弹盒中的子弹 ID
      */
-    ResourceLocation getAmmoId(ItemStack ammoBox);
+    Identifier getAmmoId(ItemStack ammoBox);
 
     /**
      * 获取子弹盒中的子弹数量
@@ -26,7 +26,7 @@ public interface IAmmoBox {
     /**
      * 设置子弹盒中子弹的 ID
      */
-    void setAmmoId(ItemStack ammoBox, ResourceLocation ammoId);
+    void setAmmoId(ItemStack ammoBox, Identifier ammoId);
 
     /**
      * 设置子弹盒中子弹数量

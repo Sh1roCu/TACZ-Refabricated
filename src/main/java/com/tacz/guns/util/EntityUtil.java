@@ -3,7 +3,7 @@ package com.tacz.guns.util;
 import com.tacz.guns.config.util.HeadShotAABBConfigRead;
 import com.tacz.guns.entity.EntityKineticBullet;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.AABB;
@@ -86,7 +86,7 @@ public class EntityUtil {
             return null;
         }
         Vec3 hitBoxPos = hitPos.subtract(entity.position());
-        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+        Identifier entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         // 有配置的调用配置
         if (entityId != null) {
             AABB aabb = HeadShotAABBConfigRead.getAABB(entityId);

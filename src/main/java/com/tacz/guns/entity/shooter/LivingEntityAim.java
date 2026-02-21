@@ -11,7 +11,7 @@ import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.modifier.custom.AdsModifier;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
@@ -38,7 +38,7 @@ public class LivingEntityAim {
         if (!(currentGunItem.getItem() instanceof IGun iGun)) {
             return;
         }
-        ResourceLocation scopeId = iGun.getAttachmentId(currentGunItem, AttachmentType.SCOPE);
+        Identifier scopeId = iGun.getAttachmentId(currentGunItem, AttachmentType.SCOPE);
         CompoundTag scopeTag = iGun.getAttachmentTag(currentGunItem, AttachmentType.SCOPE);
         if (!DefaultAssets.isEmptyAttachmentId(scopeId) && scopeTag != null) {
             TimelessAPI.getCommonAttachmentIndex(scopeId).ifPresent(index -> {
@@ -61,7 +61,7 @@ public class LivingEntityAim {
         }
         ItemStack currentGunItem = data.currentGunItem.get();
         // 如果获取不到 gunIndex，则取消瞄准状态并将 aimingProgress 归零，返回。
-        ResourceLocation gunId = iGun.getGunId(currentGunItem);
+        Identifier gunId = iGun.getGunId(currentGunItem);
         Optional<CommonGunIndex> gunIndexOptional = TimelessAPI.getCommonGunIndex(gunId);
         if (gunIndexOptional.isEmpty()) {
             data.aimingProgress = 0;

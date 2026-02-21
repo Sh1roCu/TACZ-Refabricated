@@ -6,7 +6,7 @@ public class GunNbtFactory /*extends TimelessItemNbtFactory<AbstractGunItem, Gun
 //    private int ammoCount = 0;
 //    private FireMode fireMode = FireMode.UNKNOWN;
 //    private boolean bulletInBarrel = false;
-//    private EnumMap<AttachmentType, ResourceLocation> attachments = Maps.newEnumMap(AttachmentType.class);
+//    private EnumMap<AttachmentType, Identifier> attachments = Maps.newEnumMap(AttachmentType.class);
 //
 //    public GunNbtFactory(@Nonnull AbstractGunItem item) {
 //        super(item);
@@ -31,12 +31,12 @@ public class GunNbtFactory /*extends TimelessItemNbtFactory<AbstractGunItem, Gun
 //        return this;
 //    }
 //
-//    public GunNbtFactory putAttachment(AttachmentType type, ResourceLocation attachmentId) {
+//    public GunNbtFactory putAttachment(AttachmentType type, Identifier attachmentId) {
 //        this.attachments.put(type, attachmentId);
 //        return this;
 //    }
 //
-//    public GunNbtFactory putAllAttachment(EnumMap<AttachmentType, ResourceLocation> attachments) {
+//    public GunNbtFactory putAllAttachment(EnumMap<AttachmentType, Identifier> attachments) {
 //        this.attachments = attachments;
 //        return this;
 //    }

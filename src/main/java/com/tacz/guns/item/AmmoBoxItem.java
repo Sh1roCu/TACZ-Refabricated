@@ -15,7 +15,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class AmmoBoxItem extends Item implements AmmoBoxItemDataAccessor {
-    public static final ResourceLocation PROPERTY_NAME = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "ammo_statue");
+    public static final Identifier PROPERTY_NAME = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "ammo_statue");
 
     public static final int IRON_LEVEL = 0;
     public static final int GOLD_LEVEL = 1;
@@ -51,8 +51,8 @@ public class AmmoBoxItem extends Item implements AmmoBoxItemDataAccessor {
     private static final int CREATIVE_INDEX = 6;
     private static final int ALL_TYPE_CREATIVE_INDEX = 8;
 
-    public AmmoBoxItem() {
-        super(new Properties().stacksTo(1));
+    public AmmoBoxItem(Properties properties) {
+        super(properties);
     }
 
     @Environment(EnvType.CLIENT)
@@ -101,7 +101,7 @@ public class AmmoBoxItem extends Item implements AmmoBoxItemDataAccessor {
         if (action == ClickAction.SECONDARY) {
             // 点击的格子
             ItemStack slotItem = slot.getItem();
-            ResourceLocation boxAmmoId = this.getAmmoId(ammoBox);
+            Identifier boxAmmoId = this.getAmmoId(ammoBox);
 
             // 格子为空，那就是取出物品
             if (slotItem.isEmpty()) {
@@ -139,7 +139,7 @@ public class AmmoBoxItem extends Item implements AmmoBoxItemDataAccessor {
                 if (isAllTypeCreative(ammoBox)) {
                     return false;
                 }
-                ResourceLocation slotAmmoId = iAmmo.getAmmoId(slotItem);
+                Identifier slotAmmoId = iAmmo.getAmmoId(slotItem);
                 // 格子里的子弹 ID 不对，不能放
                 if (slotAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
                     return false;
@@ -189,7 +189,7 @@ public class AmmoBoxItem extends Item implements AmmoBoxItemDataAccessor {
 
     @Override
     public int getBarWidth(ItemStack stack) {
-        ResourceLocation ammoId = this.getAmmoId(stack);
+        Identifier ammoId = this.getAmmoId(stack);
         int ammoCount = this.getAmmoCount(stack);
         int boxLevelMultiplier = this.getAmmoLevel(stack) + 1;
         double widthPercent = TimelessAPI.getCommonAmmoIndex(ammoId).map(index -> {
@@ -253,7 +253,7 @@ public class AmmoBoxItem extends Item implements AmmoBoxItemDataAccessor {
         if (!(stack.getItem() instanceof IAmmoBox iAmmoBox)) {
             return Optional.empty();
         }
-        ResourceLocation ammoId = iAmmoBox.getAmmoId(stack);
+        Identifier ammoId = iAmmoBox.getAmmoId(stack);
         if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
             return Optional.empty();
         }
@@ -266,17 +266,17 @@ public class AmmoBoxItem extends Item implements AmmoBoxItemDataAccessor {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag isAdvanced) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, java.util.function.Consumer<Component> components, TooltipFlag isAdvanced) {
         if (isAllTypeCreative(stack)) {
-            components.add(Component.translatable("tooltip.tacz.ammo_box.usage.all_type_creative").withStyle(ChatFormatting.GOLD));
+            components.accept(Component.translatable("tooltip.tacz.ammo_box.usage.all_type_creative").withStyle(ChatFormatting.GOLD));
             return;
         }
         if (isCreative(stack)) {
-            components.add(Component.translatable("tooltip.tacz.ammo_box.usage.creative.1").withStyle(ChatFormatting.YELLOW));
-            components.add(Component.translatable("tooltip.tacz.ammo_box.usage.creative.2").withStyle(ChatFormatting.YELLOW));
+            components.accept(Component.translatable("tooltip.tacz.ammo_box.usage.creative.1").withStyle(ChatFormatting.YELLOW));
+            components.accept(Component.translatable("tooltip.tacz.ammo_box.usage.creative.2").withStyle(ChatFormatting.YELLOW));
             return;
         }
-        components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
-        components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
+        components.accept(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
+        components.accept(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
     }
 }

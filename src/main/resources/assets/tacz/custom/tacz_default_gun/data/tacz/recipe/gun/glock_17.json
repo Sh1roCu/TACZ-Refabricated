@@ -1,9 +1,7 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 16
     }
   ],

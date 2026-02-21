@@ -23,7 +23,7 @@ import com.tacz.guns.util.AllowAttachmentTagMatcher;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -56,12 +56,12 @@ public class ModernKineticGunItem extends AbstractGunItem implements GunItemData
     public static final String TYPE_NAME = "modern_kinetic";
 
     private static final DoubleFunction<AttributeModifier> AM_FACTORY = amount -> new AttributeModifier(
-            ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "melee_damage"),
+            Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "melee_damage"),
             amount, AttributeModifier.Operation.ADD_VALUE
     );
 
-    public ModernKineticGunItem() {
-        super(new Properties().stacksTo(1));
+    public ModernKineticGunItem(Properties properties) {
+        super(properties);
     }
 
     @Override
@@ -180,19 +180,19 @@ public class ModernKineticGunItem extends AbstractGunItem implements GunItemData
 
     @Override
     public void melee(ShooterDataHolder dataHolder, LivingEntity user, ItemStack gunItem) {
-        ResourceLocation gunId = this.getGunId(gunItem);
+        Identifier gunId = this.getGunId(gunItem);
         TimelessAPI.getCommonGunIndex(gunId).ifPresent(gunIndex -> {
             GunMeleeData meleeData = gunIndex.getGunData().getMeleeData();
             float distance = meleeData.getDistance();
 
-            ResourceLocation muzzleId = this.getAttachmentId(gunItem, AttachmentType.MUZZLE);
+            Identifier muzzleId = this.getAttachmentId(gunItem, AttachmentType.MUZZLE);
             MeleeData muzzleData = getMeleeData(muzzleId);
             if (muzzleData != null) {
                 doMelee(user, distance, muzzleData.getDistance(), muzzleData.getRangeAngle(), muzzleData.getKnockback(), muzzleData.getDamage(), muzzleData.getEffects());
                 return;
             }
 
-            ResourceLocation stockId = this.getAttachmentId(gunItem, AttachmentType.STOCK);
+            Identifier stockId = this.getAttachmentId(gunItem, AttachmentType.STOCK);
             MeleeData stockData = getMeleeData(stockId);
             if (stockData != null) {
                 doMelee(user, distance, stockData.getDistance(), stockData.getRangeAngle(), stockData.getKnockback(), stockData.getDamage(), stockData.getEffects());
@@ -294,7 +294,7 @@ public class ModernKineticGunItem extends AbstractGunItem implements GunItemData
     public final DefaultPropertyModification defaultPropertyModification = new DefaultPropertyModification();
 
     public class DefaultPropertyModification {
-        public static final ResourceLocation SLUGS = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "intrinsic/slug");
+        public static final Identifier SLUGS = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "intrinsic/slug");
 
         @SuppressWarnings("unchecked")
         public <T> T modify(ItemStack gunItem, LivingEntity shooter, CommonGunIndex gunIndex,
@@ -529,7 +529,7 @@ public class ModernKineticGunItem extends AbstractGunItem implements GunItemData
             return;
         }
         for (EffectData data : effects) {
-            Holder<MobEffect> mobEffect = BuiltInRegistries.MOB_EFFECT.getHolder(data.getEffectId()).orElse(null);
+            Holder<MobEffect> mobEffect = BuiltInRegistries.MOB_EFFECT.get(data.getEffectId()).orElse(null);
             if (mobEffect == null) {
                 continue;
             }
@@ -545,7 +545,7 @@ public class ModernKineticGunItem extends AbstractGunItem implements GunItemData
     }
 
     @Nullable
-    private MeleeData getMeleeData(ResourceLocation attachmentId) {
+    private MeleeData getMeleeData(Identifier attachmentId) {
         if (DefaultAssets.isEmptyAttachmentId(attachmentId)) {
             return null;
         }
@@ -564,7 +564,7 @@ public class ModernKineticGunItem extends AbstractGunItem implements GunItemData
 
     @Override
     public void fireSelect(ShooterDataHolder dataHolder, ItemStack gunItem) {
-        ResourceLocation gunId = this.getGunId(gunItem);
+        Identifier gunId = this.getGunId(gunItem);
         TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> {
             FireMode fireMode = this.getFireMode(gunItem);
             List<FireMode> fireModeSet = gunIndex.getGunData().getFireModeSet();

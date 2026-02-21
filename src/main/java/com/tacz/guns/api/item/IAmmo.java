@@ -1,6 +1,6 @@
 package com.tacz.guns.api.item;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
@@ -26,12 +26,12 @@ public interface IAmmo {
      * @param ammo 输入物品
      * @return 弹药 ID
      */
-    ResourceLocation getAmmoId(ItemStack ammo);
+    Identifier getAmmoId(ItemStack ammo);
 
     /**
      * 设置弹药 ID
      */
-    void setAmmoId(ItemStack ammo, @Nullable ResourceLocation ammoId);
+    void setAmmoId(ItemStack ammo, @Nullable Identifier ammoId);
 
     /**
      * 弹药是否属于这把枪

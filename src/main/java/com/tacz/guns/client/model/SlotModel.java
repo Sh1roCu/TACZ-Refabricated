@@ -5,12 +5,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tacz.guns.client.model.bedrock.BedrockCubePerFace;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.client.resource.pojo.model.FaceUVsItem;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemDisplayContext;
 
 
-public class SlotModel extends EntityModel<Entity> {
+public class SlotModel {
     private final BedrockPart bone;
 
     public SlotModel(boolean illuminated) {
@@ -24,12 +22,11 @@ public class SlotModel extends EntityModel<Entity> {
         this(false);
     }
 
-    @Override
-    public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        bone.render(poseStack, ItemDisplayContext.GUI, buffer, packedLight, packedOverlay);
     }
 
-    @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int i) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay) {
         bone.render(poseStack, ItemDisplayContext.GUI, buffer, packedLight, packedOverlay);
     }
 }

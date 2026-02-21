@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
@@ -36,7 +36,7 @@ public class Serializers {
 
         @Override
         public Boolean read(HolderLookup.Provider provider, Tag tag) {
-            return ((ByteTag) tag).getAsByte() != 0;
+            return ((ByteTag) tag).byteValue() != 0;
         }
     };
 
@@ -58,7 +58,7 @@ public class Serializers {
 
         @Override
         public Byte read(HolderLookup.Provider provider, Tag tag) {
-            return ((ByteTag) tag).getAsByte();
+            return ((ByteTag) tag).byteValue();
         }
     };
 
@@ -80,7 +80,7 @@ public class Serializers {
 
         @Override
         public Short read(HolderLookup.Provider provider, Tag tag) {
-            return ((ShortTag) tag).getAsShort();
+            return ((ShortTag) tag).shortValue();
         }
     };
 
@@ -102,7 +102,7 @@ public class Serializers {
 
         @Override
         public Integer read(HolderLookup.Provider provider, Tag tag) {
-            return ((IntTag) tag).getAsInt();
+            return ((IntTag) tag).intValue();
         }
     };
 
@@ -124,7 +124,7 @@ public class Serializers {
 
         @Override
         public Long read(HolderLookup.Provider provider, Tag tag) {
-            return ((LongTag) tag).getAsLong();
+            return ((LongTag) tag).longValue();
         }
     };
 
@@ -146,7 +146,7 @@ public class Serializers {
 
         @Override
         public Float read(HolderLookup.Provider provider, Tag tag) {
-            return ((FloatTag) tag).getAsFloat();
+            return ((FloatTag) tag).floatValue();
         }
     };
 
@@ -168,7 +168,7 @@ public class Serializers {
 
         @Override
         public Double read(HolderLookup.Provider provider, Tag tag) {
-            return ((DoubleTag) tag).getAsDouble();
+            return ((DoubleTag) tag).doubleValue();
         }
     };
 
@@ -190,7 +190,7 @@ public class Serializers {
 
         @Override
         public Character read(HolderLookup.Provider provider, Tag tag) {
-            return (char) ((IntTag) tag).getAsInt();
+            return (char) ((IntTag) tag).intValue();
         }
     };
 
@@ -212,7 +212,7 @@ public class Serializers {
 
         @Override
         public String read(HolderLookup.Provider provider, Tag tag) {
-            return tag.getAsString();
+            return ((StringTag) tag).value();
         }
     };
 
@@ -256,7 +256,7 @@ public class Serializers {
 
         @Override
         public BlockPos read(HolderLookup.Provider provider, Tag tag) {
-            return BlockPos.of(((LongTag) tag).getAsLong());
+            return BlockPos.of(((LongTag) tag).longValue());
         }
     };
 
@@ -282,7 +282,7 @@ public class Serializers {
         @Override
         public UUID read(HolderLookup.Provider provider, Tag tag) {
             CompoundTag compound = (CompoundTag) tag;
-            return new UUID(compound.getLong("Most"), compound.getLong("Least"));
+            return new UUID(compound.getLongOr("Most", 0L), compound.getLongOr("Least", 0L));
         }
     };
 
@@ -294,39 +294,39 @@ public class Serializers {
 
         @Override
         public ItemStack read(FriendlyByteBuf buf) {
-            return buf.readJsonWithCodec(ItemStack.CODEC);
+            return buf.readLenientJsonWithCodec(ItemStack.CODEC);
         }
 
         @Override
         public Tag write(HolderLookup.Provider provider, ItemStack value) {
-            return value.save(provider, new CompoundTag());
+            return ItemStack.OPTIONAL_CODEC.encodeStart(provider.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), value).getOrThrow();
         }
 
         @Override
         public ItemStack read(HolderLookup.Provider provider, Tag tag) {
-            return ItemStack.parseOptional(provider, (CompoundTag) tag);
+            return ItemStack.OPTIONAL_CODEC.parse(provider.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), tag).result().orElse(ItemStack.EMPTY);
         }
     };
 
-    public static final IDataSerializer<ResourceLocation> RESOURCE_LOCATION = new IDataSerializer<>() {
+    public static final IDataSerializer<Identifier> RESOURCE_LOCATION = new IDataSerializer<>() {
         @Override
-        public void write(FriendlyByteBuf buf, ResourceLocation value) {
-            buf.writeResourceLocation(value);
+        public void write(FriendlyByteBuf buf, Identifier value) {
+            buf.writeIdentifier(value);
         }
 
         @Override
-        public ResourceLocation read(FriendlyByteBuf buf) {
-            return buf.readResourceLocation();
+        public Identifier read(FriendlyByteBuf buf) {
+            return buf.readIdentifier();
         }
 
         @Override
-        public Tag write(HolderLookup.Provider provider, ResourceLocation value) {
+        public Tag write(HolderLookup.Provider provider, Identifier value) {
             return StringTag.valueOf(value.toString());
         }
 
         @Override
-        public ResourceLocation read(HolderLookup.Provider provider, Tag tag) {
-            return ResourceLocation.tryParse(tag.getAsString());
+        public Identifier read(HolderLookup.Provider provider, Tag tag) {
+            return Identifier.tryParse(((StringTag) tag).value());
         }
     };
 }

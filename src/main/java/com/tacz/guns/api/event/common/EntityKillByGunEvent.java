@@ -4,7 +4,7 @@ import cn.sh1rocu.tacz.api.LogicalSide;
 import cn.sh1rocu.tacz.api.event.BaseEvent;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,8 +20,8 @@ public class EntityKillByGunEvent extends BaseEvent implements KubeJSGunEventPos
     private final Entity bullet;
     private final @Nullable LivingEntity killedEntity;
     private final @Nullable LivingEntity attacker;
-    private final ResourceLocation gunId;
-    private final ResourceLocation gunDisplayId;
+    private final Identifier gunId;
+    private final Identifier gunDisplayId;
     private final float baseDamage;
     private final DamageSource nonApPartDamageSource;
     private final DamageSource apPartDamageSource;
@@ -40,7 +40,7 @@ public class EntityKillByGunEvent extends BaseEvent implements KubeJSGunEventPos
     }
 
     public EntityKillByGunEvent(Entity bullet, @Nullable LivingEntity hurtEntity, @Nullable LivingEntity attacker,
-                                ResourceLocation gunId, ResourceLocation gunDisplayId, float baseDamage, @Nullable Pair<DamageSource, DamageSource> sources,
+                                Identifier gunId, Identifier gunDisplayId, float baseDamage, @Nullable Pair<DamageSource, DamageSource> sources,
                                 boolean isHeadShot, float headshotMultiplier, LogicalSide logicalSide) {
         this.bullet = bullet;
         this.killedEntity = hurtEntity;
@@ -73,7 +73,7 @@ public class EntityKillByGunEvent extends BaseEvent implements KubeJSGunEventPos
         return attacker;
     }
 
-    public ResourceLocation getGunId() {
+    public Identifier getGunId() {
         return gunId;
     }
 
@@ -100,7 +100,7 @@ public class EntityKillByGunEvent extends BaseEvent implements KubeJSGunEventPos
         return logicalSide;
     }
 
-    public ResourceLocation getGunDisplayId() {
+    public Identifier getGunDisplayId() {
         return gunDisplayId;
     }
 }

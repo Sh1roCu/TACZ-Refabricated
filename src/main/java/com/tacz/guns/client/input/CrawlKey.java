@@ -20,10 +20,10 @@ public class CrawlKey {
     public static final KeyMapping CRAWL_KEY = new KeyMapping("key.tacz.crawl.desc",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_C,
-            "key.category.tacz");
+            com.tacz.guns.util.InputExtraCheck.TACZ_CATEGORY);
 
     public static void onCrawlPress(InputEvent.Key event) {
-        if (isInGame() && CRAWL_KEY.matches(event.getKey(), event.getScanCode())) {
+        if (isInGame() && CRAWL_KEY.matches(new net.minecraft.client.input.KeyEvent(event.getKey(), event.getScanCode(), event.getModifiers()))) {
             if (!SyncConfig.ENABLE_CRAWL.get()) {
                 return;
             }

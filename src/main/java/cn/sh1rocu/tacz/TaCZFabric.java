@@ -21,8 +21,8 @@ import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.network.message.handshake.AcknowledgeC2SPacket;
 import com.tacz.guns.network.message.handshake.SyncedEntityDataMappingS2CPacket;
 import com.tacz.guns.resource.CommonAssetsManager;
-import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
-import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
+import fuzs.forgeconfigapiport.fabric.api.v5.ConfigRegistry;
+import fuzs.forgeconfigapiport.fabric.api.v5.ModConfigEvents;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
@@ -38,14 +38,14 @@ import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.config.ModConfig;
 
 public class TaCZFabric implements ModInitializer {
-    public static final ResourceLocation HIGHEST = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "event_highest_priority");
-    public static final ResourceLocation HIGH = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "event_high_priority");
-    public static final ResourceLocation LOW = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "event_low_priority");
-    public static final ResourceLocation LOWEST = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "event_lowest_priority");
+    public static final Identifier HIGHEST = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "event_highest_priority");
+    public static final Identifier HIGH = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "event_high_priority");
+    public static final Identifier LOW = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "event_low_priority");
+    public static final Identifier LOWEST = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "event_lowest_priority");
 
 
     @Override
@@ -53,9 +53,9 @@ public class TaCZFabric implements ModInitializer {
         // 确保配置文件加载，这个阶段将比标准的forge配置文件加载早
         PreLoadConfig.init();
 
-        NeoForgeConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.COMMON, CommonConfig.init());
-        NeoForgeConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.SERVER, ServerConfig.init());
-        NeoForgeConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.CLIENT, ClientConfig.init());
+        ConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.COMMON, CommonConfig.init());
+        ConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.SERVER, ServerConfig.init());
+        ConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.CLIENT, ClientConfig.init());
 
         PayloadTypeRegistry.configurationS2C().register(SyncedEntityDataMappingS2CPacket.TYPE, SyncedEntityDataMappingS2CPacket.STREAM_CODEC);
         PayloadTypeRegistry.configurationC2S().register(AcknowledgeC2SPacket.TYPE, AcknowledgeC2SPacket.STREAM_CODEC);
@@ -70,7 +70,7 @@ public class TaCZFabric implements ModInitializer {
         GunMod.setup();
         CommandRegistry.onServerStaring();
         CompatRegistry.onEnqueue();
-        ArgumentTypeRegistry.registerArgumentType(ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "enum_argument"), EnumArgument.class,
+        ArgumentTypeRegistry.registerArgumentType(Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "enum_argument"), EnumArgument.class,
                 new EnumArgument.Info());
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
             CommonLoadPack.loadGunPack();
@@ -102,8 +102,8 @@ public class TaCZFabric implements ModInitializer {
 
         LivingKnockBackEvent.CALLBACK.register(KnockbackChange::onKnockback);
 
-        NeoForgeModConfigEvents.loading(GunMod.MOD_ID).register(LoadingConfigEvent::onLoadingConfig);
-        NeoForgeModConfigEvents.reloading(GunMod.MOD_ID).register(LoadingConfigEvent::onReloadingConfig);
+        ModConfigEvents.loading(GunMod.MOD_ID).register(LoadingConfigEvent::onLoadingConfig);
+        ModConfigEvents.reloading(GunMod.MOD_ID).register(LoadingConfigEvent::onReloadingConfig);
 
         ServerPlayerEvents.AFTER_RESPAWN.register(PlayerRespawnEvent::onPlayerRespawn);
 

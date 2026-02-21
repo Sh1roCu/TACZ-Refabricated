@@ -1,19 +1,19 @@
 package com.tacz.guns.client.gui.components.smith;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.tacz.guns.GunMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
 public class ResultButton extends Button {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/gui/gun_smith_table.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/gui/gun_smith_table.png");
     private final ItemStack stack;
     private boolean isSelected = false;
 
@@ -23,31 +23,31 @@ public class ResultButton extends Button {
     }
 
     @Override
-    protected void renderWidget(@NotNull GuiGraphics gui, int pMouseX, int pMouseY, float pPartialTick) {
-        RenderSystem.enableDepthTest();
+    public void renderContents(@NotNull GuiGraphics gui, int pMouseX, int pMouseY, float pPartialTick) {
+        GlStateManager._enableDepthTest();
 
         if (isSelected) {
             if (isHoveredOrFocused()) {
-                gui.blit(TEXTURE, this.getX() - 1, this.getY() - 1, 52, 229, this.width + 2, this.height + 2, 256, 256);
+                gui.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX() - 1, this.getY() - 1, 52f, 229f, this.width + 2, this.height + 2, 256, 256);
             } else {
-                gui.blit(TEXTURE, this.getX(), this.getY(), 53, 230, this.width, this.height, 256, 256);
+                gui.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX(), this.getY(), 53f, 230f, this.width, this.height, 256, 256);
             }
         } else {
             if (isHoveredOrFocused()) {
-                gui.blit(TEXTURE, this.getX() - 1, this.getY() - 1, 52, 211, this.width + 2, this.height + 2, 256, 256);
+                gui.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX() - 1, this.getY() - 1, 52f, 211f, this.width + 2, this.height + 2, 256, 256);
             } else {
-                gui.blit(TEXTURE, this.getX(), this.getY(), 53, 212, this.width, this.height, 256, 256);
+                gui.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX(), this.getY(), 53f, 212f, this.width, this.height, 256, 256);
             }
         }
         Minecraft mc = Minecraft.getInstance();
         gui.renderItem(stack, this.getX() + 1, this.getY());
 
         Component hoverName = this.stack.getHoverName();
-        renderScrollingString(gui, mc.font, hoverName, this.getX() + 20, this.getY() + 4, this.getX() + 92, this.getY() + 13, 0xFFFFFF);
+        gui.drawString(mc.font, hoverName, this.getX() + 20, this.getY() + 4, 0xFFFFFF, false);
     }
 
     @Override
-    public void onPress() {
+    public void onPress(net.minecraft.client.input.InputWithModifiers input) {
         this.isSelected = true;
         this.onPress.onPress(this);
     }

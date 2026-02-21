@@ -3,10 +3,13 @@ package com.tacz.guns.entity.sync.core;
 import cn.sh1rocu.tacz.util.forge.LazyOptional;
 import com.tacz.guns.GunMod;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.Component;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
@@ -15,7 +18,7 @@ import org.ladysnake.cca.api.v3.component.ComponentRegistry;
 import java.util.Optional;
 
 public class DataHolderCapabilityProvider implements Component {
-    public static final ComponentKey<DataHolderCapabilityProvider> CAPABILITY = ComponentRegistry.getOrCreate(ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "synced_entity_data"), DataHolderCapabilityProvider.class);
+    public static final ComponentKey<DataHolderCapabilityProvider> CAPABILITY = ComponentRegistry.getOrCreate(Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "synced_entity_data"), DataHolderCapabilityProvider.class);
     private final DataHolder holder = new DataHolder();
     private final LazyOptional<DataHolder> optional = LazyOptional.of(() -> this.holder);
 
@@ -27,7 +30,8 @@ public class DataHolderCapabilityProvider implements Component {
         return optional.resolve();
     }
 
-    private ListTag serializeNBT(HolderLookup.@NotNull Provider provider) {
+    private CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag result = new CompoundTag();
         ListTag list = new ListTag();
         this.holder.dataMap.forEach((key, entry) -> {
             if (key.save()) {
@@ -38,15 +42,17 @@ public class DataHolderCapabilityProvider implements Component {
                 list.add(keyTag);
             }
         });
-        return list;
+        result.put("DataHolder", list);
+        return result;
     }
 
-    private void deserializeNBT(HolderLookup.@NotNull Provider provider, ListTag listTag) {
+    private void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         this.holder.dataMap.clear();
+        ListTag listTag = tag.getListOrEmpty("DataHolder");
         listTag.forEach(entryTag -> {
             CompoundTag keyTag = (CompoundTag) entryTag;
-            ResourceLocation classKey = ResourceLocation.tryParse(keyTag.getString("ClassKey"));
-            ResourceLocation dataKey = ResourceLocation.tryParse(keyTag.getString("DataKey"));
+            Identifier classKey = Identifier.tryParse(keyTag.getStringOr("ClassKey", ""));
+            Identifier dataKey = Identifier.tryParse(keyTag.getStringOr("DataKey", ""));
             Tag value = keyTag.get("Value");
             SyncedClassKey<?> syncedClassKey = SyncedEntityData.instance().getClassKey(classKey);
             if (syncedClassKey == null) {
@@ -63,13 +69,15 @@ public class DataHolderCapabilityProvider implements Component {
     }
 
     @Override
-    public void readFromNbt(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider provider) {
-        deserializeNBT(provider, tag.getList("DataHolder", Tag.TAG_COMPOUND));
+    public void readData(@NotNull ValueInput input) {
+        input.read("tacz_synced_data", CompoundTag.CODEC).ifPresent(tag -> {
+            deserializeNBT(input.lookup(), tag);
+        });
     }
 
     @Override
-    public void writeToNbt(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider provider) {
-        ListTag listTag = serializeNBT(provider);
-        tag.put("DataHolder", listTag);
+    public void writeData(@NotNull ValueOutput output) {
+        CompoundTag tag = serializeNBT(RegistryAccess.EMPTY);
+        output.store("tacz_synced_data", CompoundTag.CODEC, tag);
     }
 }

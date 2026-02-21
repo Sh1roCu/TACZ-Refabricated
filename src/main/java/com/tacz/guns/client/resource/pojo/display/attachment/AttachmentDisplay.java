@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import com.tacz.guns.client.resource.pojo.display.IDisplay;
 import com.tacz.guns.client.resource.pojo.display.LaserConfig;
 import com.tacz.guns.client.resource.pojo.display.gun.TextShow;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -15,13 +15,13 @@ public class AttachmentDisplay implements IDisplay {
     private LaserConfig laserConfig;
 
     @SerializedName("slot")
-    private ResourceLocation slotTextureLocation;
+    private Identifier slotTextureLocation;
 
     @SerializedName("model")
-    private ResourceLocation model;
+    private Identifier model;
 
     @SerializedName("texture")
-    private ResourceLocation texture;
+    private Identifier texture;
 
     @SerializedName("lod")
     @Nullable
@@ -59,17 +59,17 @@ public class AttachmentDisplay implements IDisplay {
     private float[] viewsFov;
 
     @SerializedName("sounds")
-    private Map<String, ResourceLocation> sounds = Maps.newHashMap();
+    private Map<String, Identifier> sounds = Maps.newHashMap();
 
-    public ResourceLocation getSlotTextureLocation() {
+    public Identifier getSlotTextureLocation() {
         return slotTextureLocation;
     }
 
-    public ResourceLocation getModel() {
+    public Identifier getModel() {
         return model;
     }
 
-    public ResourceLocation getTexture() {
+    public Identifier getTexture() {
         return texture;
     }
 
@@ -118,7 +118,7 @@ public class AttachmentDisplay implements IDisplay {
         return viewsFov;
     }
 
-    public Map<String, ResourceLocation> getSounds() {
+    public Map<String, Identifier> getSounds() {
         return sounds;
     }
 

@@ -9,7 +9,7 @@ import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.api.item.gun.GunItemManager;
 import com.tacz.guns.init.ModItems;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.EnumMap;
@@ -18,10 +18,10 @@ public final class GunItemBuilder {
     private int count = 1;
     private int ammoCount = 0;
     private boolean heatData = false;
-    private ResourceLocation gunId;
+    private Identifier gunId;
     private FireMode fireMode = FireMode.UNKNOWN;
     private boolean bulletInBarrel = false;
-    private EnumMap<AttachmentType, ResourceLocation> attachments = Maps.newEnumMap(AttachmentType.class);
+    private EnumMap<AttachmentType, Identifier> attachments = Maps.newEnumMap(AttachmentType.class);
 
     private GunItemBuilder() {
     }
@@ -40,7 +40,7 @@ public final class GunItemBuilder {
         return this;
     }
 
-    public GunItemBuilder setId(ResourceLocation id) {
+    public GunItemBuilder setId(Identifier id) {
         this.gunId = id;
         return this;
     }
@@ -55,12 +55,12 @@ public final class GunItemBuilder {
         return this;
     }
 
-    public GunItemBuilder putAttachment(AttachmentType type, ResourceLocation attachmentId) {
+    public GunItemBuilder putAttachment(AttachmentType type, Identifier attachmentId) {
         this.attachments.put(type, attachmentId);
         return this;
     }
 
-    public GunItemBuilder putAllAttachment(EnumMap<AttachmentType, ResourceLocation> attachments) {
+    public GunItemBuilder putAllAttachment(EnumMap<AttachmentType, Identifier> attachments) {
         this.attachments = attachments;
         return this;
     }

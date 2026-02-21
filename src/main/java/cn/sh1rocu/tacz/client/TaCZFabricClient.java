@@ -1,7 +1,12 @@
 package cn.sh1rocu.tacz.client;
 
 import cn.sh1rocu.tacz.api.event.*;
-import cn.sh1rocu.tacz.api.extension.IItem;
+// TODO: Custom item renderer imports removed - rendering API changed in 1.21.11
+// import cn.sh1rocu.tacz.api.extension.IItem;
+// import com.tacz.guns.client.renderer.item.AmmoItemRenderer;
+// import com.tacz.guns.client.renderer.item.AnimateGeoItemRenderer;
+// import com.tacz.guns.client.renderer.item.AttachmentItemRenderer;
+// import com.tacz.guns.client.renderer.item.GunSmithTableItemRenderer;
 import com.tacz.guns.api.client.event.BeforeRenderHandEvent;
 import com.tacz.guns.api.client.event.RenderItemInHandBobEvent;
 import com.tacz.guns.api.client.event.SwapItemWithOffHand;
@@ -23,8 +28,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
-import net.minecraft.core.registries.BuiltInRegistries;
+// import net.fabricmc.fabric.api.client.rendering.v1.SpecialBlockRendererRegistry;
+// import net.minecraft.core.registries.BuiltInRegistries;
 
 public class TaCZFabricClient implements ClientModInitializer {
     @Override
@@ -36,10 +41,13 @@ public class TaCZFabricClient implements ClientModInitializer {
         ModContainerScreen.registerScreens();
         ModEntitiesRender.registerEntityRenderers();
         ParticleFactories.registerParticles();
-        BuiltInRegistries.ITEM.stream().filter(item -> item instanceof IItem).forEach(clientEx ->
-                BuiltinItemRendererRegistry.INSTANCE.register(clientEx,
-                        (stack, mode, matrices, vertexConsumers, light, overlay) ->
-                                ((IItem) clientEx).getCustomRenderer().renderByItem(stack, mode, matrices, vertexConsumers, light, overlay)));
+        // TODO: Fabric rendering API completely changed in 1.21.11 - SpecialBlockRendererRegistry now takes (Block, SpecialModelRenderer.Unbaked)
+        // The old DynamicItemRenderer pattern is no longer supported. Custom item renderers need to be reimplemented
+        // using the new SpecialModelRenderer/SpecialGuiElementRegistry API.
+        // BuiltInRegistries.ITEM.stream().filter(item -> item instanceof IItem).forEach(clientEx -> {
+        //         Object renderer = ((IItem) clientEx).getCustomRenderer();
+        //         ... register custom renderers ...
+        // });
         subscribeEvents();
     }
 

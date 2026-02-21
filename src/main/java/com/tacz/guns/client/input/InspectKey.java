@@ -17,10 +17,10 @@ public class InspectKey {
     public static final KeyMapping INSPECT_KEY = new KeyMapping("key.tacz.inspect.desc",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_H,
-            "key.category.tacz");
+            com.tacz.guns.util.InputExtraCheck.TACZ_CATEGORY);
 
     public static void onInspectPress(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INSPECT_KEY.matches(event.getKey(), event.getScanCode())) {
+        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INSPECT_KEY.matches(new net.minecraft.client.input.KeyEvent(event.getKey(), event.getScanCode(), event.getModifiers()))) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null || player.isSpectator()) {
                 return;

@@ -20,7 +20,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
 
 @JeiPlugin
 public class GunModPlugin implements IModPlugin {
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "jei");
+    private static final Identifier UID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "jei");
 
-    private Map<ResourceLocation, RecipeType<GunSmithTableRecipe>> recipeTypeMap = new HashMap<>();
+    private Map<Identifier, RecipeType<GunSmithTableRecipe>> recipeTypeMap = new HashMap<>();
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
@@ -55,12 +55,11 @@ public class GunModPlugin implements IModPlugin {
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
         if (Minecraft.getInstance().level == null) return;
-        RecipeManager recipeManager = Minecraft.getInstance().level.getRecipeManager();
-        List<RecipeHolder<GunSmithTableRecipe>> recipes = recipeManager.getAllRecipesFor(ModRecipe.GUN_SMITH_TABLE_CRAFTING);
+        List<RecipeHolder<GunSmithTableRecipe>> recipes = new java.util.ArrayList<>(Minecraft.getInstance().level.recipeAccess().getSynchronizedRecipes().getAllOfType(ModRecipe.GUN_SMITH_TABLE_CRAFTING));
 
         for (var entry : recipeTypeMap.entrySet()) {
             TimelessAPI.getCommonBlockIndex(entry.getKey()).ifPresent(blockIndex -> {
-                List<GunSmithTableRecipe> recipeList = blockIndex.getFilter().filter(recipes, RecipeHolder::id).stream().map(RecipeHolder::value).collect(Collectors.toList());
+                List<GunSmithTableRecipe> recipeList = blockIndex.getFilter().filter(recipes, h -> h.id().identifier()).stream().map(RecipeHolder::value).collect(Collectors.toList());
                 recipeList.removeIf(recipe -> blockIndex.getData().getTabs().stream().noneMatch(tab -> Objects.equals(tab.id(), recipe.getResult().getGroup())));
                 registration.addRecipes(entry.getValue(), recipeList);
             });
@@ -93,7 +92,7 @@ public class GunModPlugin implements IModPlugin {
     }
 
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
         return UID;
     }
 }

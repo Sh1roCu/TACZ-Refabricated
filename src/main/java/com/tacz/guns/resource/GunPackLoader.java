@@ -100,7 +100,8 @@ public enum GunPackLoader implements RepositorySource {
         PackLocationInfo packLocationInfo = new PackLocationInfo("tacz_resources", Component.literal("TACZ Resources"), PackSource.BUILT_IN, Optional.empty());
         return Pack.readMetaAndCreate(packLocationInfo, new DelegatingPackResources(packLocationInfo,
                 new PackMetadataSection(Component.translatable("tacz.resources.modresources"),
-                        SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty()), extensionPacks) {
+                        new net.minecraft.util.InclusiveRange<>(net.minecraft.server.packs.metadata.pack.PackFormat.of(
+                        packType == net.minecraft.server.packs.PackType.CLIENT_RESOURCES ? SharedConstants.RESOURCE_PACK_FORMAT_MAJOR : SharedConstants.DATA_PACK_FORMAT_MAJOR))), extensionPacks) {
             public IoSupplier<InputStream> getRootResource(String... paths) {
                 if (paths.length == 1 && paths[0].equals("pack.png")) {
                     Path logoPath = getModIcon("tacz");
@@ -152,7 +153,9 @@ public enum GunPackLoader implements RepositorySource {
     private static GunPack fromDirPath(Path path) throws IOException {
         Path packInfoFilePath = path.resolve("gunpack.meta.json");
         try (InputStream stream = Files.newInputStream(packInfoFilePath)) {
-            PackMeta info = CommonAssetsManager.GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), PackMeta.class);
+            com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+            PackMeta info = CommonAssetsManager.GSON.fromJson(jsonReader, PackMeta.class);
 
             if (info == null) {
                 GunMod.LOGGER.warn(MARKER, "Failed to read info json: {}", packInfoFilePath.getFileName());
@@ -181,7 +184,9 @@ public enum GunPackLoader implements RepositorySource {
             }
 
             try (InputStream stream = zipFile.getInputStream(extDescriptorEntry)) {
-                PackMeta info = CommonAssetsManager.GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), PackMeta.class);
+                com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+                jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+                PackMeta info = CommonAssetsManager.GSON.fromJson(jsonReader, PackMeta.class);
 
                 if (info == null) {
                     GunMod.LOGGER.warn(MARKER, "Failed to read info json: {}", path.getFileName());

@@ -1,7 +1,7 @@
 package com.tacz.guns.api;
 
 import com.google.common.reflect.TypeToken;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 public record GunProperty<T>(
         String name,

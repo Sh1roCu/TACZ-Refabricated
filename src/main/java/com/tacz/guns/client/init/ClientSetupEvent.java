@@ -11,12 +11,7 @@ import com.tacz.guns.client.tooltip.ClientAmmoBoxTooltip;
 import com.tacz.guns.client.tooltip.ClientAttachmentItemTooltip;
 import com.tacz.guns.client.tooltip.ClientBlockItemTooltip;
 import com.tacz.guns.client.tooltip.ClientGunTooltip;
-import com.tacz.guns.compat.ar.ARCompat;
-import com.tacz.guns.compat.controllable.ControllableCompat;
-import com.tacz.guns.compat.immediatelyfast.ImmediatelyFastCompat;
 import com.tacz.guns.compat.playeranimator.PlayerAnimatorCompat;
-import com.tacz.guns.compat.shouldersurfing.ShoulderSurfingCompat;
-import com.tacz.guns.compat.zoomify.ZoomifyCompat;
 import com.tacz.guns.init.ModItems;
 import com.tacz.guns.inventory.tooltip.AmmoBoxTooltip;
 import com.tacz.guns.inventory.tooltip.AttachmentItemTooltip;
@@ -32,7 +27,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.server.packs.PackType;
 
 @Environment(EnvType.CLIENT)
@@ -99,12 +93,11 @@ public class ClientSetupEvent {
         // 注册自己的的硬编码第三人称动画
         ThirdPersonManager.registerDefault();
 
-        // 注册颜色
-        ColorProviderRegistry.ITEM.register(AmmoBoxItem::getColor, ModItems.AMMO_BOX);
+        // TODO: In 1.21.11 ColorProviderRegistry.ITEM was removed (item color providers moved to item model system)
+        // ColorProviderRegistry.ITEM.register(AmmoBoxItem::getColor, ModItems.AMMO_BOX);
 
-        // 注册变种
-        // noinspection deprecation
-        ItemProperties.register(ModItems.AMMO_BOX, AmmoBoxItem.PROPERTY_NAME, AmmoBoxItem::getStatue);
+        // TODO: ItemProperties removed in 1.21.11 - item model system reworked
+        // ItemProperties.register(ModItems.AMMO_BOX, AmmoBoxItem.PROPERTY_NAME, AmmoBoxItem::getStatue);
 
         // 初始化自己的枪包下载器
 //       ClientGunPackDownloadManager.init();
@@ -112,17 +105,12 @@ public class ClientSetupEvent {
 //        // 与 player animator 的兼容
 //       PlayerAnimatorCompat.init();
 
-        // 与 Shoulder Surfing Reloaded 的兼容
-        ShoulderSurfingCompat.init();
-
-        // 与 Controllable 的兼容
-        ControllableCompat.init();
-
-        // 与 Accelerated Rendering 的兼容
-        ARCompat.init();
-
-        ZoomifyCompat.init();
-        ImmediatelyFastCompat.init();
+        // TODO: Compat modules disabled - excluded from compilation until dependencies have 1.21.11 builds
+        // ShoulderSurfingCompat.init();
+        // ControllableCompat.init();
+        // ARCompat.init();
+        // ZoomifyCompat.init();
+        // ImmediatelyFastCompat.init();
     }
 
     public static void onClientResourceReload() {

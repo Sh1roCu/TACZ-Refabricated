@@ -1,21 +1,15 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 18
     },
     {
-      "item": {
-        "tag": "c:leathers"
-      },
+      "item": "#c:leathers",
       "count": 5
     },
     {
-      "item": {
-        "tag": "c:dusts/redstone"
-      },
+      "item": "#c:dusts/redstone",
       "count": 2
     }
   ],

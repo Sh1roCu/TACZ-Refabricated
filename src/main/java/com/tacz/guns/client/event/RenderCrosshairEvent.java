@@ -1,9 +1,10 @@
 package com.tacz.guns.client.event;
 
 import cn.sh1rocu.tacz.api.event.RenderTickEvent;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.platform.DestFactor;
+import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.client.animation.statemachine.AnimationStateContext;
@@ -14,7 +15,6 @@ import com.tacz.guns.api.entity.ReloadState;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.gui.GunRefitScreen;
 import com.tacz.guns.client.renderer.crosshair.CrosshairType;
-import com.tacz.guns.compat.shouldersurfing.ShoulderSurfingCompat;
 import com.tacz.guns.config.client.RenderConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,7 +24,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
 public class RenderCrosshairEvent {
-    private static final ResourceLocation HIT_ICON = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/crosshair/hit/hit_marker.png");
+    private static final Identifier HIT_ICON = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/crosshair/hit/hit_marker.png");
     private static final long KEEP_TIME = 300;
     private static boolean isRefitScreen = false;
     private static long hitTimestamp = -1L;
@@ -78,7 +78,7 @@ public class RenderCrosshairEvent {
                 // 枪包可以强制显示准星
                 boolean forceShow = gunIndex.isShowCrosshair();
                 // 越肩视角可以强制显示准星
-                boolean shoulderSurfingForceShow = ShoulderSurfingCompat.showCrosshair();
+                boolean shoulderSurfingForceShow = false /* TODO: ShoulderSurfing compat disabled */;
                 // 两个强制都没有时，那么才允许隐藏
                 if (!forceShow && !shoulderSurfingForceShow) {
                     return;
@@ -91,8 +91,7 @@ public class RenderCrosshairEvent {
                 renderCrosshair(guiGraphics, window);
             }
         });
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager._blendFuncSeparate(com.mojang.blaze3d.opengl.GlConst.GL_SRC_ALPHA, com.mojang.blaze3d.opengl.GlConst.GL_ONE_MINUS_SRC_ALPHA, com.mojang.blaze3d.opengl.GlConst.GL_ONE, com.mojang.blaze3d.opengl.GlConst.GL_ZERO);
     }
 
     public static void onRenderTick(RenderTickEvent event) {
@@ -103,7 +102,7 @@ public class RenderCrosshairEvent {
     private static void renderCrosshair(GuiGraphics graphics, Window window) {
         Options options = Minecraft.getInstance().options;
         // 越肩视角可以强制显示准星
-        boolean shoulderSurfingForceShow = ShoulderSurfingCompat.showCrosshair();
+        boolean shoulderSurfingForceShow = false /* TODO: ShoulderSurfing compat disabled */;
         if (!options.getCameraType().isFirstPerson() && !shoulderSurfingForceShow) {
             return;
         }
@@ -120,11 +119,11 @@ public class RenderCrosshairEvent {
         int width = window.getGuiScaledWidth();
         int height = window.getGuiScaledHeight();
 
-        ResourceLocation location = CrosshairType.getTextureLocation(RenderConfig.CROSSHAIR_TYPE.get());
+        Identifier location = CrosshairType.getTextureLocation(RenderConfig.CROSSHAIR_TYPE.get());
 
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.setShaderColor(1F, 1F, 1F, 0.9f);
+        GlStateManager._enableBlend();
+        GlStateManager._blendFuncSeparate(com.mojang.blaze3d.opengl.GlConst.GL_SRC_ALPHA, com.mojang.blaze3d.opengl.GlConst.GL_ONE_MINUS_SRC_ALPHA, com.mojang.blaze3d.opengl.GlConst.GL_SRC_ALPHA, com.mojang.blaze3d.opengl.GlConst.GL_ONE_MINUS_SRC_ALPHA);
+        // TODO: In 1.21.11 RenderSystem.setShaderColor was removed; crosshair alpha=0.9 tinting not applied
         float x = width / 2f - 8;
         float y = height / 2f - 8;
         graphics.blit(location, (int) x, (int) y, 0, 0, 16, 16, 16, 16);
@@ -154,13 +153,9 @@ public class RenderCrosshairEvent {
         float x = width / 2f - 8;
         float y = height / 2f - 8;
 
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        if (remainHeadShotTime > KEEP_TIME) {
-            RenderSystem.setShaderColor(1F, 1F, 1F, 1 - fadeTime / KEEP_TIME);
-        } else {
-            RenderSystem.setShaderColor(1F, 0, 0, 1 - fadeTime / KEEP_TIME);
-        }
+        GlStateManager._enableBlend();
+        GlStateManager._blendFuncSeparate(com.mojang.blaze3d.opengl.GlConst.GL_SRC_ALPHA, com.mojang.blaze3d.opengl.GlConst.GL_ONE_MINUS_SRC_ALPHA, com.mojang.blaze3d.opengl.GlConst.GL_SRC_ALPHA, com.mojang.blaze3d.opengl.GlConst.GL_ONE_MINUS_SRC_ALPHA);
+        // TODO: In 1.21.11 RenderSystem.setShaderColor was removed; hit marker fade/color tinting not applied
 
         graphics.blit(HIT_ICON, (int) (x - offset), (int) (y - offset), 0, 0, 8, 8, 16, 16);
         graphics.blit(HIT_ICON, (int) (x + 8 + offset), (int) (y - offset), 8, 0, 8, 8, 16, 16);

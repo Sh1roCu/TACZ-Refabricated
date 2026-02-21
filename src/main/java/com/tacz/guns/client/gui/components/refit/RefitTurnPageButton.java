@@ -1,6 +1,6 @@
 package com.tacz.guns.client.gui.components.refit;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.tacz.guns.client.gui.GunRefitScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -20,20 +20,20 @@ public class RefitTurnPageButton extends Button implements IComponentTooltip {
     }
 
     @Override
-    public void renderWidget(@Nonnull GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
-        RenderSystem.disableDepthTest();
-        RenderSystem.enableBlend();
+    public void renderContents(@Nonnull GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
+        GlStateManager._disableDepthTest();
+        GlStateManager._enableBlend();
 
         int x = getX(), y = getY();
         int yOffset = isUpPage ? 0 : 80;
         if (isHoveredOrFocused()) {
-            graphics.blit(GunRefitScreen.TURN_PAGE_TEXTURE, x, y, width, height, 0, yOffset, 180, 80, 180, 160);
+            graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, GunRefitScreen.TURN_PAGE_TEXTURE, x, y, 0f, (float) yOffset, width, height, 180, 80, 180, 160);
         } else {
-            graphics.blit(GunRefitScreen.TURN_PAGE_TEXTURE, x + 1, y + 1, width - 2, height - 2, 10, yOffset + 10, 180 - 20, 80 - 20, 180, 160);
+            graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, GunRefitScreen.TURN_PAGE_TEXTURE, x + 1, y + 1, 10f, (float) (yOffset + 10), width - 2, height - 2, 180 - 20, 80 - 20, 180, 160);
         }
 
-        RenderSystem.enableDepthTest();
-        RenderSystem.disableBlend();
+        GlStateManager._enableDepthTest();
+        GlStateManager._disableBlend();
     }
 
     @Override

@@ -8,7 +8,7 @@ import com.tacz.guns.client.resource.ClientAssetsManager;
 import com.tacz.guns.client.resource.pojo.animation.gltf.RawAnimationStructure;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -22,22 +22,24 @@ import java.io.Reader;
 import java.util.Map;
 
 
-public class GltfManager extends SimplePreparableReloadListener<Map<ResourceLocation, AnimationStructure>> implements IdentifiableResourceReloadListener {
+public class GltfManager extends SimplePreparableReloadListener<Map<Identifier, AnimationStructure>> implements IdentifiableResourceReloadListener {
     private static final Marker MARKER = MarkerFactory.getMarker("GltfAnimationLoader");
 
-    private final Map<ResourceLocation, AnimationStructure> dataMap = Maps.newHashMap();
+    private final Map<Identifier, AnimationStructure> dataMap = Maps.newHashMap();
     private final FileToIdConverter filetoidconverter = new FileToIdConverter("animations", ".gltf");
 
     @Override
     @NotNull
-    protected Map<ResourceLocation, AnimationStructure> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
-        Map<ResourceLocation, AnimationStructure> output = Maps.newHashMap();
-        for (Map.Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
-            ResourceLocation resourcelocation = entry.getKey();
-            ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
+    protected Map<Identifier, AnimationStructure> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+        Map<Identifier, AnimationStructure> output = Maps.newHashMap();
+        for (Map.Entry<Identifier, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
+            Identifier resourcelocation = entry.getKey();
+            Identifier resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
 
             try (Reader reader = entry.getValue().openAsReader()) {
-                RawAnimationStructure rawStructure = ClientAssetsManager.GSON.fromJson(reader, RawAnimationStructure.class);
+                com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(reader);
+                jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+                RawAnimationStructure rawStructure = ClientAssetsManager.GSON.fromJson(jsonReader, RawAnimationStructure.class);
                 AnimationStructure animationStructure = new AnimationStructure(rawStructure);
                 output.put(resourcelocation1, animationStructure);
             } catch (IllegalArgumentException | IOException | JsonParseException jsonparseexception) {
@@ -48,19 +50,19 @@ public class GltfManager extends SimplePreparableReloadListener<Map<ResourceLoca
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, AnimationStructure> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected void apply(Map<Identifier, AnimationStructure> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         dataMap.clear();
         dataMap.putAll(pObject);
     }
 
-    public AnimationStructure getGltfAnimation(ResourceLocation id) {
+    public AnimationStructure getGltfAnimation(Identifier id) {
         return dataMap.get(id);
     }
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "gltf_manager");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "gltf_manager");
 
     @Override
-    public ResourceLocation getFabricId() {
+    public Identifier getFabricId() {
         return ID;
     }
 }

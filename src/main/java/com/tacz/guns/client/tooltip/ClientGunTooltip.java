@@ -28,7 +28,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -69,7 +69,7 @@ public class ClientGunTooltip implements ClientTooltipComponent {
     public ClientGunTooltip(GunTooltip tooltip) {
         this.gun = tooltip.getGun();
         this.iGun = tooltip.getIGun();
-        ResourceLocation ammoId = tooltip.getAmmoId();
+        Identifier ammoId = tooltip.getAmmoId();
         this.gunIndex = tooltip.getGunIndex();
         this.display = TimelessAPI.getGunDisplay(gun).orElse(null);
         this.ammo = AmmoItemBuilder.create().setId(ammoId).build();
@@ -78,7 +78,7 @@ public class ClientGunTooltip implements ClientTooltipComponent {
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(Font font) {
         int height = 0;
         if (shouldShow(GunTooltipPart.DESCRIPTION) && this.desc != null) {
             height += 10 * this.desc.size() + 2;
@@ -225,7 +225,7 @@ public class ClientGunTooltip implements ClientTooltipComponent {
 
 
         if (shouldShow(GunTooltipPart.PACK_INFO)) {
-            ResourceLocation gunId = iGun.getGunId(gun);
+            Identifier gunId = iGun.getGunId(gun);
             PackInfo packInfoObject = ClientAssetsManager.INSTANCE.getPackInfo(gunId);
             if (packInfoObject != null) {
                 packInfo = Component.translatable(packInfoObject.getName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
@@ -235,13 +235,13 @@ public class ClientGunTooltip implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderText(Font font, int pX, int pY, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
+    public void renderText(GuiGraphics guiGraphics, Font font, int pX, int pY) {
         int yOffset = pY;
 
         if (shouldShow(GunTooltipPart.DESCRIPTION) && this.desc != null) {
             yOffset += 2;
             for (FormattedCharSequence sequence : this.desc) {
-                font.drawInBatch(sequence, pX, yOffset, 0xaaaaaa, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+                guiGraphics.drawString(font, sequence, pX, yOffset, 0xaaaaaa);
                 yOffset += 10;
             }
         }
@@ -251,10 +251,10 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             yOffset += 4;
 
             // 弹药名
-            font.drawInBatch(this.ammoName, pX + 20, yOffset, 0xffaa00, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.ammoName, pX + 20, yOffset, 0xffaa00);
 
             // 弹药数
-            font.drawInBatch(this.ammoCountText, pX + 20, yOffset + 10, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.ammoCountText, pX + 20, yOffset + 10, 0x777777);
 
             yOffset += 20;
         }
@@ -264,17 +264,17 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             yOffset += 4;
 
             // 等级信息
-            font.drawInBatch(this.levelInfo, pX, yOffset, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.levelInfo, pX, yOffset, 0x777777);
             yOffset += 10;
 
             // 枪械类型
             if (this.gunType != null) {
-                font.drawInBatch(this.gunType, pX, yOffset, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+                guiGraphics.drawString(font, this.gunType, pX, yOffset, 0x777777);
                 yOffset += 10;
             }
 
             // 伤害
-            font.drawInBatch(this.damage, pX, yOffset, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.damage, pX, yOffset, 0x777777);
             yOffset += 10;
         }
 
@@ -283,14 +283,14 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             yOffset += 4;
 
             // 穿甲伤害
-            font.drawInBatch(this.armorIgnore, pX, yOffset, 0xffaa00, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.armorIgnore, pX, yOffset, 0xffaa00);
             yOffset += 10;
 
             // 爆头伤害
-            font.drawInBatch(this.headShotMultiplier, pX, yOffset, 0xffaa00, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.headShotMultiplier, pX, yOffset, 0xffaa00);
             yOffset += 10;
 
-            font.drawInBatch(this.weight, pX, yOffset, 0xffffff, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.weight, pX, yOffset, 0xffffff);
             yOffset += 10;
         }
 
@@ -299,7 +299,7 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             yOffset += 4;
 
             // Z 键说明
-            font.drawInBatch(this.tips, pX, yOffset, 0xffffff, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            guiGraphics.drawString(font, this.tips, pX, yOffset, 0xffffff);
             yOffset += 10;
         }
 
@@ -308,13 +308,13 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             // 枪包名
             if (packInfo != null) {
                 yOffset += 4;
-                font.drawInBatch(this.packInfo, pX, yOffset, 0xffffff, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+                guiGraphics.drawString(font, this.packInfo, pX, yOffset, 0xffffff);
             }
         }
     }
 
     @Override
-    public void renderImage(Font pFont, int pX, int pY, GuiGraphics guiGraphics) {
+    public void renderImage(Font pFont, int pX, int pY, int width, int height, GuiGraphics guiGraphics) {
         IGun iGun = IGun.getIGunOrNull(this.gun);
         if (iGun == null) {
             return;

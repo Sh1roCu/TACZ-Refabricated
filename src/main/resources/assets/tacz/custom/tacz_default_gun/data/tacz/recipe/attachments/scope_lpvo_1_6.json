@@ -1,27 +1,19 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 14
     },
     {
-      "item": {
-        "tag": "c:gems/amethyst"
-      },
+      "item": "#c:gems/amethyst",
       "count": 4
     },
     {
-      "item": {
-        "tag": "c:dusts/glowstone"
-      },
+      "item": "#c:dusts/glowstone",
       "count": 8
     },
     {
-      "item": {
-        "tag": "c:dusts/redstone"
-      },
+      "item": "#c:dusts/redstone",
       "count": 6
     }
   ],

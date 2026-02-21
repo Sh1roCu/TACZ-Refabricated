@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Consumer;
 
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 @Mixin(SoundEngine.class)
 public abstract class SoundEngineMixin {
     @Inject(method = "play", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V", shift = At.Shift.AFTER))
-    private void tacz$prepareChannelInfo(SoundInstance soundInstance, CallbackInfo ci, @Local ChannelAccess.ChannelHandle channelHandle, @Local Sound sound) {
+    private void tacz$prepareChannelInfo(SoundInstance soundInstance, CallbackInfoReturnable<SoundEngine.PlayResult> cir, @Local ChannelAccess.ChannelHandle channelHandle, @Local Sound sound) {
         var injection = ((ChannelAccessHandleInjection) channelHandle);
 
         if (sound.shouldStream())

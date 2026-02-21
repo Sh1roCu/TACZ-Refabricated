@@ -13,7 +13,7 @@ import com.tacz.guns.client.resource.pojo.animation.bedrock.BedrockAnimationFile
 import com.tacz.guns.client.resource.pojo.model.BedrockModelPOJO;
 import com.tacz.guns.client.resource.pojo.model.BedrockVersion;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,26 +27,26 @@ import java.util.Optional;
 // 这个理论上已经不需要了
 public class InternalAssetLoader {
     // 曳光弹模型
-    public static final ResourceLocation DEFAULT_BULLET_TEXTURE = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/entity/basic_bullet.png");
-    public static final ResourceLocation DEFAULT_BULLET_MODEL = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/basic_bullet.json");
+    public static final Identifier DEFAULT_BULLET_TEXTURE = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/entity/basic_bullet.png");
+    public static final Identifier DEFAULT_BULLET_MODEL = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/basic_bullet.json");
     // 射击标靶车
-    public static final ResourceLocation TARGET_MINECART_MODEL_LOCATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/target_minecart.json");
-    public static final ResourceLocation TARGET_MINECART_TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/entity/target_minecart.png");
-    public static final ResourceLocation ENTITY_EMPTY_TEXTURE = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/entity/empty.png");
+    public static final Identifier TARGET_MINECART_MODEL_LOCATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/target_minecart.json");
+    public static final Identifier TARGET_MINECART_TEXTURE_LOCATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/entity/target_minecart.png");
+    public static final Identifier ENTITY_EMPTY_TEXTURE = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/entity/empty.png");
     // 射击标靶
-    public static final ResourceLocation TARGET_MODEL_LOCATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/target.json");
-    public static final ResourceLocation TARGET_TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/block/target.png");
+    public static final Identifier TARGET_MODEL_LOCATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/target.json");
+    public static final Identifier TARGET_TEXTURE_LOCATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/block/target.png");
     // 雕像
-    public static final ResourceLocation STATUE_MODEL_LOCATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/statue.json");
-    public static final ResourceLocation STATUE_TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/block/statue.png");
+    public static final Identifier STATUE_MODEL_LOCATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/statue.json");
+    public static final Identifier STATUE_TEXTURE_LOCATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/block/statue.png");
     // 改装台
-    public static final ResourceLocation SMITH_TABLE_MODEL_LOCATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/gun_smith_table.json");
-    public static final ResourceLocation SMITH_TABLE_TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/block/gun_smith_table.png");
+    public static final Identifier SMITH_TABLE_MODEL_LOCATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "models/bedrock/gun_smith_table.json");
+    public static final Identifier SMITH_TABLE_TEXTURE_LOCATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/block/gun_smith_table.png");
     // 默认动画
-    private static final ResourceLocation DEFAULT_PISTOL_ANIMATIONS_LOC = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "animations/pistol_default.animation.json");
-    private static final ResourceLocation DEFAULT_RIFLE_ANIMATIONS_LOC = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "animations/rifle_default.animation.json");
+    private static final Identifier DEFAULT_PISTOL_ANIMATIONS_LOC = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "animations/pistol_default.animation.json");
+    private static final Identifier DEFAULT_RIFLE_ANIMATIONS_LOC = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "animations/rifle_default.animation.json");
     // 内部资源缓存
-    private static final Map<ResourceLocation, BedrockModel> BEDROCK_MODELS = Maps.newHashMap();
+    private static final Map<Identifier, BedrockModel> BEDROCK_MODELS = Maps.newHashMap();
     private static List<ObjectAnimation> defaultPistolAnimations;
     private static List<ObjectAnimation> defaultRifleAnimations;
 
@@ -66,19 +66,22 @@ public class InternalAssetLoader {
         loadBedrockModels(InternalAssetLoader.STATUE_MODEL_LOCATION);
     }
 
-    private static BedrockAnimationFile loadAnimations(ResourceLocation resourceLocation) {
+    private static BedrockAnimationFile loadAnimations(Identifier resourceLocation) {
         try (InputStream inputStream = Minecraft.getInstance().getResourceManager().open(resourceLocation)) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            JsonObject json = JsonParser.parseReader(bufferedReader).getAsJsonObject();
+            com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new BufferedReader(new InputStreamReader(inputStream)));
+            jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+            JsonObject json = JsonParser.parseReader(jsonReader).getAsJsonObject();
             return ClientAssetsManager.GSON.fromJson(json, BedrockAnimationFile.class);
         } catch (IOException | JsonSyntaxException | JsonIOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void loadBedrockModels(ResourceLocation location) {
+    private static void loadBedrockModels(Identifier location) {
         try (InputStream stream = Minecraft.getInstance().getResourceManager().open(location)) {
-            BedrockModelPOJO pojo = ClientAssetsManager.GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), BedrockModelPOJO.class);
+            com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+            BedrockModelPOJO pojo = ClientAssetsManager.GSON.fromJson(jsonReader, BedrockModelPOJO.class);
             BEDROCK_MODELS.put(location, new BedrockModel(pojo, BedrockVersion.NEW));
         } catch (IOException | JsonSyntaxException | JsonIOException e) {
             e.fillInStackTrace();
@@ -93,7 +96,7 @@ public class InternalAssetLoader {
         return defaultRifleAnimations;
     }
 
-    public static Optional<BedrockModel> getBedrockModel(ResourceLocation location) {
+    public static Optional<BedrockModel> getBedrockModel(Identifier location) {
         return Optional.ofNullable(BEDROCK_MODELS.get(location));
     }
 }

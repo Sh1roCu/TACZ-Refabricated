@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -24,7 +24,7 @@ public class GunSmithTableResult {
     public static final Codec<GunSmithTableResult> CODEC = ExtraCodecs.catchDecoderException(Codec.of(GunSmithTableResult::encode, GunSmithTableResult::decode));
     public static final StreamCodec<RegistryFriendlyByteBuf, GunSmithTableResult> STREAM_CODEC = StreamCodec.composite(
             ItemStack.OPTIONAL_STREAM_CODEC, GunSmithTableResult::getResult,
-            ResourceLocation.STREAM_CODEC, GunSmithTableResult::getGroup,
+            Identifier.STREAM_CODEC, GunSmithTableResult::getGroup,
             GunSmithTableResult::new
     );
 
@@ -37,16 +37,16 @@ public class GunSmithTableResult {
             String typeName = Codec.STRING.fieldOf("type").decode(ops, map).getOrThrow();
             int count = Codec.INT.optionalFieldOf("count", 1).decode(ops, map).getOrThrow();
             CompoundTag extraTag = CompoundTag.CODEC.optionalFieldOf("nbt", null).decode(ops, map).getOrThrow();
-            ResourceLocation tabOverride = Codec.STRING.optionalFieldOf("group").decode(ops, map).getOrThrow()
+            Identifier tabOverride = Codec.STRING.optionalFieldOf("group").decode(ops, map).getOrThrow()
                     .map(raw -> raw.contains(":") ? raw : GunMod.MOD_ID + ":" + raw)
-                    .map(ResourceLocation::tryParse).orElse(null);
+                    .map(Identifier::tryParse).orElse(null);
 
             GunSmithTableResult result;
             switch (typeName) {
                 case GunSmithTableResult.GUN,
                      GunSmithTableResult.AMMO,
                      GunSmithTableResult.ATTACHMENT -> {
-                    ResourceLocation id = ResourceLocation.CODEC.fieldOf("id").decode(ops, map).getOrThrow();
+                    Identifier id = Identifier.CODEC.fieldOf("id").decode(ops, map).getOrThrow();
                     RawGunTableResult raw = new RawGunTableResult(typeName, id, count);
                     if (extraTag != null) raw.setNbt(extraTag);
                     if (typeName.equals(GunSmithTableResult.GUN)) {
@@ -59,7 +59,7 @@ public class GunSmithTableResult {
                     result = new GunSmithTableResult(itemStack, tabOverride);
                     if (extraTag != null) {
                         result.getResult().update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag -> {
-                            for (String key : extraTag.getAllKeys()) {
+                            for (String key : extraTag.keySet()) {
                                 Tag value = extraTag.get(key);
                                 if (value != null) {
                                     tag.put(key, value);
@@ -80,12 +80,12 @@ public class GunSmithTableResult {
     public static final String CUSTOM = "custom";
 
     private ItemStack result = ItemStack.EMPTY;
-    private ResourceLocation group = null;
+    private Identifier group = null;
 
     @Nullable
     private RawGunTableResult raw = null;
 
-    public GunSmithTableResult(ItemStack result, @Nullable ResourceLocation group) {
+    public GunSmithTableResult(ItemStack result, @Nullable Identifier group) {
         this.result = result;
         this.group = group == null ? TabConfig.TAB_EMPTY : group;
     }
@@ -95,7 +95,7 @@ public class GunSmithTableResult {
         this.raw = raw;
     }
 
-    public GunSmithTableResult(@NotNull RawGunTableResult raw, @Nullable ResourceLocation group) {
+    public GunSmithTableResult(@NotNull RawGunTableResult raw, @Nullable Identifier group) {
         this.raw = raw;
         this.group = group == null ? TabConfig.TAB_EMPTY : group;
     }
@@ -115,7 +115,7 @@ public class GunSmithTableResult {
         return result;
     }
 
-    public ResourceLocation getGroup() {
+    public Identifier getGroup() {
         return group;
     }
 }

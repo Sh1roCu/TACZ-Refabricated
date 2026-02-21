@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 
@@ -16,7 +16,7 @@ public class RenderHandEvent extends BaseEvent implements ICancellableEvent {
     private final InteractionHand hand;
     private final ItemStack stack;
     private final PoseStack matrices;
-    private final MultiBufferSource vertexConsumers;
+    private final SubmitNodeCollector collector;
     private final float tickDelta;
     private final float pitch;
     private final float swingProgress;
@@ -29,12 +29,12 @@ public class RenderHandEvent extends BaseEvent implements ICancellableEvent {
         }
     });
 
-    public RenderHandEvent(AbstractClientPlayer player, InteractionHand hand, ItemStack stack, PoseStack matrices, MultiBufferSource vertexConsumers, float tickDelta, float pitch, float swingProgress, float equipProgress, int light) {
+    public RenderHandEvent(AbstractClientPlayer player, InteractionHand hand, ItemStack stack, PoseStack matrices, SubmitNodeCollector collector, float tickDelta, float pitch, float swingProgress, float equipProgress, int light) {
         this.player = player;
         this.hand = hand;
         this.stack = stack;
         this.matrices = matrices;
-        this.vertexConsumers = vertexConsumers;
+        this.collector = collector;
         this.tickDelta = tickDelta;
         this.pitch = pitch;
         this.swingProgress = swingProgress;
@@ -54,8 +54,8 @@ public class RenderHandEvent extends BaseEvent implements ICancellableEvent {
         return matrices;
     }
 
-    public MultiBufferSource getMultiBufferSource() {
-        return vertexConsumers;
+    public SubmitNodeCollector getCollector() {
+        return collector;
     }
 
     public int getPackedLight() {

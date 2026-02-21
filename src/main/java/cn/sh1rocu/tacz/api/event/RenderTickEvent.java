@@ -11,7 +11,7 @@ import net.minecraft.client.Minecraft;
 public class RenderTickEvent extends BaseEvent {
     private final Minecraft client;
     public final Phase phase;
-    private final DeltaTracker.Timer timer;
+    private final DeltaTracker timer;
 
     public static final Event<Callback> CALLBACK = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
         for (Callback callback : callbacks) {
@@ -19,7 +19,7 @@ public class RenderTickEvent extends BaseEvent {
         }
     });
 
-    public RenderTickEvent(Minecraft client, Phase phase, DeltaTracker.Timer timer) {
+    public RenderTickEvent(Minecraft client, Phase phase, DeltaTracker timer) {
         this.client = client;
         this.phase = phase;
         this.timer = timer;
@@ -29,7 +29,7 @@ public class RenderTickEvent extends BaseEvent {
         return client;
     }
 
-    public DeltaTracker.Timer getTimer() {
+    public DeltaTracker getTimer() {
         return timer;
     }
 

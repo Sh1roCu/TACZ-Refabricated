@@ -14,7 +14,7 @@ import com.tacz.guns.network.message.ServerMessageSyncBaseTimestamp;
 import com.tacz.guns.network.message.event.ServerMessageGunShoot;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,7 +43,7 @@ public class LivingEntityShoot {
         if (!(currentGunItem.getItem() instanceof IGun iGun)) {
             return ShootResult.NOT_GUN;
         }
-        ResourceLocation gunId = iGun.getGunId(currentGunItem);
+        Identifier gunId = iGun.getGunId(currentGunItem);
         Optional<CommonGunIndex> gunIndexOptional = TimelessAPI.getCommonGunIndex(gunId);
         if (gunIndexOptional.isEmpty()) {
             return ShootResult.ID_NOT_EXIST;
@@ -62,7 +62,7 @@ public class LivingEntityShoot {
         }
         if (SyncConfig.SERVER_SHOOT_NETWORK_V.get()) {
             // 根据 tick time 和 允许的网络延迟波动 计算 时间戳的接受窗口
-            MinecraftServer server = Objects.requireNonNull(shooter.getServer());
+            MinecraftServer server = Objects.requireNonNull(shooter.level().getServer());
             double tickTime = Math.max(server.getTickTimesNanos()[server.getTickCount() % 100] * 1.0E-6D, 50);
             long alpha = System.currentTimeMillis() - data.baseTimestamp - timestamp;
             if (alpha < -300 || alpha > 300 + tickTime * 2) { // 允许 +- 300ms 的网络波动、窗口下限再扩大 2 个 tick time 时间(最坏情况射击会延迟2个 tick)
@@ -165,7 +165,7 @@ public class LivingEntityShoot {
         if (!(currentGunItem.getItem() instanceof IGun iGun)) {
             return 0;
         }
-        ResourceLocation gunId = iGun.getGunId(currentGunItem);
+        Identifier gunId = iGun.getGunId(currentGunItem);
         Optional<CommonGunIndex> gunIndex = TimelessAPI.getCommonGunIndex(gunId);
         FireMode fireMode = iGun.getFireMode(currentGunItem);
         long interval = timestamp - data.shootTimestamp;

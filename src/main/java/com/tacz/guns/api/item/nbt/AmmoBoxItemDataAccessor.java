@@ -7,7 +7,7 @@ import com.tacz.guns.api.item.IGun;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
@@ -19,16 +19,16 @@ public interface AmmoBoxItemDataAccessor extends IAmmoBox {
     String LEVEL_TAG = "Level";
 
     @Override
-    default ResourceLocation getAmmoId(ItemStack ammoBox) {
+    default Identifier getAmmoId(ItemStack ammoBox) {
         CompoundTag tag = ammoBox.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        if (tag.contains(AMMO_ID_TAG, Tag.TAG_STRING)) {
-            return ResourceLocation.parse(tag.getString(AMMO_ID_TAG));
+        if (tag.contains(AMMO_ID_TAG)) {
+            return Identifier.parse(tag.getStringOr(AMMO_ID_TAG, ""));
         }
         return DefaultAssets.EMPTY_AMMO_ID;
     }
 
     @Override
-    default void setAmmoId(ItemStack ammoBox, ResourceLocation ammoId) {
+    default void setAmmoId(ItemStack ammoBox, Identifier ammoId) {
         ammoBox.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag -> {
             tag.putString(AMMO_ID_TAG, ammoId.toString());
         }));
@@ -40,8 +40,8 @@ public interface AmmoBoxItemDataAccessor extends IAmmoBox {
         if (isAllTypeCreative(ammoBox) || isCreative(ammoBox)) {
             return Integer.MAX_VALUE;
         }
-        if (tag.contains(AMMO_COUNT_TAG, Tag.TAG_INT)) {
-            return tag.getInt(AMMO_COUNT_TAG);
+        if (tag.contains(AMMO_COUNT_TAG)) {
+            return tag.getIntOr(AMMO_COUNT_TAG, 0);
         }
         return 0;
     }
@@ -63,11 +63,11 @@ public interface AmmoBoxItemDataAccessor extends IAmmoBox {
             if (isAllTypeCreative(ammoBox)) {
                 return true;
             }
-            ResourceLocation ammoId = iAmmoBox.getAmmoId(ammoBox);
+            Identifier ammoId = iAmmoBox.getAmmoId(ammoBox);
             if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
                 return false;
             }
-            ResourceLocation gunId = iGun.getGunId(gun);
+            Identifier gunId = iGun.getGunId(gun);
             return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId().equals(ammoId)).orElse(false);
         }
         return false;
@@ -84,8 +84,8 @@ public interface AmmoBoxItemDataAccessor extends IAmmoBox {
     @Override
     default int getAmmoLevel(ItemStack ammoBox) {
         CompoundTag tag = ammoBox.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        if (tag.contains(LEVEL_TAG, Tag.TAG_INT)) {
-            return tag.getInt(LEVEL_TAG);
+        if (tag.contains(LEVEL_TAG)) {
+            return tag.getIntOr(LEVEL_TAG, 0);
         }
         return 0;
     }
@@ -93,8 +93,8 @@ public interface AmmoBoxItemDataAccessor extends IAmmoBox {
     @Override
     default boolean isCreative(ItemStack ammoBox) {
         CompoundTag tag = ammoBox.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        if (tag.contains(CREATIVE_TAG, Tag.TAG_BYTE)) {
-            return tag.getBoolean(CREATIVE_TAG);
+        if (tag.contains(CREATIVE_TAG)) {
+            return tag.getBooleanOr(CREATIVE_TAG, false);
         }
         return false;
     }
@@ -102,8 +102,8 @@ public interface AmmoBoxItemDataAccessor extends IAmmoBox {
     @Override
     default boolean isAllTypeCreative(ItemStack ammoBox) {
         CompoundTag tag = ammoBox.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        if (tag.contains(ALL_TYPE_CREATIVE_TAG, Tag.TAG_BYTE)) {
-            return tag.getBoolean(ALL_TYPE_CREATIVE_TAG);
+        if (tag.contains(ALL_TYPE_CREATIVE_TAG)) {
+            return tag.getBooleanOr(ALL_TYPE_CREATIVE_TAG, false);
         }
         return false;
     }
@@ -113,14 +113,14 @@ public interface AmmoBoxItemDataAccessor extends IAmmoBox {
         ammoBox.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag -> {
             if (isAllType) {
                 // 移除可能存在的创造模式标签
-                if (tag.contains(CREATIVE_TAG, Tag.TAG_BYTE)) {
+                if (tag.contains(CREATIVE_TAG)) {
                     tag.remove(CREATIVE_TAG);
                 }
                 tag.putBoolean(ALL_TYPE_CREATIVE_TAG, true);
                 return;
             }
             // 移除可能存在的全类型标签
-            if (tag.contains(ALL_TYPE_CREATIVE_TAG, Tag.TAG_BYTE)) {
+            if (tag.contains(ALL_TYPE_CREATIVE_TAG)) {
                 tag.remove(ALL_TYPE_CREATIVE_TAG);
             }
             tag.putBoolean(CREATIVE_TAG, true);

@@ -7,39 +7,31 @@ import com.mojang.math.Axis;
 import com.tacz.guns.client.model.SlotModel;
 import com.tacz.guns.client.model.bedrock.BedrockModel;
 import com.tacz.guns.client.renderer.block.GunSmithTableRenderer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
-public class GunSmithTableItemRenderer extends BlockEntityWithoutLevelRenderer {
+public class GunSmithTableItemRenderer {
     private static final SlotModel SLOT_BLOCK_MODEL = new SlotModel();
 
-    public static final Supplier<GunSmithTableItemRenderer> INSTANCE = Suppliers.memoize(() -> {
-        Minecraft client = Minecraft.getInstance();
-        return new GunSmithTableItemRenderer(client.getBlockEntityRenderDispatcher(), client.getEntityModels());
-    });
+    public static final Supplier<GunSmithTableItemRenderer> INSTANCE = Suppliers.memoize(GunSmithTableItemRenderer::new);
 
-    public GunSmithTableItemRenderer(BlockEntityRenderDispatcher dispatcher, EntityModelSet modelSet) {
-        super(dispatcher, modelSet);
+    public GunSmithTableItemRenderer() {
     }
 
-    @Override
     public void renderByItem(@Nonnull ItemStack stack, @Nonnull ItemDisplayContext transformType, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource pBuffer, int pPackedLight, int pPackedOverlay) {
         GunSmithTableRenderer.getIndex(stack).ifPresentOrElse(index -> {
             BedrockModel model = index.getModel();
-            ResourceLocation texture = index.getTexture();
+            Identifier texture = index.getTexture();
             if (model == null) {
                 return;
             }
@@ -49,19 +41,19 @@ public class GunSmithTableItemRenderer extends BlockEntityWithoutLevelRenderer {
             if (transforms != null) {
                 poseStack.translate(0.5F, 0.5F, 0.5F);
                 ItemTransform transform = transforms.getTransform(transformType);
-                transform.apply(false, poseStack);
+                transform.apply(false, poseStack.last());
                 poseStack.translate(-0.5F, -0.5F, -0.5F);
             }
 
             poseStack.translate(0.5, 1.5, 0.5);
             poseStack.mulPose(Axis.ZN.rotationDegrees(180));
-            RenderType renderType = RenderType.entityTranslucent(texture);
+            RenderType renderType = RenderTypes.entityTranslucent(texture);
             model.render(poseStack, transformType, renderType, pPackedLight, pPackedOverlay);
             poseStack.popPose();
         }, () -> {
             poseStack.translate(0.5, 1.5, 0.5);
             poseStack.mulPose(Axis.ZN.rotationDegrees(180));
-            VertexConsumer buffer = pBuffer.getBuffer(RenderType.entityTranslucent(MissingTextureAtlasSprite.getLocation()));
+            VertexConsumer buffer = pBuffer.getBuffer(RenderTypes.entityTranslucent(MissingTextureAtlasSprite.getLocation()));
             SLOT_BLOCK_MODEL.renderToBuffer(poseStack, buffer, pPackedLight, pPackedOverlay);
         });
     }

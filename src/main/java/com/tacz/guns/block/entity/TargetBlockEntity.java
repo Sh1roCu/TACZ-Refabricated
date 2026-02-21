@@ -23,6 +23,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
@@ -31,7 +33,7 @@ import static com.tacz.guns.block.TargetBlock.OUTPUT_POWER;
 import static com.tacz.guns.block.TargetBlock.STAND;
 
 public class TargetBlockEntity extends BlockEntity implements Nameable {
-    public static final BlockEntityType<TargetBlockEntity> TYPE = BlockEntityType.Builder.of(TargetBlockEntity::new, ModBlocks.TARGET).build(null);
+    public static final BlockEntityType<TargetBlockEntity> TYPE = net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.create(TargetBlockEntity::new, ModBlocks.TARGET).build();
     /**
      * 标靶复位时间，暂定为 5 秒
      */
@@ -63,34 +65,24 @@ public class TargetBlockEntity extends BlockEntity implements Nameable {
 
     public void setOwner(@Nullable ResolvableProfile owner) {
         this.owner = owner;
-        if (this.owner != null) {
-            this.owner.resolve().thenAcceptAsync((profile) -> {
-                this.owner = profile;
-                this.refresh();
-            }, SkullBlockEntity.CHECKED_MAIN_THREAD_EXECUTOR);
-        }
+        this.refresh();
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
-        if (tag.contains(OWNER_TAG, Tag.TAG_COMPOUND)) {
-            this.owner = DataComponents.PROFILE.codec().parse(provider.createSerializationContext(NbtOps.INSTANCE), tag.getCompound(OWNER_TAG)).getOrThrow();
-        }
-        if (tag.contains(CUSTOM_NAME_TAG, Tag.TAG_STRING)) {
-            this.name = Component.Serializer.fromJson(tag.getString(CUSTOM_NAME_TAG), provider);
-        }
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        input.read(OWNER_TAG, DataComponents.PROFILE.codec()).ifPresent(profile -> this.owner = profile);
+        input.read(CUSTOM_NAME_TAG, net.minecraft.network.chat.ComponentSerialization.CODEC).ifPresent(component -> this.name = component);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
-        ;
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
         if (owner != null) {
-            tag.put(OWNER_TAG, DataComponents.PROFILE.codec().encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), owner).getOrThrow());
+            output.store(OWNER_TAG, DataComponents.PROFILE.codec(), owner);
         }
         if (this.name != null) {
-            tag.putString(CUSTOM_NAME_TAG, Component.Serializer.toJson(this.name, provider));
+            output.store(CUSTOM_NAME_TAG, net.minecraft.network.chat.ComponentSerialization.CODEC, this.name);
         }
     }
 

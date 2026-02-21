@@ -11,7 +11,7 @@ import com.tacz.guns.resource.filter.RecipeFilter;
 import com.tacz.guns.resource.network.DataType;
 import com.tacz.guns.util.ResourceScanner;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -23,14 +23,14 @@ import java.util.List;
 import java.util.Map;
 
 
-public class RecipeFilterManager extends SimplePreparableReloadListener<Map<ResourceLocation, List<JsonElement>>> implements INetworkCacheReloadListener {
-    private final Map<ResourceLocation, RecipeFilter> filters = Maps.newHashMap();
+public class RecipeFilterManager extends SimplePreparableReloadListener<Map<Identifier, List<JsonElement>>> implements INetworkCacheReloadListener {
+    private final Map<Identifier, RecipeFilter> filters = Maps.newHashMap();
 
     private final Gson gson;
     private final Marker marker;
 
     private final FileToIdConverter fileToIdConverter;
-    protected Map<ResourceLocation, String> networkCache;
+    protected Map<Identifier, String> networkCache;
 
     public RecipeFilterManager() {
         this.gson = CommonAssetsManager.GSON;
@@ -40,18 +40,18 @@ public class RecipeFilterManager extends SimplePreparableReloadListener<Map<Reso
 
     @NotNull
     @Override
-    protected Map<ResourceLocation, List<JsonElement>> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected Map<Identifier, List<JsonElement>> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         return ResourceScanner.scanDirectoryAll(pResourceManager, this.fileToIdConverter, this.gson);
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, List<JsonElement>> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected void apply(Map<Identifier, List<JsonElement>> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         filters.clear();
 
-        ImmutableMap.Builder<ResourceLocation, String> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<Identifier, String> builder = ImmutableMap.builder();
 
-        for (Map.Entry<ResourceLocation, List<JsonElement>> entry : pObject.entrySet()) {
-            ResourceLocation id = entry.getKey();
+        for (Map.Entry<Identifier, List<JsonElement>> entry : pObject.entrySet()) {
+            Identifier id = entry.getKey();
 
             for (JsonElement element : entry.getValue()) {
                 try {
@@ -82,7 +82,7 @@ public class RecipeFilterManager extends SimplePreparableReloadListener<Map<Reso
     }
 
     @Override
-    public Map<ResourceLocation, String> getNetworkCache() {
+    public Map<Identifier, String> getNetworkCache() {
         return networkCache;
     }
 
@@ -91,18 +91,18 @@ public class RecipeFilterManager extends SimplePreparableReloadListener<Map<Reso
         return DataType.RECIPE_FILTER;
     }
 
-    public Map<ResourceLocation, RecipeFilter> getFilters() {
+    public Map<Identifier, RecipeFilter> getFilters() {
         return filters;
     }
 
-    public RecipeFilter getFilter(ResourceLocation id) {
+    public RecipeFilter getFilter(Identifier id) {
         return filters.get(id);
     }
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "recipe_filter_manager");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "recipe_filter_manager");
 
     @Override
-    public ResourceLocation getFabricId() {
+    public Identifier getFabricId() {
         return ID;
     }
 }

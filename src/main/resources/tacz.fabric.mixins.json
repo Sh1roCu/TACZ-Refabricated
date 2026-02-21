@@ -20,17 +20,13 @@
     "common.PersistentEntitySectionManagerMixin",
     "common.PlayerListMixin",
     "common.PlayerMixin",
-    "common.RecipeManagerMixin",
     "common.ReloadableResourcesMixin",
     "common.ServerEntityMixin",
     "common.ServerLevelMixin",
     "common.ServerPacksSourceMixin",
     "common.itemhandler.AbstractHorseMixin",
     "common.itemhandler.LivingEntityMixin",
-    "common.itemhandler.PlayerMixin",
-    "compat.carryon.ConfigLoaderMixin",
-    "compat.controllable.BindingContextMixin",
-    "compat.tweakeroo.ItemMixin"
+    "common.itemhandler.PlayerMixin"
   ],
   "client": [
     "accessor.AbstractSliderButtonAccessor",

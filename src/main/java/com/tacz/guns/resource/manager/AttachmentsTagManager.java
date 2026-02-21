@@ -12,7 +12,7 @@ import com.tacz.guns.resource.CommonAssetsManager;
 import com.tacz.guns.resource.network.DataType;
 import com.tacz.guns.util.ResourceScanner;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -23,15 +23,15 @@ import org.slf4j.MarkerFactory;
 import java.util.*;
 
 
-public class AttachmentsTagManager extends SimplePreparableReloadListener<Map<ResourceLocation, List<JsonElement>>> implements INetworkCacheReloadListener {
-    private final Map<ResourceLocation, Set<String>> tags = Maps.newHashMap();
-    private final Map<ResourceLocation, Set<String>> allow_attachments = Maps.newHashMap();
+public class AttachmentsTagManager extends SimplePreparableReloadListener<Map<Identifier, List<JsonElement>>> implements INetworkCacheReloadListener {
+    private final Map<Identifier, Set<String>> tags = Maps.newHashMap();
+    private final Map<Identifier, Set<String>> allow_attachments = Maps.newHashMap();
 
     private final Gson gson;
     private final Marker marker;
 
     private final FileToIdConverter fileToIdConverter;
-    protected Map<ResourceLocation, String> networkCache;
+    protected Map<Identifier, String> networkCache;
 
     public AttachmentsTagManager() {
         this.gson = CommonAssetsManager.GSON;
@@ -41,18 +41,18 @@ public class AttachmentsTagManager extends SimplePreparableReloadListener<Map<Re
 
     @NotNull
     @Override
-    protected Map<ResourceLocation, List<JsonElement>> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected Map<Identifier, List<JsonElement>> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         return ResourceScanner.scanDirectoryAll(pResourceManager, this.fileToIdConverter, this.gson);
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, List<JsonElement>> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected void apply(Map<Identifier, List<JsonElement>> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         tags.clear();
         allow_attachments.clear();
-        ImmutableMap.Builder<ResourceLocation, String> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<Identifier, String> builder = ImmutableMap.builder();
 
-        for (Map.Entry<ResourceLocation, List<JsonElement>> entry : pObject.entrySet()) {
-            ResourceLocation id = entry.getKey();
+        for (Map.Entry<Identifier, List<JsonElement>> entry : pObject.entrySet()) {
+            Identifier id = entry.getKey();
 
             List<String> temp = new ArrayList<>();
             for (JsonElement element : entry.getValue()) {
@@ -71,7 +71,7 @@ public class AttachmentsTagManager extends SimplePreparableReloadListener<Map<Re
             }
 
             if (id.getPath().startsWith("allow_attachments/") && id.getPath().length() > 18) {
-                ResourceLocation gunId = id.withPath(id.getPath().substring(18));
+                Identifier gunId = id.withPath(id.getPath().substring(18));
                 allow_attachments.computeIfAbsent(gunId, (v) -> Sets.newHashSet()).addAll(temp);
             } else {
                 tags.computeIfAbsent(id, (v) -> Sets.newHashSet()).addAll(temp);
@@ -89,7 +89,7 @@ public class AttachmentsTagManager extends SimplePreparableReloadListener<Map<Re
     }
 
     @Override
-    public Map<ResourceLocation, String> getNetworkCache() {
+    public Map<Identifier, String> getNetworkCache() {
         return networkCache;
     }
 
@@ -98,18 +98,18 @@ public class AttachmentsTagManager extends SimplePreparableReloadListener<Map<Re
         return DataType.ATTACHMENT_TAGS;
     }
 
-    public Set<String> getAttachmentTags(ResourceLocation registryName) {
+    public Set<String> getAttachmentTags(Identifier registryName) {
         return tags.get(registryName);
     }
 
-    public Set<String> getAllowAttachmentTags(ResourceLocation registryName) {
+    public Set<String> getAllowAttachmentTags(Identifier registryName) {
         return allow_attachments.get(registryName);
     }
 
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "attachments_tag_manager");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "attachments_tag_manager");
 
     @Override
-    public ResourceLocation getFabricId() {
+    public Identifier getFabricId() {
         return null;
     }
 }

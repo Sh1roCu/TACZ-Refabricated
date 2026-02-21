@@ -3,7 +3,7 @@ package com.tacz.guns.api.client.animation;
 import com.tacz.guns.client.sound.SoundPlayManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 
 import java.util.Arrays;
@@ -42,7 +42,7 @@ public class ObjectAnimationSoundChannel {
             mixVolume *= mixVolume;
         }
         for (int i = from + 1; i <= to; i++) {
-            ResourceLocation name = content.keyframeSoundName[i];
+            Identifier name = content.keyframeSoundName[i];
             SoundPlayManager.playClientSound(entity, name, mixVolume, pitch, distance);
         }
     }

@@ -12,14 +12,14 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public record ServerMessageGunFireSelect(int shooterId, ItemStack gunItemStack) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<ServerMessageGunFireSelect> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "server_gun_fire_select")
+            Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "server_gun_fire_select")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerMessageGunFireSelect> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT, message -> message.shooterId,

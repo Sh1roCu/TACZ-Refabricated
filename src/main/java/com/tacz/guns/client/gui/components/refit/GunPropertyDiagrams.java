@@ -15,7 +15,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
@@ -44,7 +44,7 @@ public final class GunPropertyDiagrams {
         if (cacheProperty == null) {
             return;
         }
-        ResourceLocation gunId = iGun.getGunId(gunItem);
+        Identifier gunId = iGun.getGunId(gunItem);
         TimelessAPI.getCommonGunIndex(gunId).ifPresent(index -> {
             GunData gunData = index.getGunData();
             FireMode fireMode = iGun.getFireMode(gunItem);

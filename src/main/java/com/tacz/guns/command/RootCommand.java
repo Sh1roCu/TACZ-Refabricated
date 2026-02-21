@@ -11,7 +11,7 @@ public class RootCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(ROOT_NAME)
-                .requires((source -> source.hasPermission(2)));
+                .requires((source -> source.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)));
         root.then(AttachmentLockCommand.get());
         root.then(DebugCommand.get());
         root.then(DummyAmmoCommand.get());

@@ -2,13 +2,13 @@ package com.tacz.guns.api.item.builder;
 
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.item.IBlock;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public final class BlockItemBuilder {
     private int count = 1;
-    private ResourceLocation blockId = DefaultAssets.DEFAULT_BLOCK_ID;
+    private Identifier blockId = DefaultAssets.DEFAULT_BLOCK_ID;
     private final ItemLike blockItem;
 
     private BlockItemBuilder(ItemLike blockItem) {
@@ -24,7 +24,7 @@ public final class BlockItemBuilder {
         return this;
     }
 
-    public BlockItemBuilder setId(ResourceLocation id) {
+    public BlockItemBuilder setId(Identifier id) {
         this.blockId = id;
         return this;
     }

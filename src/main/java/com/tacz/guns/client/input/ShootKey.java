@@ -18,6 +18,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
+import com.tacz.guns.util.InputExtraCheck;
+
 import static com.tacz.guns.util.InputExtraCheck.isInGame;
 
 @Environment(EnvType.CLIENT)
@@ -25,7 +27,7 @@ public class ShootKey {
     public static final KeyMapping SHOOT_KEY = new KeyMapping("key.tacz.shoot.desc",
             InputConstants.Type.MOUSE,
             GLFW.GLFW_MOUSE_BUTTON_LEFT,
-            "key.category.tacz");
+            InputExtraCheck.TACZ_CATEGORY);
     private static boolean lastTimeShootSuccess = false;
 
     public static void autoShoot(Minecraft mc, boolean isPhaseEnd) {
@@ -86,7 +88,7 @@ public class ShootKey {
     }
 
     public static void semiShoot(InputEvent.MouseButton.Post event) {
-        if (isInGame() && SHOOT_KEY.matchesMouse(event.getButton())) {
+        if (isInGame() && SHOOT_KEY.matchesMouse(new net.minecraft.client.input.MouseButtonEvent(0, 0, new net.minecraft.client.input.MouseButtonInfo(event.getButton(), event.getModifiers())))) {
             // 松开鼠标，重置 DryFire 状态
             if (event.getAction() == GLFW.GLFW_RELEASE) {
                 SoundPlayManager.resetDryFireSound();
@@ -104,7 +106,7 @@ public class ShootKey {
                         .map(index -> !index.getGunData().getBurstData().isContinuousShoot())
                         .orElse(false);
                 if (fireMode == FireMode.UNKNOWN) {
-                    player.sendSystemMessage(Component.translatable("message.tacz.fire_select.fail"));
+                    player.displayClientMessage(Component.translatable("message.tacz.fire_select.fail"), false);
                 }
                 if (fireMode == FireMode.SEMI || isBurstSemi) {
                     lastTimeShootSuccess = IClientPlayerGunOperator.fromLocalPlayer(player).shoot() == ShootResult.SUCCESS;
@@ -134,7 +136,7 @@ public class ShootKey {
                     .map(index -> !index.getGunData().getBurstData().isContinuousShoot())
                     .orElse(false);
             if (fireMode == FireMode.UNKNOWN) {
-                player.sendSystemMessage(Component.translatable("message.tacz.fire_select.fail"));
+                player.displayClientMessage(Component.translatable("message.tacz.fire_select.fail"), false);
                 return false;
             }
             if (fireMode == FireMode.SEMI || isBurstSemi) {

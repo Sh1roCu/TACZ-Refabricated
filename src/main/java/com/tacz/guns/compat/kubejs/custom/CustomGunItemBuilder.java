@@ -3,7 +3,7 @@ package com.tacz.guns.compat.kubejs.custom;
 public class CustomGunItemBuilder /*extends ItemBuilder */ {
 //    public String typeName;
 //
-//    public CustomGunItemBuilder(ResourceLocation i) {
+//    public CustomGunItemBuilder(Identifier i) {
 //        super(i);
 //        this.typeName = "kubejs_default";
 //    }

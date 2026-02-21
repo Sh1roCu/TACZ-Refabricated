@@ -1,6 +1,6 @@
 package com.tacz.guns.util;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.tacz.guns.compat.optifine.OptifineCompat;
@@ -8,10 +8,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.entity.HumanoidArm;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -32,13 +28,23 @@ public final class RenderHelper {
     }
 
     private static void innerBlit(Matrix4f matrix, float x1, float x2, float y1, float y2, float blitOffset, float minU, float maxU, float minV, float maxV) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.addVertex(matrix, x1, y2, blitOffset).setUv(minU, maxV);
-        bufferbuilder.addVertex(matrix, x2, y2, blitOffset).setUv(maxU, maxV);
-        bufferbuilder.addVertex(matrix, x2, y1, blitOffset).setUv(maxU, minV);
-        bufferbuilder.addVertex(matrix, x1, y1, blitOffset).setUv(minU, minV);
-        BufferUploader.draw(bufferbuilder.buildOrThrow());
+        // In 1.21.11 BufferUploader was removed; use direct GL for simple textured quad rendering
+        GL11.glBegin(GL11.GL_QUADS);
+        float[] v0 = transformVertex(matrix, x1, y2, blitOffset);
+        GL11.glTexCoord2f(minU, maxV); GL11.glVertex3f(v0[0], v0[1], v0[2]);
+        float[] v1 = transformVertex(matrix, x2, y2, blitOffset);
+        GL11.glTexCoord2f(maxU, maxV); GL11.glVertex3f(v1[0], v1[1], v1[2]);
+        float[] v2 = transformVertex(matrix, x2, y1, blitOffset);
+        GL11.glTexCoord2f(maxU, minV); GL11.glVertex3f(v2[0], v2[1], v2[2]);
+        float[] v3 = transformVertex(matrix, x1, y1, blitOffset);
+        GL11.glTexCoord2f(minU, minV); GL11.glVertex3f(v3[0], v3[1], v3[2]);
+        GL11.glEnd();
+    }
+
+    private static float[] transformVertex(Matrix4f matrix, float x, float y, float z) {
+        org.joml.Vector4f v = new org.joml.Vector4f(x, y, z, 1.0f);
+        v.mul(matrix);
+        return new float[]{v.x(), v.y(), v.z()};
     }
 
     public static void enableItemEntityStencilTest() {
@@ -68,19 +74,9 @@ public final class RenderHelper {
         GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
 
+    // TODO: In 1.21.11, AvatarRenderer.renderRightHand/renderLeftHand now requires SubmitNodeCollector
+    // instead of MultiBufferSource. This method needs rearchitecting for the new rendering pipeline.
     public static void renderFirstPersonArm(LocalPlayer player, HumanoidArm hand, PoseStack matrixStack, int combinedLight) {
-        Minecraft mc = Minecraft.getInstance();
-        EntityRenderDispatcher renderManager = mc.getEntityRenderDispatcher();
-        PlayerRenderer renderer = (PlayerRenderer) renderManager.getRenderer(player);
-        MultiBufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-        int oldId = RenderSystem.getShaderTexture(0);
-        RenderSystem.setShaderTexture(0, player.getSkin().texture());
-
-        if (hand == HumanoidArm.RIGHT) {
-            renderer.renderRightHand(matrixStack, buffer, combinedLight, player);
-        } else {
-            renderer.renderLeftHand(matrixStack, buffer, combinedLight, player);
-        }
-        RenderSystem.setShaderTexture(0, oldId);
+        // No-op: hand rendering requires SubmitNodeCollector in 1.21.11 pipeline
     }
 }

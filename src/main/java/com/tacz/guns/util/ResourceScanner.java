@@ -5,12 +5,13 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.tacz.guns.GunMod;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.GsonHelper;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -28,18 +29,20 @@ public class ResourceScanner {
      * @param pGson            Gson实例
      * @return 扫描到的json文件
      */
-    public static Map<ResourceLocation, JsonElement> scanDirectory(ResourceManager pResourceManager, String pName, Gson pGson) {
+    public static Map<Identifier, JsonElement> scanDirectory(ResourceManager pResourceManager, String pName, Gson pGson) {
         return scanDirectory(pResourceManager, FileToIdConverter.json(pName), pGson);
     }
 
-    public static Map<ResourceLocation, JsonElement> scanDirectory(ResourceManager pResourceManager, FileToIdConverter filetoidconverter, Gson pGson) {
-        Map<ResourceLocation, JsonElement> output = Maps.newHashMap();
-        for (Map.Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
-            ResourceLocation resourcelocation = entry.getKey();
-            ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
+    public static Map<Identifier, JsonElement> scanDirectory(ResourceManager pResourceManager, FileToIdConverter filetoidconverter, Gson pGson) {
+        Map<Identifier, JsonElement> output = Maps.newHashMap();
+        for (Map.Entry<Identifier, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
+            Identifier resourcelocation = entry.getKey();
+            Identifier resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
 
             try (Reader reader = entry.getValue().openAsReader()) {
-                JsonElement jsonelement = GsonHelper.fromJson(pGson, reader, JsonElement.class, true);
+                JsonReader jsonReader = new JsonReader(reader);
+                jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+                JsonElement jsonelement = pGson.getAdapter(JsonElement.class).read(jsonReader);
                 JsonElement jsonelement1 = output.put(resourcelocation1, jsonelement);
                 if (jsonelement1 != null) {
                     throw new IllegalStateException("Duplicate data file ignored with ID " + resourcelocation1);
@@ -60,15 +63,17 @@ public class ResourceScanner {
      * @param pGson             Gson实例
      * @return 扫描到的json文件
      */
-    public static Map<ResourceLocation, List<JsonElement>> scanDirectoryAll(ResourceManager pResourceManager, FileToIdConverter filetoidconverter, Gson pGson) {
-        Map<ResourceLocation, List<JsonElement>> output = Maps.newHashMap();
-        for (Map.Entry<ResourceLocation, List<Resource>> entry : filetoidconverter.listMatchingResourceStacks(pResourceManager).entrySet()) {
-            ResourceLocation resourcelocation = entry.getKey();
-            ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
+    public static Map<Identifier, List<JsonElement>> scanDirectoryAll(ResourceManager pResourceManager, FileToIdConverter filetoidconverter, Gson pGson) {
+        Map<Identifier, List<JsonElement>> output = Maps.newHashMap();
+        for (Map.Entry<Identifier, List<Resource>> entry : filetoidconverter.listMatchingResourceStacks(pResourceManager).entrySet()) {
+            Identifier resourcelocation = entry.getKey();
+            Identifier resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
 
             for (Resource resource : entry.getValue()) {
                 try (Reader reader = resource.openAsReader()) {
-                    JsonElement jsonelement = GsonHelper.fromJson(pGson, reader, JsonElement.class, true);
+                    JsonReader jsonReader = new JsonReader(reader);
+                    jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+                    JsonElement jsonelement = pGson.getAdapter(JsonElement.class).read(jsonReader);
                     List<JsonElement> list = output.computeIfAbsent(resourcelocation1, k -> Lists.newArrayList());
                     list.add(jsonelement);
                 } catch (IllegalArgumentException | IOException | JsonParseException jsonparseexception) {

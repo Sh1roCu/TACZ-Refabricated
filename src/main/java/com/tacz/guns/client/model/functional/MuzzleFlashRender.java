@@ -12,13 +12,13 @@ import com.tacz.guns.client.model.SlotModel;
 import com.tacz.guns.client.model.bedrock.BedrockModel;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import com.tacz.guns.client.resource.pojo.display.gun.MuzzleFlash;
-import com.tacz.guns.compat.iris.IrisCompat;
 import com.tacz.guns.resource.modifier.custom.SilenceModifier;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix3f;
@@ -83,7 +83,7 @@ public class MuzzleFlashRender implements IFunctionalRenderer {
                 poseStack2.scale(scale, scale, scale);
                 poseStack2.mulPose(Axis.ZP.rotationDegrees(muzzleFlashRandomRotate));
                 poseStack2.translate(0, -1, 0);
-                RenderType renderTypeBg = RenderType.entityTranslucent(muzzleFlash.getTexture());
+                RenderType renderTypeBg = RenderTypes.entityTranslucent(muzzleFlash.getTexture());
                 MUZZLE_FLASH_MODEL.renderToBuffer(poseStack2, multiBufferSource.getBuffer(renderTypeBg), light, overlay);
             }
             poseStack2.popPose();
@@ -94,7 +94,7 @@ public class MuzzleFlashRender implements IFunctionalRenderer {
                 poseStack2.scale(scale / 2, scale / 2, scale / 2);
                 poseStack2.mulPose(Axis.ZP.rotationDegrees(muzzleFlashRandomRotate));
                 poseStack2.translate(0, -0.9, 0);
-                RenderType renderTypeLight = RenderType.energySwirl(muzzleFlash.getTexture(), 1, 1);
+                RenderType renderTypeLight = RenderTypes.energySwirl(muzzleFlash.getTexture(), 1, 1);
                 MUZZLE_FLASH_MODEL.renderToBuffer(poseStack2, multiBufferSource.getBuffer(renderTypeLight), light, overlay);
             }
             poseStack2.popPose();
@@ -104,9 +104,7 @@ public class MuzzleFlashRender implements IFunctionalRenderer {
     @Override
     @SuppressWarnings("unchecked")
     public void render(PoseStack poseStack, VertexConsumer vertexBuffer, ItemDisplayContext transformType, int light, int overlay) {
-        if (IrisCompat.isRenderShadow()) {
-            return;
-        }
+        // TODO: IrisCompat.isRenderShadow() disabled - iris compat excluded from compilation
         if (!isSelf) {
             return;
         }
@@ -120,7 +118,7 @@ public class MuzzleFlashRender implements IFunctionalRenderer {
             ItemStack muzzleAttachment = bedrockGunModel.getCurrentAttachmentItem().get(AttachmentType.MUZZLE);
             IAttachment iAttachment = IAttachment.getIAttachmentOrNull(muzzleAttachment);
             if (iAttachment != null) {
-                ResourceLocation attachmentId = iAttachment.getAttachmentId(muzzleAttachment);
+                Identifier attachmentId = iAttachment.getAttachmentId(muzzleAttachment);
                 TimelessAPI.getCommonAttachmentIndex(attachmentId).ifPresent(index -> {
                     var modifier = index.getData().getModifier();
                     if (modifier.containsKey(SilenceModifier.ID) && modifier.get(SilenceModifier.ID).getValue() instanceof Pair<?, ?> pair) {

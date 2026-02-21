@@ -8,7 +8,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
@@ -23,11 +25,11 @@ import org.jetbrains.annotations.Nullable;
  * 双方块的枪械工作台，2x1x1
  */
 public class GunSmithTableBlockB extends AbstractGunSmithTableBlock {
-    public static final MapCodec<GunSmithTableBlockB> CODEC = simpleCodec((properties) -> new GunSmithTableBlockB());
+    public static final MapCodec<GunSmithTableBlockB> CODEC = simpleCodec(GunSmithTableBlockB::new);
     public static final EnumProperty<BedPart> PART = BlockStateProperties.BED_PART;
 
-    public GunSmithTableBlockB() {
-        super();
+    public GunSmithTableBlockB(Properties properties) {
+        super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, BedPart.FOOT));
     }
 
@@ -61,10 +63,10 @@ public class GunSmithTableBlockB extends AbstractGunSmithTableBlock {
     @Override
     public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(worldIn, pos, state, placer, stack);
-        if (!worldIn.isClientSide) {
+        if (!worldIn.isClientSide()) {
             BlockPos relative = pos.relative(state.getValue(FACING));
             worldIn.setBlock(relative, state.setValue(PART, BedPart.HEAD), Block.UPDATE_ALL);
-            worldIn.blockUpdated(pos, Blocks.AIR);
+            worldIn.updateNeighborsAt(pos, Blocks.AIR, null);
             state.updateNeighbourShapes(worldIn, pos, Block.UPDATE_ALL);
         }
     }
@@ -72,7 +74,7 @@ public class GunSmithTableBlockB extends AbstractGunSmithTableBlock {
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState blockState, Player player) {
         // 用于抑制创造模式下摧毁head方块时foot的掉落
-        if (!level.isClientSide && player.isCreative()) {
+        if (!level.isClientSide() && player.isCreative()) {
             BedPart bedPart = blockState.getValue(PART);
             if (bedPart == BedPart.FOOT) {
                 BlockPos blockpos = pos.relative(getNeighbourDirection(bedPart, blockState.getValue(FACING)));
@@ -87,11 +89,11 @@ public class GunSmithTableBlockB extends AbstractGunSmithTableBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState facingState, LevelAccessor level, BlockPos currentPos, BlockPos facingPos) {
+    protected BlockState updateShape(BlockState state, LevelReader levelReader, ScheduledTickAccess scheduledTickAccess, BlockPos currentPos, Direction direction, BlockPos facingPos, BlockState facingState, RandomSource randomSource) {
         if (direction == getNeighbourDirection(state.getValue(PART), state.getValue(FACING))) {
             return facingState.is(this) && facingState.getValue(PART) != state.getValue(PART) ? state : Blocks.AIR.defaultBlockState();
         } else {
-            return super.updateShape(state, direction, facingState, level, currentPos, facingPos);
+            return super.updateShape(state, levelReader, scheduledTickAccess, currentPos, direction, facingPos, facingState, randomSource);
         }
     }
 

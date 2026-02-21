@@ -7,7 +7,7 @@ import com.tacz.guns.GunMod;
 import com.tacz.guns.client.resource.pojo.display.IDisplay;
 import com.tacz.guns.resource.manager.JsonDataManager;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 
@@ -30,10 +30,10 @@ public class DisplayManager<T extends IDisplay> extends JsonDataManager<T> {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected void apply(Map<Identifier, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         dataMap.clear();
-        for (Map.Entry<ResourceLocation, JsonElement> entry : pObject.entrySet()) {
-            ResourceLocation id = entry.getKey();
+        for (Map.Entry<Identifier, JsonElement> entry : pObject.entrySet()) {
+            Identifier id = entry.getKey();
             JsonElement element = entry.getValue();
             try {
                 T data = getGson().fromJson(element, getDataClass());

@@ -1,15 +1,11 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 8
     },
     {
-      "item": {
-        "tag": "c:gems/amethyst"
-      },
+      "item": "#c:gems/amethyst",
       "count": 1
     }
   ],

@@ -30,7 +30,6 @@ import cn.sh1rocu.tacz.mixin.accessor.GameRendererAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import com.tacz.guns.compat.iris.IrisCompat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -49,9 +48,14 @@ public class HandRenderer {
         final PoseStack poseStack = new PoseStack();
 
         // We need to scale the matrix by 0.125 so the hand doesn't clip through blocks.
+        // In 1.21.11, resetProjectionMatrix and getProjectionMatrix(double) are removed.
+        // Use RenderSystem backup/restore instead.
+        RenderSystem.backupProjectionMatrix();
         Matrix4f scaleMatrix = new Matrix4f().scale(1F, 1F, DEPTH);
-        scaleMatrix.mul(gameRenderer.getProjectionMatrix(((GameRendererAccessor) gameRenderer).tacz$getFov(camera, tickDelta, false)));
-        gameRenderer.resetProjectionMatrix(scaleMatrix);
+        scaleMatrix.mul(gameRenderer.getProjectionMatrix((float) ((GameRendererAccessor) gameRenderer).tacz$getFov(camera, tickDelta, false)));
+        // setProjectionMatrix requires a GpuBufferSlice + ProjectionType now, which is complex.
+        // For now, skip the projection matrix override - the hand may clip but it will compile.
+        // TODO: Properly implement projection matrix override for 1.21.11
 
         poseStack.setIdentity();
 
@@ -65,12 +69,9 @@ public class HandRenderer {
     }
 
     public void renderSolid(Consumer<PoseStack> renderer, float tickDelta, Camera camera, GameRenderer gameRenderer) {
-        if (IrisCompat.isPackInUseQuick()) {
-            renderer.accept(null);
-            return;
-        }
+        // TODO: IrisCompat.isPackInUseQuick() disabled - iris compat excluded from compilation
 
-        Matrix4f projection = RenderSystem.getProjectionMatrix();
+        RenderSystem.backupProjectionMatrix();
 
         PoseStack poseStack = setupGlState(gameRenderer, camera, tickDelta);
 
@@ -78,7 +79,6 @@ public class HandRenderer {
 
         RenderSystem.getModelViewStack().pushMatrix();
         RenderSystem.getModelViewStack().set(poseStack.last().pose());
-        RenderSystem.applyModelViewMatrix();
 
         LocalPlayer playerEntity = Minecraft.getInstance().player;
         float f2 = Mth.lerp(tickDelta, playerEntity.xBobO, playerEntity.xBob);
@@ -88,12 +88,9 @@ public class HandRenderer {
 
         renderer.accept(poseStack);
 
-        Minecraft.getInstance().getProfiler().pop();
-
-        gameRenderer.resetProjectionMatrix(projection);
+        RenderSystem.restoreProjectionMatrix();
 
         poseStack.popPose();
         RenderSystem.getModelViewStack().popMatrix();
-        RenderSystem.applyModelViewMatrix();
     }
 }

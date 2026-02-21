@@ -3,7 +3,7 @@ package com.tacz.guns.init;
 import com.tacz.guns.GunMod;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 
@@ -19,6 +19,6 @@ public class ModAttributes {
 //             new RangedAttribute("attribute.name.tacz.weight_capacity", 0.0D, -1024D, 1024.0D).setSyncable(true));
 
     private static Attribute register(String name, Attribute attribute) {
-        return Registry.register(BuiltInRegistries.ATTRIBUTE, ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, name), attribute);
+        return Registry.register(BuiltInRegistries.ATTRIBUTE, Identifier.fromNamespaceAndPath(GunMod.MOD_ID, name), attribute);
     }
 }

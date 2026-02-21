@@ -20,10 +20,10 @@ public class AimKey {
     public static final KeyMapping AIM_KEY = new KeyMapping("key.tacz.aim.desc",
             InputConstants.Type.MOUSE,
             GLFW.GLFW_MOUSE_BUTTON_RIGHT,
-            "key.category.tacz");
+            com.tacz.guns.util.InputExtraCheck.TACZ_CATEGORY);
 
     public static void onAimPress(InputEvent.MouseButton.Post event) {
-        if (isInGame() && AIM_KEY.matchesMouse(event.getButton())) {
+        if (isInGame() && AIM_KEY.matchesMouse(new net.minecraft.client.input.MouseButtonEvent(0, 0, new net.minecraft.client.input.MouseButtonInfo(event.getButton(), event.getModifiers())))) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null || player.isSpectator()) {
                 return;

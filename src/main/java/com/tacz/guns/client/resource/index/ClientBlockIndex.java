@@ -8,12 +8,12 @@ import com.tacz.guns.client.resource.pojo.model.BedrockModelPOJO;
 import com.tacz.guns.client.resource.pojo.model.BedrockVersion;
 import com.tacz.guns.resource.pojo.BlockIndexPOJO;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.StringUtils;
 
 public class ClientBlockIndex {
     private BedrockModel model;
-    private ResourceLocation texture;
+    private Identifier texture;
     private String name;
     private ItemTransforms transforms;
     private String tooltipKey;
@@ -41,7 +41,7 @@ public class ClientBlockIndex {
     }
 
     private static BlockDisplay checkDisplay(BlockIndexPOJO pojo, ClientBlockIndex index) {
-        ResourceLocation display = pojo.getDisplay();
+        Identifier display = pojo.getDisplay();
         Preconditions.checkArgument(display != null, "index object missing display field");
         BlockDisplay blockDisplay = ClientAssetsManager.INSTANCE.getBlockDisplay(pojo.getDisplay());
         Preconditions.checkArgument(blockDisplay != null, "there is no corresponding display file");
@@ -49,7 +49,7 @@ public class ClientBlockIndex {
     }
 
     private static void checkModel(BlockDisplay display, ClientBlockIndex index) {
-        ResourceLocation modelLocation = display.getModelLocation();
+        Identifier modelLocation = display.getModelLocation();
         Preconditions.checkArgument(modelLocation != null, "display object missing model field");
         BedrockModelPOJO modelPOJO = ClientAssetsManager.INSTANCE.getBedrockModelPOJO(modelLocation);
         Preconditions.checkArgument(modelPOJO != null, "there is no corresponding model file");
@@ -64,7 +64,7 @@ public class ClientBlockIndex {
         }
         Preconditions.checkArgument(index.model != null, "there is no model data in the model file");
 
-        ResourceLocation textureLocation = display.getModelTexture();
+        Identifier textureLocation = display.getModelTexture();
         Preconditions.checkArgument(textureLocation != null, "missing default texture");
         index.texture = display.getModelTexture();
     }
@@ -78,7 +78,7 @@ public class ClientBlockIndex {
         return model;
     }
 
-    public ResourceLocation getTexture() {
+    public Identifier getTexture() {
         return texture;
     }
 

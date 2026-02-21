@@ -3,7 +3,7 @@ package com.tacz.guns.entity.shooter;
 import cn.sh1rocu.tacz.api.mixin.ForcePoseInjection;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IGun;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +37,7 @@ public class LivingEntityCrawl {
             return;
         }
         // 如果获取不到 gunIndex，则取消趴下状态
-        ResourceLocation gunId = iGun.getGunId(currentGunItem);
+        Identifier gunId = iGun.getGunId(currentGunItem);
         if (TimelessAPI.getCommonGunIndex(gunId).isEmpty()) {
             data.isCrawling = false;
             this.setCrawlPose();

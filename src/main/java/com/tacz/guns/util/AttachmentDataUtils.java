@@ -17,7 +17,7 @@ import com.tacz.guns.resource.pojo.data.gun.BulletData;
 import com.tacz.guns.resource.pojo.data.gun.ExtraDamage;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import com.tacz.guns.resource.pojo.data.gun.GunFireModeAdjustData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public final class AttachmentDataUtils {
             if (type == AttachmentType.NONE) {
                 continue;
             }
-            ResourceLocation attachmentId = iGun.getAttachmentId(gunItem, type);
+            Identifier attachmentId = iGun.getAttachmentId(gunItem, type);
             if (DefaultAssets.isEmptyAttachmentId(attachmentId)) {
                 continue;
             }
@@ -57,7 +57,7 @@ public final class AttachmentDataUtils {
         if (iGun == null) {
             return 0;
         }
-        ResourceLocation attachmentId = iGun.getAttachmentId(gunItem, AttachmentType.EXTENDED_MAG);
+        Identifier attachmentId = iGun.getAttachmentId(gunItem, AttachmentType.EXTENDED_MAG);
         if (DefaultAssets.isEmptyAttachmentId(attachmentId)) {
             return 0;
         }
@@ -97,7 +97,7 @@ public final class AttachmentDataUtils {
 
         List<Modifier> modifiers = new ArrayList<>();
         for (AttachmentType type : AttachmentType.values()) {
-            ResourceLocation id = iGun.getAttachmentId(gunItem, type);
+            Identifier id = iGun.getAttachmentId(gunItem, type);
             AttachmentData attachmentData = gunData.getExclusiveAttachments().get(id);
             if (attachmentData != null) {
                 var m = attachmentData.getModifier().get(WeightModifier.ID);
@@ -217,7 +217,7 @@ public final class AttachmentDataUtils {
         }
         List<Modifier> modifiers = new ArrayList<>();
         for (AttachmentType type : AttachmentType.values()) {
-            ResourceLocation attachmentId = iGun.getAttachmentId(gunItem, type);
+            Identifier attachmentId = iGun.getAttachmentId(gunItem, type);
             if (DefaultAssets.isEmptyAttachmentId(attachmentId)) {
                 continue;
             }
@@ -257,7 +257,7 @@ public final class AttachmentDataUtils {
             return false;
         }
         for (AttachmentType type : AttachmentType.values()) {
-            ResourceLocation attachmentId = iGun.getAttachmentId(gunItem, type);
+            Identifier attachmentId = iGun.getAttachmentId(gunItem, type);
             if (DefaultAssets.isEmptyAttachmentId(attachmentId)) {
                 continue;
             }

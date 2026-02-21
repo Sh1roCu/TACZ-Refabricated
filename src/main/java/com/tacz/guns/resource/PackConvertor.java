@@ -107,7 +107,9 @@ public class PackConvertor {
                     String namespace = matcher.group(1);
                     ZipEntry entry = zipFile.getEntry(path);
                     try (InputStream stream = zipFile.getInputStream(entry)) {
-                        PackInfo info = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), PackInfo.class);
+                        com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+                        jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+                        PackInfo info = GSON.fromJson(jsonReader, PackInfo.class);
                         if (info != null) {
                             return new LegacyPack(file, namespace, info);
                         }
@@ -155,7 +157,9 @@ public class PackConvertor {
                 String newPath = "data/" + namespace + "/recipes/" + path;
 
                 try (InputStream stream = oldPack.getInputStream(entry)) {
-                    JsonObject object = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), JsonObject.class);
+                    com.google.gson.stream.JsonReader jsonReader = new com.google.gson.stream.JsonReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+                    jsonReader.setStrictness(com.google.gson.Strictness.LENIENT);
+                    JsonObject object = GSON.fromJson(jsonReader, JsonObject.class);
                     if (object != null) {
                         object.addProperty("type", "tacz:gun_smith_table_crafting");
                         newZip.putNextEntry(new ZipEntry(newPath));

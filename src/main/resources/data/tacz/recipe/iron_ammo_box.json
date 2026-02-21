@@ -12,11 +12,7 @@
     "PPP"
   ],
   "key": {
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "P": {
-      "tag": "minecraft:planks"
-    }
+    "I": "#c:ingots/iron",
+    "P": "#minecraft:planks"
   }
 }

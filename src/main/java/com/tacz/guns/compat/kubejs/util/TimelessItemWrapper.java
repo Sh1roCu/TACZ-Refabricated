@@ -45,31 +45,31 @@ public class TimelessItemWrapper {
 //        return itemBuilder.build();
 //    }
 //
-//    public static ItemStack of(ResourceLocation id) {
-//        return ItemIndexInfo.createFromResourceLocation(id).getItemStack();
+//    public static ItemStack of(Identifier id) {
+//        return ItemIndexInfo.createFromIdentifier(id).getItemStack();
 //    }
 //
-//    public static ItemStack of(Item item, ResourceLocation id) {
-//        return ItemIndexInfo.createFromResourceLocation(id).getItemStack(item);
+//    public static ItemStack of(Item item, Identifier id) {
+//        return ItemIndexInfo.createFromIdentifier(id).getItemStack(item);
 //    }
 //
 //    public static class ItemIndexInfo {
 //        private static final String FALL_BACK = "error";
 //        private final String parent;
-//        private final ResourceLocation indexId;
+//        private final Identifier indexId;
 //        private static final ItemIndexInfo DEFAULT = new ItemIndexInfo(FALL_BACK, DefaultAssets.EMPTY_GUN_ID);
 //
 //        private ItemIndexInfo(String pNamespace, String pParent, String pPath) {
 //            this.parent = (isTypeValid(pParent)) ? pParent : FALL_BACK;
-//            this.indexId = ResourceLocation.fromNamespaceAndPath(pNamespace, pPath);
+//            this.indexId = Identifier.fromNamespaceAndPath(pNamespace, pPath);
 //        }
 //
-//        private ItemIndexInfo(String pParent, ResourceLocation pLocation) {
+//        private ItemIndexInfo(String pParent, Identifier pLocation) {
 //            this.parent = (isTypeValid(pParent)) ? pParent : FALL_BACK;
 //            this.indexId = (pLocation != null) ? pLocation : DefaultAssets.EMPTY_GUN_ID;
 //        }
 //
-//        public static ItemIndexInfo createFromResourceLocation(ResourceLocation id) {
+//        public static ItemIndexInfo createFromIdentifier(Identifier id) {
 //            String namespace = id.getNamespace();
 //            String path = id.getPath();
 //            int i = path.indexOf("/");
@@ -82,15 +82,15 @@ public class TimelessItemWrapper {
 //        }
 //
 //        public static ItemIndexInfo create(String pLocation) {
-//            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(pLocation);
-//            return createFromResourceLocation(id);
+//            Identifier id = Identifier.fromNamespaceAndPath(pLocation);
+//            return createFromIdentifier(id);
 //        }
 //
 //        public String getParent() {
 //            return parent;
 //        }
 //
-//        public ResourceLocation getIndexId() {
+//        public Identifier getIndexId() {
 //            return indexId;
 //        }
 //

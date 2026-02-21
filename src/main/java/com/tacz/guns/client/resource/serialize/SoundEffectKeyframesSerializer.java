@@ -3,7 +3,7 @@ package com.tacz.guns.client.resource.serialize;
 import com.google.gson.*;
 import com.tacz.guns.client.resource.pojo.animation.bedrock.SoundEffectKeyframes;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectRBTreeMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 
 import java.lang.reflect.Type;
@@ -13,7 +13,7 @@ import java.util.Map;
 public class SoundEffectKeyframesSerializer implements JsonDeserializer<SoundEffectKeyframes> {
     @Override
     public SoundEffectKeyframes deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException {
-        Double2ObjectRBTreeMap<ResourceLocation> keyframes = new Double2ObjectRBTreeMap<>();
+        Double2ObjectRBTreeMap<Identifier> keyframes = new Double2ObjectRBTreeMap<>();
         // 如果是对象
         if (json.isJsonObject()) {
             JsonObject jsonObject = json.getAsJsonObject();
@@ -22,7 +22,7 @@ public class SoundEffectKeyframesSerializer implements JsonDeserializer<SoundEff
                 JsonElement value = entrySet.getValue();
                 if (value.isJsonObject()) {
                     String soundId = GsonHelper.getAsString(value.getAsJsonObject(), "effect");
-                    ResourceLocation soundLocation = ResourceLocation.tryParse(soundId);
+                    Identifier soundLocation = Identifier.tryParse(soundId);
                     if (soundLocation != null) {
                         keyframes.put(time, soundLocation);
                     }

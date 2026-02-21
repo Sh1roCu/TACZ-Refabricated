@@ -16,11 +16,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import static com.tacz.guns.block.StatueBlock.FACING;
 
 public class StatueBlockEntity extends BlockEntity {
-    public static final BlockEntityType<StatueBlockEntity> TYPE = BlockEntityType.Builder.of(StatueBlockEntity::new, ModBlocks.STATUE).build(null);
+    public static final BlockEntityType<StatueBlockEntity> TYPE = net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder.create(StatueBlockEntity::new, ModBlocks.STATUE).build();
     private static final String ITEM_TAG = "Item";
     private ItemStack gunItem = ItemStack.EMPTY;
 
@@ -71,24 +73,20 @@ public class StatueBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
-        if (tag.contains(ITEM_TAG, Tag.TAG_COMPOUND)) {
-            this.gunItem = ItemStack.parseOptional(provider, tag.getCompound(ITEM_TAG));
-        }
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        input.read(ITEM_TAG, ItemStack.OPTIONAL_CODEC).ifPresent(stack -> this.gunItem = stack);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
-        tag.put(ITEM_TAG, gunItem.saveOptional(provider));
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.store(ITEM_TAG, ItemStack.OPTIONAL_CODEC, gunItem);
     }
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        CompoundTag tag = super.getUpdateTag(provider);
-        tag.put(ITEM_TAG, gunItem.saveOptional(provider));
-        return tag;
+        return saveWithoutMetadata(provider);
     }
 
     // TODO

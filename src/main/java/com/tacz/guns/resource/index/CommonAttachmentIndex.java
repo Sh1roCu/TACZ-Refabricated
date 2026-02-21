@@ -5,7 +5,7 @@ import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.resource.CommonAssetsManager;
 import com.tacz.guns.resource.pojo.AttachmentIndexPOJO;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 public class CommonAttachmentIndex {
@@ -33,7 +33,7 @@ public class CommonAttachmentIndex {
     }
 
     private static void checkData(AttachmentIndexPOJO attachmentIndexPOJO, CommonAttachmentIndex index) {
-        ResourceLocation pojoData = attachmentIndexPOJO.getData();
+        Identifier pojoData = attachmentIndexPOJO.getData();
         Preconditions.checkArgument(pojoData != null, "index object missing pojoData field");
         AttachmentData data = CommonAssetsManager.get().getAttachmentData(pojoData);
         Preconditions.checkArgument(data != null, "there is no corresponding data file");

@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.networking.v1.FabricServerConfigurationNetworkHan
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.network.ConfigurationTask;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public class HandshakeNetworking {
     public record SyncedEntityDataTask(FabricServerConfigurationNetworkHandler handler) implements ConfigurationTask {
         public static final ConfigurationTask.Type TYPE = new ConfigurationTask.Type(
-                ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "synced_entity_data_mapping").toString()
+                Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "synced_entity_data_mapping").toString()
         );
 
         @Override

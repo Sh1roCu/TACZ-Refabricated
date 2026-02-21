@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.client.resource.pojo.display.IDisplay;
 import com.tacz.guns.client.resource.pojo.display.LaserConfig;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -16,9 +16,9 @@ public class GunDisplay implements IDisplay {
     @SerializedName("model_type")
     private String modelType = "default";
     @SerializedName("model")
-    private ResourceLocation modelLocation;
+    private Identifier modelLocation;
     @SerializedName("texture")
-    private ResourceLocation modelTexture;
+    private Identifier modelTexture;
     @SerializedName("iron_zoom")
     private float ironZoom = 1.2f;
     @SerializedName("zoom_model_fov")
@@ -28,13 +28,13 @@ public class GunDisplay implements IDisplay {
     private GunLod gunLod;
     @Nullable
     @SerializedName("hud")
-    private ResourceLocation hudTextureLocation;
+    private Identifier hudTextureLocation;
     @Nullable
     @SerializedName("hud_empty")
-    private ResourceLocation hudEmptyTextureLocation;
+    private Identifier hudEmptyTextureLocation;
     @Nullable
     @SerializedName("slot")
-    private ResourceLocation slotTextureLocation;
+    private Identifier slotTextureLocation;
     @NotNull
     @SerializedName("ammo_count_style")
     private AmmoCountStyle ammoCountStyle = AmmoCountStyle.NORMAL;
@@ -46,10 +46,10 @@ public class GunDisplay implements IDisplay {
     private String thirdPersonAnimation;
     @Nullable
     @SerializedName("animation")
-    private ResourceLocation animationLocation;
+    private Identifier animationLocation;
     @Nullable
     @SerializedName("state_machine")
-    private ResourceLocation stateMachineLocation;
+    private Identifier stateMachineLocation;
     @Nullable
     @SerializedName("state_machine_param")
     private Map<String, Object> stateMachineParam = null;
@@ -59,16 +59,16 @@ public class GunDisplay implements IDisplay {
     private DefaultAnimationType defaultAnimationType;
     @Nullable
     @SerializedName("default_animation")
-    private ResourceLocation defaultAnimation = null;
+    private Identifier defaultAnimation = null;
     @Nullable
     @SerializedName("player_animator_3rd")
-    private ResourceLocation playerAnimator3rd;
+    private Identifier playerAnimator3rd;
     @Nullable
     @SerializedName("3rd_fixed_hand")
     private boolean playerAnimator3rdFixedHand = false;
     @Nullable
     @SerializedName("sounds")
-    private Map<String, ResourceLocation> sounds;
+    private Map<String, Identifier> sounds;
     @Nullable
     @SerializedName("transform")
     private GunTransform transform;
@@ -99,11 +99,11 @@ public class GunDisplay implements IDisplay {
         return modelType;
     }
 
-    public ResourceLocation getModelLocation() {
+    public Identifier getModelLocation() {
         return modelLocation;
     }
 
-    public ResourceLocation getModelTexture() {
+    public Identifier getModelTexture() {
         return modelTexture;
     }
 
@@ -113,27 +113,27 @@ public class GunDisplay implements IDisplay {
     }
 
     @Nullable
-    public ResourceLocation getHudTextureLocation() {
+    public Identifier getHudTextureLocation() {
         return hudTextureLocation;
     }
 
     @Nullable
-    public ResourceLocation getHudEmptyTextureLocation() {
+    public Identifier getHudEmptyTextureLocation() {
         return hudEmptyTextureLocation;
     }
 
     @Nullable
-    public ResourceLocation getSlotTextureLocation() {
+    public Identifier getSlotTextureLocation() {
         return slotTextureLocation;
     }
 
     @Nullable
-    public ResourceLocation getAnimationLocation() {
+    public Identifier getAnimationLocation() {
         return animationLocation;
     }
 
     @Nullable
-    public ResourceLocation getStateMachineLocation() {
+    public Identifier getStateMachineLocation() {
         return stateMachineLocation;
     }
 
@@ -148,12 +148,12 @@ public class GunDisplay implements IDisplay {
     }
 
     @Nullable
-    public ResourceLocation getDefaultAnimation() {
+    public Identifier getDefaultAnimation() {
         return defaultAnimation;
     }
 
     @Nullable
-    public ResourceLocation getPlayerAnimator3rd() {
+    public Identifier getPlayerAnimator3rd() {
         return playerAnimator3rd;
     }
 
@@ -163,7 +163,7 @@ public class GunDisplay implements IDisplay {
     }
 
     @Nullable
-    public Map<String, ResourceLocation> getSounds() {
+    public Map<String, Identifier> getSounds() {
         return sounds;
     }
 

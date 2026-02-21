@@ -8,6 +8,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.tacz.guns.init.ModAttributes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -40,8 +41,8 @@ public abstract class LivingEntityMixin {
         }
     }
 
-    @ModifyVariable(method = "actuallyHurt", at = @At(value = "LOAD", ordinal = 0), index = 2)
-    private float tacz$livingHurtEvent(float value, DamageSource pDamageSource, @Share("hurt") LocalRef<LivingHurtEvent> eventRef) {
+    @ModifyVariable(method = "actuallyHurt", at = @At(value = "LOAD", ordinal = 0), index = 3)
+    private float tacz$livingHurtEvent(float value, ServerLevel serverLevel, DamageSource pDamageSource, @Share("hurt") LocalRef<LivingHurtEvent> eventRef) {
         LivingHurtEvent event = new LivingHurtEvent((LivingEntity) (Object) this, pDamageSource, value);
         eventRef.set(event);
         LivingHurtEvent.CALLBACK.invoker().onLivingHurt(event);
@@ -51,7 +52,7 @@ public abstract class LivingEntityMixin {
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"), cancellable = true)
-    private void tacz$shouldCancelHurt(DamageSource damageSource, float f, CallbackInfo ci, @Share("hurt") LocalRef<LivingHurtEvent> eventRef) {
+    private void tacz$shouldCancelHurt(ServerLevel serverLevel, DamageSource damageSource, float f, CallbackInfo ci, @Share("hurt") LocalRef<LivingHurtEvent> eventRef) {
         if (eventRef.get().getAmount() <= 0)
             ci.cancel();
     }

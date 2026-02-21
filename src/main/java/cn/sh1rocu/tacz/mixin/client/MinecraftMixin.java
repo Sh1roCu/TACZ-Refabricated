@@ -60,7 +60,7 @@ public abstract class MinecraftMixin {
 
     @Shadow
     @Final
-    private DeltaTracker.Timer timer;
+    private DeltaTracker.Timer deltaTracker;
 
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/repository/PackRepository;reload()V"))
     private void tacz$addPacks(GameConfig gameConfig, CallbackInfo ci) {
@@ -70,12 +70,12 @@ public abstract class MinecraftMixin {
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 0, shift = At.Shift.BEFORE))
     private void tacz$renderTickStart(boolean tick, CallbackInfo ci) {
-        RenderTickEvent.CALLBACK.invoker().post(new RenderTickEvent((Minecraft) (Object) this, RenderTickEvent.Phase.START, this.timer));
+        RenderTickEvent.CALLBACK.invoker().post(new RenderTickEvent((Minecraft) (Object) this, RenderTickEvent.Phase.START, this.deltaTracker));
     }
 
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 4, shift = At.Shift.AFTER))
     private void tacz$renderTickEnd(boolean tick, CallbackInfo ci) {
-        RenderTickEvent.CALLBACK.invoker().post(new RenderTickEvent((Minecraft) (Object) this, RenderTickEvent.Phase.END, this.timer));
+        RenderTickEvent.CALLBACK.invoker().post(new RenderTickEvent((Minecraft) (Object) this, RenderTickEvent.Phase.END, this.deltaTracker));
     }
 
     @Inject(method = "clearClientLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetData()V"))
@@ -96,7 +96,7 @@ public abstract class MinecraftMixin {
         eventRef.set(inputEvent);
         if (inputEvent.isCanceled()) {
             if (inputEvent.shouldSwingHand()) {
-                this.particleEngine.crack(blockPos, blockHitResult.getDirection());
+                // particleEngine.crack was removed in 1.21.11
                 this.player.swing(InteractionHand.MAIN_HAND);
             }
             ci.cancel();
@@ -137,12 +137,10 @@ public abstract class MinecraftMixin {
         }
     }
 
-    @ModifyExpressionValue(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/InteractionResult;shouldSwing()Z"))
-    private boolean tacz$onlySwingHandIfNeeded(boolean original, @Share("inputEvent") LocalRef<InputEvent.InteractionKeyMappingTriggered> inputEvent) {
-        return original && (inputEvent.get() == null || inputEvent.get().shouldSwingHand());
-    }
+    // TODO: InteractionResult.shouldSwing() was removed in 1.21.11. Re-implement swing hand check if needed.
+    // The InteractionResult is now an interface without shouldSwing(). Swing behavior may be handled differently.
 
-    @Inject(method = "pickBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/player/Abilities;instabuild:Z", ordinal = 0), cancellable = true)
+    @Inject(method = "pickBlock", at = @At("HEAD"), cancellable = true)
     private void tacz$callInteractionPickInput(CallbackInfo ci) {
         if (tacz$onClickInput(2, this.options.keyPickItem, InteractionHand.MAIN_HAND).isCanceled())
             ci.cancel();

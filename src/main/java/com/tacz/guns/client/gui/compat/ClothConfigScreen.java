@@ -1,6 +1,6 @@
 package com.tacz.guns.client.gui.compat;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -40,7 +40,9 @@ public class ClothConfigScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics gui, int pMouseX, int pMouseY, float pPartialTick) {
         this.renderBackground(gui, pMouseX, pMouseY, pPartialTick);
-        this.message.renderCentered(gui, this.width / 2, 80);
+        // MultiLineLabel.renderCentered removed in 1.21.11 - draw text directly
+        Component text = Component.translatable("gui.tacz.cloth_config_warning.tips");
+        gui.drawCenteredString(this.font, text, this.width / 2, 80, 0xFFFFFF);
         super.render(gui, pMouseX, pMouseY, pPartialTick);
     }
 

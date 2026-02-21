@@ -16,14 +16,14 @@ import com.tacz.guns.client.input.*;
 import com.tacz.guns.client.resource.pojo.display.gun.ControllableData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.EnumMap;
 import java.util.Optional;
 
 public class ControllableInner {
-    public static final BindingContext GUN_KEY_CONFLICT = new GunKeyConflict(ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "gun_key"));
+    public static final BindingContext GUN_KEY_CONFLICT = new GunKeyConflict(Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "gun_key"));
     public static final ButtonBinding AIM = new ButtonBinding(Buttons.LEFT_TRIGGER, "key.tacz.aim.desc", "key.category.tacz", GUN_KEY_CONFLICT, OnPressAndReleaseHandler.create(
             context -> Optional.of(() -> AimKey.onAimControllerPress(true)),
             context -> AimKey.onAimControllerPress(false))
@@ -116,7 +116,7 @@ public class ControllableInner {
     }
 
     public static class GunKeyConflict extends InGameContext {
-        protected GunKeyConflict(ResourceLocation id) {
+        protected GunKeyConflict(Identifier id) {
             super(id);
         }
 

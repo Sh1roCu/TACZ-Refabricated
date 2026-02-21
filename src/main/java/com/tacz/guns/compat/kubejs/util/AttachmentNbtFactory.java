@@ -2,7 +2,7 @@ package com.tacz.guns.compat.kubejs.util;
 
 import com.tacz.guns.api.item.IAttachment;
 import com.tacz.guns.item.AttachmentItem;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -18,7 +18,7 @@ public class AttachmentNbtFactory extends TimelessItemNbtFactory<AttachmentItem,
     }
 
     @Deprecated
-    public void setSkinId(ResourceLocation skinId) {
+    public void setSkinId(Identifier skinId) {
     }
 
     @Override

@@ -12,12 +12,11 @@ import com.tacz.guns.inventory.tooltip.AttachmentItemTooltip;
 import com.tacz.guns.resource.index.CommonAttachmentIndex;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,15 +31,15 @@ import java.util.Optional;
 import static com.tacz.guns.util.datafixer.AttachmentIdFix.updateAttachmentIdInTag;
 
 public class AttachmentItem extends Item implements AttachmentItemDataAccessor, IItem {
-    public AttachmentItem() {
-        super(new Properties().stacksTo(1));
+    public AttachmentItem(Properties properties) {
+        super(properties);
     }
 
     @Override
     @Nonnull
     @Environment(EnvType.CLIENT)
     public Component getName(@Nonnull ItemStack stack) {
-        ResourceLocation attachmentId = this.getAttachmentId(stack);
+        Identifier attachmentId = this.getAttachmentId(stack);
         Optional<ClientAttachmentIndex> attachmentIndex = TimelessAPI.getClientAttachmentIndex(attachmentId);
         if (attachmentIndex.isPresent()) {
             return Component.translatable(attachmentIndex.get().getName());
@@ -48,7 +47,7 @@ public class AttachmentItem extends Item implements AttachmentItemDataAccessor, 
         return super.getName(stack);
     }
 
-    private static Comparator<Map.Entry<ResourceLocation, CommonAttachmentIndex>> idNameSort() {
+    private static Comparator<Map.Entry<Identifier, CommonAttachmentIndex>> idNameSort() {
         return Comparator.comparingInt(m -> m.getValue().getSort());
     }
 
@@ -68,7 +67,7 @@ public class AttachmentItem extends Item implements AttachmentItemDataAccessor, 
 
     @Environment(EnvType.CLIENT)
     @Override
-    public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+    public Object getCustomRenderer() {
         return AttachmentItemRenderer.INSTANCE.get();
     }
 
@@ -77,7 +76,7 @@ public class AttachmentItem extends Item implements AttachmentItemDataAccessor, 
     public AttachmentType getType(ItemStack attachmentStack) {
         IAttachment iAttachment = IAttachment.getIAttachmentOrNull(attachmentStack);
         if (iAttachment != null) {
-            ResourceLocation id = iAttachment.getAttachmentId(attachmentStack);
+            Identifier id = iAttachment.getAttachmentId(attachmentStack);
             return TimelessAPI.getCommonAttachmentIndex(id).map(CommonAttachmentIndex::getType).orElse(AttachmentType.NONE);
         } else {
             return AttachmentType.NONE;
@@ -89,9 +88,9 @@ public class AttachmentItem extends Item implements AttachmentItemDataAccessor, 
         return Optional.of(new AttachmentItemTooltip(this.getAttachmentId(stack), this.getType(stack), stack));
     }
 
-    @Override
-    public void verifyComponentsAfterLoad(ItemStack stack) {
-        super.verifyComponentsAfterLoad(stack);
+    // verifyComponentsAfterLoad was removed in 1.21.11
+    // TODO: Find a replacement hook for component verification after load
+    public void verifyTagOnLoad(ItemStack stack) {
         stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(this::verifyTagAfterLoad));
     }
 

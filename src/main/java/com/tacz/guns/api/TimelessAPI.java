@@ -17,7 +17,7 @@ import com.tacz.guns.resource.index.CommonBlockIndex;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 
@@ -29,11 +29,11 @@ public final class TimelessAPI {
     @Environment(EnvType.CLIENT)
     public static Optional<GunDisplayInstance> getGunDisplay(ItemStack stack) {
         if (stack.getItem() instanceof IGun iGun) {
-            ResourceLocation gunId = iGun.getGunId(stack);
+            Identifier gunId = iGun.getGunId(stack);
             if (getCommonGunIndex(gunId).isEmpty()) {
                 return Optional.empty();
             }
-            ResourceLocation displayId = iGun.getGunDisplayId(stack);
+            Identifier displayId = iGun.getGunDisplayId(stack);
             if (displayId.equals(DefaultAssets.DEFAULT_GUN_DISPLAY_ID)) {
                 return getClientGunIndex(gunId).map(ClientGunIndex::getDefaultDisplay);
             } else {
@@ -44,12 +44,12 @@ public final class TimelessAPI {
     }
 
     @Environment(EnvType.CLIENT)
-    public static Optional<ClientGunIndex> getClientGunIndex(ResourceLocation gunId) {
+    public static Optional<ClientGunIndex> getClientGunIndex(Identifier gunId) {
         return Optional.ofNullable(ClientIndexManager.GUN_INDEX.get(gunId));
     }
 
     @Environment(EnvType.CLIENT)
-    public static Optional<GunDisplayInstance> getGunDisplay(ResourceLocation displayId, ResourceLocation fallbackGunId) {
+    public static Optional<GunDisplayInstance> getGunDisplay(Identifier displayId, Identifier fallbackGunId) {
         if (displayId == null || displayId.equals(DefaultAssets.DEFAULT_GUN_DISPLAY_ID)) {
             return getClientGunIndex(fallbackGunId).map(ClientGunIndex::getDefaultDisplay);
         }
@@ -62,82 +62,82 @@ public final class TimelessAPI {
     }
 
     @Environment(EnvType.CLIENT)
-    public static Optional<ClientAttachmentIndex> getClientAttachmentIndex(ResourceLocation attachmentId) {
+    public static Optional<ClientAttachmentIndex> getClientAttachmentIndex(Identifier attachmentId) {
         return Optional.ofNullable(ClientIndexManager.ATTACHMENT_INDEX.get(attachmentId));
     }
 
     @Environment(EnvType.CLIENT)
-    public static Optional<ClientAmmoIndex> getClientAmmoIndex(ResourceLocation ammoId) {
+    public static Optional<ClientAmmoIndex> getClientAmmoIndex(Identifier ammoId) {
         return Optional.ofNullable(ClientIndexManager.AMMO_INDEX.get(ammoId));
     }
 
     @Environment(EnvType.CLIENT)
-    public static Optional<ClientBlockIndex> getClientBlockIndex(ResourceLocation blockId) {
+    public static Optional<ClientBlockIndex> getClientBlockIndex(Identifier blockId) {
         return Optional.ofNullable(ClientIndexManager.BLOCK_INDEX.get(blockId));
     }
 
     @Environment(EnvType.CLIENT)
-    public static Set<Map.Entry<ResourceLocation, ClientGunIndex>> getAllClientGunIndex() {
+    public static Set<Map.Entry<Identifier, ClientGunIndex>> getAllClientGunIndex() {
         return ClientIndexManager.getAllGuns();
     }
 
     @Environment(EnvType.CLIENT)
-    public static Set<Map.Entry<ResourceLocation, ClientAmmoIndex>> getAllClientAmmoIndex() {
+    public static Set<Map.Entry<Identifier, ClientAmmoIndex>> getAllClientAmmoIndex() {
         return ClientIndexManager.getAllAmmo();
     }
 
     @Environment(EnvType.CLIENT)
-    public static Set<Map.Entry<ResourceLocation, ClientAttachmentIndex>> getAllClientAttachmentIndex() {
+    public static Set<Map.Entry<Identifier, ClientAttachmentIndex>> getAllClientAttachmentIndex() {
         return ClientIndexManager.getAllAttachments();
     }
 
-    public static Optional<CommonBlockIndex> getCommonBlockIndex(ResourceLocation blockId) {
+    public static Optional<CommonBlockIndex> getCommonBlockIndex(Identifier blockId) {
         return Optional.ofNullable(CommonAssetsManager.get().getBlockIndex(blockId));
     }
 
-    public static Optional<CommonGunIndex> getCommonGunIndex(ResourceLocation gunId) {
+    public static Optional<CommonGunIndex> getCommonGunIndex(Identifier gunId) {
         return Optional.ofNullable(CommonAssetsManager.get().getGunIndex(gunId));
     }
 
-    public static Optional<CommonAttachmentIndex> getCommonAttachmentIndex(ResourceLocation attachmentId) {
+    public static Optional<CommonAttachmentIndex> getCommonAttachmentIndex(Identifier attachmentId) {
         return Optional.ofNullable(CommonAssetsManager.get().getAttachmentIndex(attachmentId));
     }
 
-    public static Optional<CommonAmmoIndex> getCommonAmmoIndex(ResourceLocation ammoId) {
+    public static Optional<CommonAmmoIndex> getCommonAmmoIndex(Identifier ammoId) {
         return Optional.ofNullable(CommonAssetsManager.get().getAmmoIndex(ammoId));
     }
 
     /**
      * @deprecated 不再使用独立的配方同步，而是使用原版的配方加载器<br/>
-     * 请用 {@link net.minecraft.world.item.crafting.RecipeManager#byKey(ResourceLocation)}和{@link net.minecraft.world.item.crafting.RecipeManager#getAllRecipesFor(RecipeType)}获取配方
+     * 请用 {@link net.minecraft.world.item.crafting.RecipeManager#byKey(Identifier)}和{@link net.minecraft.world.item.crafting.RecipeManager#getAllRecipesFor(RecipeType)}获取配方
      */
     @Deprecated
-    public static Optional<GunSmithTableRecipe> getRecipe(ResourceLocation recipeId) {
+    public static Optional<GunSmithTableRecipe> getRecipe(Identifier recipeId) {
         return Optional.empty();
     }
 
-    public static Set<Map.Entry<ResourceLocation, CommonBlockIndex>> getAllCommonBlockIndex() {
+    public static Set<Map.Entry<Identifier, CommonBlockIndex>> getAllCommonBlockIndex() {
         return CommonAssetsManager.get().getAllBlocks();
     }
 
-    public static Set<Map.Entry<ResourceLocation, CommonGunIndex>> getAllCommonGunIndex() {
+    public static Set<Map.Entry<Identifier, CommonGunIndex>> getAllCommonGunIndex() {
         return CommonAssetsManager.get().getAllGuns();
     }
 
-    public static Set<Map.Entry<ResourceLocation, CommonAmmoIndex>> getAllCommonAmmoIndex() {
+    public static Set<Map.Entry<Identifier, CommonAmmoIndex>> getAllCommonAmmoIndex() {
         return CommonAssetsManager.get().getAllAmmos();
     }
 
-    public static Set<Map.Entry<ResourceLocation, CommonAttachmentIndex>> getAllCommonAttachmentIndex() {
+    public static Set<Map.Entry<Identifier, CommonAttachmentIndex>> getAllCommonAttachmentIndex() {
         return CommonAssetsManager.get().getAllAttachments();
     }
 
     /**
      * @deprecated 不再使用独立的配方同步，而是使用原版的配方加载器<br/>
-     * 请用 {@link net.minecraft.world.item.crafting.RecipeManager#byKey(ResourceLocation)}和{@link net.minecraft.world.item.crafting.RecipeManager#getAllRecipesFor(RecipeType)}获取配方
+     * 请用 {@link net.minecraft.world.item.crafting.RecipeManager#byKey(Identifier)}和{@link net.minecraft.world.item.crafting.RecipeManager#getAllRecipesFor(RecipeType)}获取配方
      */
     @Deprecated
-    public static Map<ResourceLocation, GunSmithTableRecipe> getAllRecipes() {
+    public static Map<Identifier, GunSmithTableRecipe> getAllRecipes() {
         return Map.of();
     }
 

@@ -8,7 +8,7 @@ import com.tacz.guns.config.client.RenderConfig;
 import com.tacz.guns.init.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -30,7 +30,7 @@ public class TooltipEvent {
         }
     }
 
-    public static Component formatTooltip(String key, ResourceLocation value) {
+    public static Component formatTooltip(String key, Identifier value) {
         return Component.literal(String.format("%s: \"%s\"", key, value)).withStyle(ChatFormatting.DARK_GRAY);
     }
 }

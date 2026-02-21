@@ -81,14 +81,20 @@ public class AttachmentQueryCategory implements IRecipeCategory<AttachmentQueryE
         return TITLE;
     }
 
-    @Override
-    @SuppressWarnings("removal")
-    public IDrawable getBackground() {
-        return bgDraw;
-    }
+    // getBackground() was removed from JEI IRecipeCategory in JEI 27.x
 
     @Override
     public IDrawable getIcon() {
         return iconDraw;
+    }
+
+    @Override
+    public int getWidth() {
+        return 160;
+    }
+
+    @Override
+    public int getHeight() {
+        return 145;
     }
 }

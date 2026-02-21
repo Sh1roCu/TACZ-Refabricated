@@ -1,6 +1,6 @@
 package com.tacz.guns.util;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.File;
 import java.nio.file.FileVisitResult;
@@ -13,9 +13,9 @@ public class TacPathVisitor extends SimpleFileVisitor<Path> {
     private final File root;
     private final String namespace;
     private final String suffix;
-    private final BiConsumer<ResourceLocation, Path> consumer;
+    private final BiConsumer<Identifier, Path> consumer;
 
-    public TacPathVisitor(File root, String namespace, String suffix, BiConsumer<ResourceLocation, Path> consumer) {
+    public TacPathVisitor(File root, String namespace, String suffix, BiConsumer<Identifier, Path> consumer) {
         this.root = root;
         this.namespace = namespace;
         this.suffix = suffix;
@@ -26,7 +26,7 @@ public class TacPathVisitor extends SimpleFileVisitor<Path> {
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         if (file.toFile().getName().endsWith(suffix)) {
             String path = PathHandler.getPath(root.toPath(), file, suffix);
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace, path);
+            Identifier id = Identifier.fromNamespaceAndPath(namespace, path);
             consumer.accept(id, file);
         }
         return FileVisitResult.CONTINUE;

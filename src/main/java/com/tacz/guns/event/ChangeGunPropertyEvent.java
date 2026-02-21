@@ -3,7 +3,7 @@ package com.tacz.guns.event;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.event.common.AttachmentPropertyEvent;
 import com.tacz.guns.api.item.IGun;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -16,7 +16,7 @@ public class ChangeGunPropertyEvent {
         if (iGun == null) {
             return;
         }
-        ResourceLocation gunId = iGun.getGunId(gunItem);
+        Identifier gunId = iGun.getGunId(gunItem);
         TimelessAPI.getCommonGunIndex(gunId).ifPresent(gunIndex -> event.getCacheProperty().eval(gunItem, gunIndex.getGunData()));
     }
 }

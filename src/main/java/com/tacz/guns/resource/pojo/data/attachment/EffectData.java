@@ -1,13 +1,13 @@
 package com.tacz.guns.resource.pojo.data.attachment;
 
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public class EffectData {
     @SerializedName("id")
     @Nullable
-    private ResourceLocation effectId;
+    private Identifier effectId;
 
     @SerializedName("time")
     private int time = 0;
@@ -19,7 +19,7 @@ public class EffectData {
     private boolean hideParticles = false;
 
     @Nullable
-    public ResourceLocation getEffectId() {
+    public Identifier getEffectId() {
         return effectId;
     }
 

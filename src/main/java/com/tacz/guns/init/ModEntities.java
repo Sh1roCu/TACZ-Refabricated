@@ -5,7 +5,7 @@ import com.tacz.guns.entity.EntityKineticBullet;
 import com.tacz.guns.entity.TargetMinecart;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
@@ -18,6 +18,6 @@ public class ModEntities {
     public static EntityType<TargetMinecart> TARGET_MINECART = register("target_minecart", TargetMinecart.TYPE);
 
     private static <T extends Entity> EntityType<T> register(String name, EntityType<T> type) {
-        return Registry.register(BuiltInRegistries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, name), type);
+        return Registry.register(BuiltInRegistries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(GunMod.MOD_ID, name), type);
     }
 }

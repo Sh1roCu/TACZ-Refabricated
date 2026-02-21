@@ -12,7 +12,7 @@ import com.tacz.guns.client.resource.pojo.animation.bedrock.*;
 import com.tacz.guns.util.math.MathUtil;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectMap;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectRBTreeMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -162,9 +162,9 @@ public class Animations {
                 soundChannel.content = new AnimationSoundChannelContent();
                 int keyframeNum = soundEffectKeyframes.getKeyframes().size();
                 soundChannel.content.keyframeTimeS = new double[keyframeNum];
-                soundChannel.content.keyframeSoundName = new ResourceLocation[keyframeNum];
+                soundChannel.content.keyframeSoundName = new Identifier[keyframeNum];
                 int i = 0;
-                for (Map.Entry<Double, ResourceLocation> entry : soundEffectKeyframes.getKeyframes().double2ObjectEntrySet()) {
+                for (Map.Entry<Double, Identifier> entry : soundEffectKeyframes.getKeyframes().double2ObjectEntrySet()) {
                     soundChannel.content.keyframeTimeS[i] = entry.getKey();
                     soundChannel.content.keyframeSoundName[i] = entry.getValue();
                     i++;

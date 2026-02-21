@@ -8,7 +8,7 @@ import com.tacz.guns.GunMod;
 import com.tacz.guns.util.ResourceScanner;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -25,8 +25,8 @@ import java.util.Map;
  *
  * @param <T> 数据类型
  */
-public class JsonDataManager<T> extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> implements IdentifiableResourceReloadListener {
-    protected final Map<ResourceLocation, T> dataMap = Maps.newHashMap();
+public class JsonDataManager<T> extends SimplePreparableReloadListener<Map<Identifier, JsonElement>> implements IdentifiableResourceReloadListener {
+    protected final Map<Identifier, T> dataMap = Maps.newHashMap();
 
     private final Gson gson;
     private final Class<T> dataClass;
@@ -34,7 +34,7 @@ public class JsonDataManager<T> extends SimplePreparableReloadListener<Map<Resou
 
     private final FileToIdConverter fileToIdConverter;
 
-    public final ResourceLocation ID;
+    public final Identifier ID;
 
     public JsonDataManager(Class<T> dataClass, Gson pGson, String directory, String marker) {
         this(dataClass, pGson, FileToIdConverter.json(directory), marker);
@@ -44,21 +44,21 @@ public class JsonDataManager<T> extends SimplePreparableReloadListener<Map<Resou
         this.gson = pGson;
         this.dataClass = dataClass;
         this.marker = MarkerFactory.getMarker(marker);
-        this.ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, marker.toLowerCase(Locale.ROOT));
+        this.ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, marker.toLowerCase(Locale.ROOT));
         this.fileToIdConverter = fileToIdConverter;
     }
 
     @NotNull
     @Override
-    protected Map<ResourceLocation, JsonElement> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected Map<Identifier, JsonElement> prepare(ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         return ResourceScanner.scanDirectory(pResourceManager, fileToIdConverter, this.gson);
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
+    protected void apply(Map<Identifier, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         dataMap.clear();
-        for (Map.Entry<ResourceLocation, JsonElement> entry : pObject.entrySet()) {
-            ResourceLocation id = entry.getKey();
+        for (Map.Entry<Identifier, JsonElement> entry : pObject.entrySet()) {
+            Identifier id = entry.getKey();
             JsonElement element = entry.getValue();
             try {
                 T data = parseJson(element);
@@ -87,16 +87,16 @@ public class JsonDataManager<T> extends SimplePreparableReloadListener<Map<Resou
         return gson;
     }
 
-    public T getData(ResourceLocation id) {
+    public T getData(Identifier id) {
         return dataMap.get(id);
     }
 
-    public Map<ResourceLocation, T> getAllData() {
+    public Map<Identifier, T> getAllData() {
         return dataMap;
     }
 
     @Override
-    public ResourceLocation getFabricId() {
+    public Identifier getFabricId() {
         return this.ID;
     }
 }

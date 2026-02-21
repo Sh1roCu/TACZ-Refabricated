@@ -1,21 +1,15 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/copper"
-      },
+      "item": "#c:ingots/copper",
       "count": 15
     },
     {
-      "item": {
-        "tag": "c:gems/lapis"
-      },
+      "item": "#c:gems/lapis",
       "count": 5
     },
     {
-      "item": {
-        "tag": "c:gunpowders"
-      },
+      "item": "#c:gunpowders",
       "count": 2
     }
   ],

@@ -1,6 +1,6 @@
 package com.tacz.guns.client.gui.overlay;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.TimelessAPI;
@@ -23,10 +23,8 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -34,12 +32,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
 
-public class GunHudOverlay implements LayeredDraw.Layer {
-    private static final ResourceLocation SEMI = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/fire_mode_semi.png");
-    private static final ResourceLocation AUTO = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/fire_mode_auto.png");
-    private static final ResourceLocation BURST = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/fire_mode_burst.png");
-    private static final ResourceLocation HEATBAR = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/heat_bar.png");
-    private static final ResourceLocation HEATBASE = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/heat_base.png");
+public class GunHudOverlay {
+    private static final Identifier SEMI = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/fire_mode_semi.png");
+    private static final Identifier AUTO = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/fire_mode_auto.png");
+    private static final Identifier BURST = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/fire_mode_burst.png");
+    private static final Identifier HEATBAR = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/heat_bar.png");
+    private static final Identifier HEATBASE = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/heat_base.png");
 
     private static final DecimalFormat CURRENT_AMMO_FORMAT = new DecimalFormat("000");
     private static final DecimalFormat CURRENT_AMMO_FORMAT_PERCENT = new DecimalFormat("000%");
@@ -52,7 +50,6 @@ public class GunHudOverlay implements LayeredDraw.Layer {
 
     public static final GunHudOverlay INSTANCE = new GunHudOverlay();
 
-    @Override
     public void render(GuiGraphics graphics, @NotNull DeltaTracker deltaTracker) {
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();
@@ -69,7 +66,7 @@ public class GunHudOverlay implements LayeredDraw.Layer {
         if (!(stack.getItem() instanceof IGun iGun)) {
             return;
         }
-        ResourceLocation gunId = iGun.getGunId(stack);
+        Identifier gunId = iGun.getGunId(stack);
 
         GunData gunData = TimelessAPI.getClientGunIndex(gunId).map(ClientGunIndex::getGunData).orElse(null);
         GunDisplayInstance display = TimelessAPI.getGunDisplay(stack).orElse(null);
@@ -126,60 +123,61 @@ public class GunHudOverlay implements LayeredDraw.Layer {
         // 竖线
         graphics.fill(width - 75, height - 43, width - 74, height - 25, 0xFFFFFFFF);
 
-        PoseStack poseStack = graphics.pose();
+        org.joml.Matrix3x2fStack poseMatrix = graphics.pose();
 
         Font font = mc.font;
 
         // 数字
-        poseStack.pushPose();
-        poseStack.scale(1.5f, 1.5f, 1);
+        poseMatrix.pushMatrix();
+        poseMatrix.scale(1.5f, 1.5f);
         graphics.drawString(font, currentAmmoCountText, (int) ((width - 70) / 1.5f), (int) ((height - 43) / 1.5f), ammoCountColor, false);
-        poseStack.popPose();
+        poseMatrix.popMatrix();
 
-        poseStack.pushPose();
-        poseStack.scale(0.8f, 0.8f, 1);
+        poseMatrix.pushMatrix();
+        poseMatrix.scale(0.8f, 0.8f);
         graphics.drawString(font, inventoryAmmoCountText, (int) ((width - 68 + mc.font.width(currentAmmoCountText) * 1.5f) / 0.8f), (int) ((height - 43) / 0.8f), inventoryAmmoCountColor, false);
-        poseStack.popPose();
+        poseMatrix.popMatrix();
 
         // 模组版本信息
-        String minecraftVersion = SharedConstants.getCurrentVersion().getName();
+        String minecraftVersion = SharedConstants.getCurrentVersion().name();
         String modVersion = FabricLoader.getInstance().getModContainer(GunMod.MOD_ID).orElseThrow().getMetadata().getVersion().getFriendlyString();
         String debugInfo = String.format("%s-%s", minecraftVersion, modVersion);
         // 文本
-        poseStack.pushPose();
-        poseStack.scale(0.5f, 0.5f, 1);
+        poseMatrix.pushMatrix();
+        poseMatrix.scale(0.5f, 0.5f);
         graphics.drawString(font, debugInfo, (int) ((width - 70) / 0.5f), (int) ((height - 29f) / 0.5f), 0xffaaaaaa);
-        poseStack.popPose();
+        poseMatrix.popMatrix();
 
         // 图标渲染
-        RenderSystem.enableDepthTest();
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        GlStateManager._enableDepthTest();
+        GlStateManager._enableBlend();
+        GlStateManager._blendFuncSeparate(
+                com.mojang.blaze3d.opengl.GlConst.GL_SRC_ALPHA,
+                com.mojang.blaze3d.opengl.GlConst.GL_ONE_MINUS_SRC_ALPHA,
+                com.mojang.blaze3d.opengl.GlConst.GL_ONE,
+                com.mojang.blaze3d.opengl.GlConst.GL_ZERO);
 
         // 获取图标
-        ResourceLocation hudTexture = display.getHUDTexture();
-        @Nullable ResourceLocation hudEmptyTexture = display.getHudEmptyTexture();
+        Identifier hudTexture = display.getHUDTexture();
+        @Nullable Identifier hudEmptyTexture = display.getHudEmptyTexture();
 
         if (ammoCount <= 0 || overheatLocked) {
-            if (hudEmptyTexture == null) {
-                RenderSystem.setShaderColor(1, 0.3f, 0.3f, 1);
-            } else {
+            if (hudEmptyTexture != null) {
                 hudTexture = hudEmptyTexture;
             }
+            // TODO: In 1.21.11 RenderSystem.setShaderColor was removed; tinting is not applied when hudEmptyTexture is null
         }
         // 渲染枪械图标
-        graphics.blit(hudTexture, width - 117, height - 44, 0, 0, 39, 13, 39, 13);
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, hudTexture, width - 117, height - 44, 0f, 0f, 39, 13, 39, 13);
 
         // 渲染开火模式图标
         FireMode fireMode = IGun.getMainHandFireMode(player);
-        ResourceLocation fireModeTexture = switch (fireMode) {
+        Identifier fireModeTexture = switch (fireMode) {
             case AUTO -> AUTO;
             case BURST -> BURST;
             default -> SEMI;
         };
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        graphics.blit(fireModeTexture, (int) (width - 68.5 + mc.font.width(currentAmmoCountText) * 1.5), height - 38, 0, 0, 10, 10, 10, 10);
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, fireModeTexture, (int) (width - 68.5 + mc.font.width(currentAmmoCountText) * 1.5), height - 38, 0f, 0f, 10, 10, 10, 10);
     }
 
     private static void handleCacheCount(LocalPlayer player, ItemStack stack, GunData gunData, IGun iGun, boolean useInventoryAmmo) {

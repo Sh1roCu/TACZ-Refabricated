@@ -8,8 +8,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,9 +58,9 @@ public class AddReloadListenerEvent extends BaseEvent {
         }
 
         @Override
-        public CompletableFuture<Void> reload(final PreparationBarrier stage, final ResourceManager resourceManager, final ProfilerFiller preparationsProfiler, final ProfilerFiller reloadProfiler, final Executor backgroundExecutor, final Executor gameExecutor) {
+        public CompletableFuture<Void> reload(final SharedState sharedState, final Executor backgroundExecutor, final PreparationBarrier stage, final Executor gameExecutor) {
             if (FabricLoader.getInstance().isModLoaded(GunMod.MOD_ID))
-                return wrapped.reload(stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+                return wrapped.reload(sharedState, backgroundExecutor, stage, gameExecutor);
             else
                 return CompletableFuture.completedFuture(null);
         }

@@ -6,14 +6,14 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 public class ClientMessagePlayerFireSelect implements CustomPacketPayload {
     public static final ClientMessagePlayerFireSelect INSTANCE = new ClientMessagePlayerFireSelect();
     public static final CustomPacketPayload.Type<ClientMessagePlayerFireSelect> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "client_player_fire_select")
+            Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "client_player_fire_select")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientMessagePlayerFireSelect> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 

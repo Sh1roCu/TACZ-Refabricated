@@ -1,6 +1,5 @@
 package com.tacz.guns.block;
 
-import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.serialization.MapCodec;
 import com.tacz.guns.block.entity.TargetBlockEntity;
 import com.tacz.guns.entity.EntityKineticBullet;
@@ -37,12 +36,10 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
 public class TargetBlock extends BaseEntityBlock {
-    public static final MapCodec<TargetBlock> CODEC = simpleCodec((properties) -> new TargetBlock());
+    public static final MapCodec<TargetBlock> CODEC = simpleCodec(TargetBlock::new);
     public static final IntegerProperty OUTPUT_POWER = BlockStateProperties.POWER;
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
     public static final BooleanProperty STAND = BooleanProperty.create("stand");
     public static final VoxelShape BOX_BOTTOM_STAND_X = Shapes.or(Block.box(6, 0, 6, 10, 16, 10), Block.box(6, 13, 2, 10, 16, 14));
@@ -51,8 +48,8 @@ public class TargetBlock extends BaseEntityBlock {
     public static final VoxelShape BOX_UPPER_X = Block.box(6, 0, 2, 10, 16, 14);
     public static final VoxelShape BOX_UPPER_Z = Block.box(2, 0, 6, 14, 16, 10);
 
-    public TargetBlock() {
-        super(Properties.of().sound(SoundType.WOOD).strength(2.0F, 3.0F).noOcclusion().pushReaction(PushReaction.DESTROY));
+    public TargetBlock(Properties properties) {
+        super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(HALF, DoubleBlockHalf.LOWER).setValue(STAND, true).setValue(OUTPUT_POWER, 0));
     }
 
@@ -146,7 +143,7 @@ public class TargetBlock extends BaseEntityBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor level, BlockPos currentPos, BlockPos facingPos) {
+    public BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader levelReader, net.minecraft.world.level.ScheduledTickAccess tickAccess, BlockPos currentPos, Direction facing, BlockPos facingPos, BlockState facingState, net.minecraft.util.RandomSource random) {
         DoubleBlockHalf half = state.getValue(HALF);
         boolean stand = state.getValue(STAND);
 
@@ -164,7 +161,7 @@ public class TargetBlock extends BaseEntityBlock {
         }
 
         // 底下方块没了也拆掉
-        if (half == DoubleBlockHalf.LOWER && facing == Direction.DOWN && !state.canSurvive(level, currentPos)) {
+        if (half == DoubleBlockHalf.LOWER && facing == Direction.DOWN && !state.canSurvive(levelReader, currentPos)) {
             return Blocks.AIR.defaultBlockState();
         } else {
             return state;
@@ -186,15 +183,14 @@ public class TargetBlock extends BaseEntityBlock {
     @Override
     public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(world, pos, state, placer, stack);
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             BlockPos above = pos.above();
             world.setBlock(above, state.setValue(HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
-            world.blockUpdated(pos, Blocks.AIR);
             state.updateNeighbourShapes(world, pos, Block.UPDATE_ALL);
             if (stack.has(DataComponents.CUSTOM_NAME)) {
                 BlockEntity blockentity = world.getBlockEntity(pos);
                 if (blockentity instanceof TargetBlockEntity e) {
-                    ResolvableProfile profile = new ResolvableProfile(Optional.of(stack.getHoverName().getString()), Optional.empty(), new PropertyMap());
+                    ResolvableProfile profile = ResolvableProfile.createUnresolved(stack.getHoverName().getString());
                     e.setOwner(profile);
                     e.setCustomName(stack.getHoverName());
                     e.refresh();
@@ -204,7 +200,7 @@ public class TargetBlock extends BaseEntityBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
         BlockPos blockPos = state.getValue(HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
         BlockEntity blockentity = level.getBlockEntity(blockPos);
         if (blockentity instanceof TargetBlockEntity e) {
@@ -212,7 +208,7 @@ public class TargetBlock extends BaseEntityBlock {
             stack.set(DataComponents.CUSTOM_NAME, e.getCustomName());
             return stack;
         }
-        return super.getCloneItemStack(level, pos, state);
+        return super.getCloneItemStack(level, pos, state, includeData);
     }
 
     @Override
@@ -246,6 +242,6 @@ public class TargetBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.INVISIBLE;
     }
 }

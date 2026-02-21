@@ -9,14 +9,8 @@
     "I I"
   ],
   "key": {
-    "L": {
-      "tag": "minecraft:logs"
-    },
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "B": {
-      "item": "minecraft:iron_block"
-    }
+    "L": "#minecraft:logs",
+    "I": "#c:ingots/iron",
+    "B": "minecraft:iron_block"
   }
 }

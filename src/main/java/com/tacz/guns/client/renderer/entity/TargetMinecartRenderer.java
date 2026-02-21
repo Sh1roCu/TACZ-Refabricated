@@ -11,19 +11,21 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.entity.AbstractMinecartRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MinecartRenderer;
+import net.minecraft.client.renderer.entity.state.MinecartRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public class TargetMinecartRenderer extends MinecartRenderer<TargetMinecart> {
+public class TargetMinecartRenderer extends AbstractMinecartRenderer<TargetMinecart, MinecartRenderState> {
     private static final String HEAD_NAME = "head";
     private static final String HEAD_2_NAME = "head2";
 
@@ -37,12 +39,12 @@ public class TargetMinecartRenderer extends MinecartRenderer<TargetMinecart> {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(TargetMinecart minecart) {
-        return InternalAssetLoader.ENTITY_EMPTY_TEXTURE;
+    public MinecartRenderState createRenderState() {
+        return new MinecartRenderState();
     }
 
     @Override
-    protected void renderMinecartContents(TargetMinecart targetMinecart, float pPartialTicks, BlockState pState, PoseStack stack, MultiBufferSource buffer, int pPackedLight) {
+    protected void submitMinecartContents(MinecartRenderState state, BlockState pState, PoseStack stack, SubmitNodeCollector collector, int pPackedLight) {
         getModel().ifPresent(model -> {
             BedrockPart headModel = model.getNode(HEAD_NAME);
             BedrockPart head2Model = model.getNode(HEAD_2_NAME);
@@ -54,21 +56,8 @@ public class TargetMinecartRenderer extends MinecartRenderer<TargetMinecart> {
             stack.scale(1.5f, 1.5f, 1.5f);
             stack.mulPose(Axis.ZN.rotationDegrees(180));
             stack.mulPose(Axis.YN.rotationDegrees(90));
-            RenderType renderType = RenderType.entityTranslucent(InternalAssetLoader.TARGET_MINECART_TEXTURE_LOCATION);
+            RenderType renderType = RenderTypes.entityTranslucent(InternalAssetLoader.TARGET_MINECART_TEXTURE_LOCATION);
             model.render(stack, ItemDisplayContext.NONE, renderType, pPackedLight, OverlayTexture.NO_OVERLAY);
-            if (targetMinecart.getGameProfile() != null) {
-                stack.translate(0, 1, -4.5 / 16d);
-                Minecraft minecraft = Minecraft.getInstance();
-                GameProfile gameProfile = targetMinecart.getGameProfile().gameProfile();
-                ResourceLocation skin = minecraft.getSkinManager().getInsecureSkin(gameProfile).texture();
-                headModel.visible = true;
-                RenderType skullRenderType = RenderType.entityTranslucentCull(skin);
-                headModel.render(stack, ItemDisplayContext.NONE, buffer.getBuffer(skullRenderType), pPackedLight, OverlayTexture.NO_OVERLAY);
-
-                head2Model.visible = true;
-                stack.translate(0, 0, 0.01);
-                head2Model.render(stack, ItemDisplayContext.NONE, buffer.getBuffer(skullRenderType), pPackedLight, OverlayTexture.NO_OVERLAY);
-            }
             stack.popPose();
         });
     }

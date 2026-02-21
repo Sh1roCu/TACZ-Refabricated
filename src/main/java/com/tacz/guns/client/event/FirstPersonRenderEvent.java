@@ -7,7 +7,6 @@ import com.tacz.guns.api.client.other.KeepingItemRenderer;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.renderer.item.AnimateGeoItemRenderer;
 import com.tacz.guns.client.renderer.other.HandRenderer;
-import com.tacz.guns.compat.iris.IrisCompat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -60,15 +59,14 @@ public class FirstPersonRenderEvent {
                 renderer.tryInit(stack, player, event.getPartialTick());
             }
 
-            // 防止内存泄漏
-            IrisCompat.endBatch(Minecraft.getInstance().renderBuffers().bufferSource());
+            // TODO: IrisCompat.endBatch() disabled - iris compat excluded from compilation
 
             GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
             HandRenderer.INSTANCE.renderSolid((poseStack) -> {
                 renderer.renderFirstPerson(
                         player, stack, transformType,
                         poseStack == null ? event.getPoseStack() : poseStack,
-                        event.getMultiBufferSource(),
+                        event.getCollector(),
                         event.getPackedLight(),
                         event.getPartialTick()
                 );

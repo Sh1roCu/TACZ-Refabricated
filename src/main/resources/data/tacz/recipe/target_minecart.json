@@ -8,11 +8,7 @@
     "B"
   ],
   "key": {
-    "A": {
-      "item": "tacz:target"
-    },
-    "B": {
-      "item": "minecraft:minecart"
-    }
+    "A": "tacz:target",
+    "B": "minecraft:minecart"
   }
 }

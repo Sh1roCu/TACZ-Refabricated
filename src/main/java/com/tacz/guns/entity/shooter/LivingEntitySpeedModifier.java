@@ -8,15 +8,15 @@ import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
 import com.tacz.guns.resource.modifier.custom.ExtraMovementModifier;
 import com.tacz.guns.resource.modifier.custom.WeightModifier;
 import com.tacz.guns.resource.pojo.data.gun.MoveSpeed;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 
 public class LivingEntitySpeedModifier {
-    private static final ResourceLocation EXTRA_SPEED_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "extra_speed_modifier");
-    private static final ResourceLocation WEIGHT_SPEED_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "weight_speed_modifier");
+    private static final Identifier EXTRA_SPEED_MODIFIER_ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "extra_speed_modifier");
+    private static final Identifier WEIGHT_SPEED_MODIFIER_ID = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "weight_speed_modifier");
     private final LivingEntity shooter;
     private final ShooterDataHolder dataHolder;
 

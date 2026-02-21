@@ -31,7 +31,7 @@ public interface TimelessForgeEventWrappers {
 //            return getForgeEvent().getAttacker();
 //        }
 //
-//        default ResourceLocation getGunId() {
+//        default Identifier getGunId() {
 //            return getForgeEvent().getGunId();
 //        }
 //
@@ -65,7 +65,7 @@ public interface TimelessForgeEventWrappers {
 //            getForgeEvent().setAttacker(attacker);
 //        }
 //
-//        default void setGunId(ResourceLocation gunId) {
+//        default void setGunId(Identifier gunId) {
 //            getForgeEvent().setGunId(gunId);
 //        }
 //
@@ -101,7 +101,7 @@ public interface TimelessForgeEventWrappers {
 //            return getForgeEvent().getAttacker();
 //        }
 //
-//        default ResourceLocation getGunId() {
+//        default Identifier getGunId() {
 //            return getForgeEvent().getGunId();
 //        }
 //
@@ -125,7 +125,7 @@ public interface TimelessForgeEventWrappers {
 //            return getForgeEvent().getLogicalSide();
 //        }
 //
-//        default ResourceLocation getGunDisplayId() {
+//        default Identifier getGunDisplayId() {
 //            return getForgeEvent().getGunDisplayId();
 //        }
 //    }

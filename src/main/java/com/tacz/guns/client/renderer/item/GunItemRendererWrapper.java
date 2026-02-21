@@ -28,10 +28,12 @@ import com.tacz.guns.util.math.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -121,7 +123,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ItemStack stack) {
+    public Identifier getTextureLocation(ItemStack stack) {
         return TimelessAPI.getGunDisplay(stack).map(GunDisplayInstance::getModelTexture).orElse(null);
     }
 
@@ -137,7 +139,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
                 lastModel = model;
             }
             IClientPlayerGunOperator clientPlayerGunOperator = IClientPlayerGunOperator.fromLocalPlayer(player);
-            float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+            float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
             float aimingProgress = clientPlayerGunOperator.getClientAimingProgress(partialTicks);
             float zoom = iGun.getAimingZoom(stack);
             float multiplier = 1 - aimingProgress + aimingProgress / (float) Math.sqrt(zoom);
@@ -153,7 +155,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
         Optional.ofNullable(getModel(stack)).ifPresent(model -> {
             PoseStack poseStack = event.getPoseStack();
             IClientPlayerGunOperator clientPlayerGunOperator = IClientPlayerGunOperator.fromLocalPlayer(player);
-            float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+            float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
             float aimingProgress = clientPlayerGunOperator.getClientAimingProgress(partialTicks);
             float zoom = iGun.getAimingZoom(stack);
             float multiplier = 1 - aimingProgress + aimingProgress / (float) Math.sqrt(zoom);
@@ -165,7 +167,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
     }
 
     @Override
-    public void renderFirstPerson(LocalPlayer player, ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource,
+    public void renderFirstPerson(LocalPlayer player, ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, SubmitNodeCollector collector,
                                   int light, float partialTick) {
         if (!(stack.getItem() instanceof IGun)) {
             return;
@@ -217,7 +219,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
                 gunModel.setRenderHand(false);
             }
             // 调用枪械模型渲染
-            RenderType renderType = RenderType.entityCutout(display.getModelTexture());
+            RenderType renderType = RenderTypes.entityCutout(display.getModelTexture());
             gunModel.render(poseStack, stack, ctx, renderType, light, OverlayTexture.NO_OVERLAY);
             // 缓存枪口位置，为第一人称曳光弹渲染作准备
             cacheMuzzlePosition(poseStack, gunModel);
@@ -273,14 +275,14 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
             if (transformType == GUI) {
                 poseStack.translate(0.5, 1.5, 0.5);
                 poseStack.mulPose(Axis.ZN.rotationDegrees(180));
-                VertexConsumer buffer = pBuffer.getBuffer(RenderType.entityTranslucent(gunIndex.getSlotTexture()));
+                VertexConsumer buffer = pBuffer.getBuffer(RenderTypes.entityTranslucent(gunIndex.getSlotTexture()));
                 SLOT_GUN_MODEL.renderToBuffer(poseStack, buffer, pPackedLight, pPackedOverlay);
                 return;
             }
             // 剩下的渲染
             BedrockGunModel gunModel;
-            ResourceLocation gunTexture;
-            Pair<BedrockGunModel, ResourceLocation> lodModel = gunIndex.getLodModel();
+            Identifier gunTexture;
+            Pair<BedrockGunModel, Identifier> lodModel = gunIndex.getLodModel();
             if (lodModel == null || RenderDistance.inRenderHighPolyModelDistance(poseStack)) {
                 gunModel = gunIndex.getGunModel();
                 gunTexture = gunIndex.getModelTexture();
@@ -297,13 +299,13 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
             // 应用 display 数据中的缩放
             applyScaleTransform(transformType, gunIndex.getTransform().getScale(), poseStack);
             // 渲染枪械模型
-            RenderType renderType = RenderType.entityCutout(gunTexture);
+            RenderType renderType = RenderTypes.entityCutout(gunTexture);
             gunModel.render(poseStack, stack, transformType, renderType, pPackedLight, pPackedOverlay);
         }, () -> {
             // 没有这个 gunID，渲染个错误材质提醒别人
             poseStack.translate(0.5, 1.5, 0.5);
             poseStack.mulPose(Axis.ZN.rotationDegrees(180));
-            VertexConsumer buffer = pBuffer.getBuffer(RenderType.entityTranslucent(MissingTextureAtlasSprite.getLocation()));
+            VertexConsumer buffer = pBuffer.getBuffer(RenderTypes.entityTranslucent(MissingTextureAtlasSprite.getLocation()));
             SLOT_GUN_MODEL.renderToBuffer(poseStack, buffer, pPackedLight, pPackedOverlay);
         });
         poseStack.popPose();

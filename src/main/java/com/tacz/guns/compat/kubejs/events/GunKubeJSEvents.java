@@ -23,7 +23,7 @@ public class GunKubeJSEvents {
 //        ;
 //
 //        @Nullable
-//        public ResourceLocation getEventSubId() {
+//        public Identifier getEventSubId() {
 //            ItemStack itemStack = getEventItemStack();
 //            return itemStack.getItem() instanceof IGun iGun ? iGun.getGunId(itemStack) : null;
 //        }
@@ -63,7 +63,7 @@ public class GunKubeJSEvents {
 //        }
 //
 //        @Override
-//        public ResourceLocation getEventSubId() {
+//        public Identifier getEventSubId() {
 //            return event.getGunId();
 //        }
 //
@@ -80,7 +80,7 @@ public class GunKubeJSEvents {
 //        }
 //
 //        @Override
-//        public ResourceLocation getEventSubId() {
+//        public Identifier getEventSubId() {
 //            return event.getGunId();
 //        }
 //
@@ -97,7 +97,7 @@ public class GunKubeJSEvents {
 //        }
 //
 //        @Override
-//        public ResourceLocation getEventSubId() {
+//        public Identifier getEventSubId() {
 //            return event.getGunId();
 //        }
 //
@@ -241,7 +241,7 @@ public class GunKubeJSEvents {
 //
 //        @Override
 //        @Nullable
-//        public ResourceLocation getEventSubId() {
+//        public Identifier getEventSubId() {
 //            return event.getAmmo().getGunId();
 //        }
 //    }

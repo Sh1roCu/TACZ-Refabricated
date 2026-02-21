@@ -4,6 +4,7 @@ import cn.sh1rocu.tacz.compat.rei.REIClientPlugin;
 import cn.sh1rocu.tacz.compat.rei.entry.AttachmentQueryEntry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 
@@ -38,5 +39,15 @@ public class AttachmentQueryDisplay implements Display {
     @Override
     public CategoryIdentifier<?> getCategoryIdentifier() {
         return REIClientPlugin.ATTACHMENT_QUERY;
+    }
+
+    @Override
+    public DisplaySerializer<? extends Display> getSerializer() {
+        throw new UnsupportedOperationException("AttachmentQueryDisplay does not support serialization");
+    }
+
+    @Override
+    public java.util.Optional<net.minecraft.resources.Identifier> getDisplayLocation() {
+        return java.util.Optional.empty();
     }
 }

@@ -1,21 +1,15 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/gold"
-      },
+      "item": "#c:ingots/gold",
       "count": 5
     },
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 62
     },
     {
-      "item": {
-        "tag": "c:gems/quartz"
-      },
+      "item": "#c:gems/quartz",
       "count": 3
     }
   ],

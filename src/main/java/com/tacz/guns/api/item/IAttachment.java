@@ -1,7 +1,7 @@
 package com.tacz.guns.api.item;
 
 import com.tacz.guns.api.item.attachment.AttachmentType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -26,25 +26,25 @@ public interface IAttachment {
      * 获取配件 ID
      */
     @Nonnull
-    ResourceLocation getAttachmentId(ItemStack attachmentStack);
+    Identifier getAttachmentId(ItemStack attachmentStack);
 
     /**
      * 设置配件 ID
      */
-    void setAttachmentId(ItemStack attachmentStack, @Nullable ResourceLocation attachmentId);
+    void setAttachmentId(ItemStack attachmentStack, @Nullable Identifier attachmentId);
 
     /**
      * @deprecated
      */
     @Deprecated
     @Nullable
-    ResourceLocation getSkinId(ItemStack attachmentStack);
+    Identifier getSkinId(ItemStack attachmentStack);
 
     /**
      * @deprecated
      */
     @Deprecated
-    void setSkinId(ItemStack attachmentStack, @Nullable ResourceLocation skinId);
+    void setSkinId(ItemStack attachmentStack, @Nullable Identifier skinId);
 
     /**
      * 获取瞄具配件的缩放倍率的数字索引，仅瞄具配件可用

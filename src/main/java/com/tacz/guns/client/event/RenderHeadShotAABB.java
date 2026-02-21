@@ -8,32 +8,21 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 
 @Environment(EnvType.CLIENT)
 public class RenderHeadShotAABB {
-    public static void onRenderEntity(RenderLivingEvent.Post<?, ?> event) {
-        boolean canRender = Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes();
-        if (!canRender) {
-            return;
-        }
+    public static void onRenderEntity(RenderLivingEvent.Post<?, ?, ?> event) {
+        // TODO: In 1.21.11, EntityRenderDispatcher.shouldRenderHitBoxes() and LevelRenderer.renderLineBox() were removed.
+        // Debug hitbox rendering for headshot AABBs needs to be reimplemented using the new rendering pipeline.
         if (!RenderConfig.HEAD_SHOT_DEBUG_HITBOX.get()) {
             return;
         }
-        LivingEntity entity = event.getEntity();
-        ResourceLocation entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-        AABB aabb = HeadShotAABBConfigRead.getAABB(entityId);
-        if (aabb == null) {
-            float width = entity.getBbWidth();
-            float eyeHeight = entity.getEyeHeight();
-            // 扩张 0.01，避免和原版显示重合
-            aabb = new AABB(-width / 2, eyeHeight - 0.25, -width / 2, width / 2, eyeHeight + 0.25, width / 2).inflate(0.01);
-        }
-        VertexConsumer buffer = event.getMultiBufferSource().getBuffer(RenderType.lines());
-        LevelRenderer.renderLineBox(event.getPoseStack(), buffer, aabb, 1.0F, 1.0F, 0.0F, 1.0F);
+        // Rendering is currently disabled pending migration to new debug rendering system.
     }
 }

@@ -1,7 +1,8 @@
 package com.tacz.guns.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.client.model.bedrock.ModelRendererWrapper;
@@ -10,19 +11,16 @@ import com.tacz.guns.client.model.functional.TextShowRender;
 import com.tacz.guns.client.resource.pojo.display.gun.TextShow;
 import com.tacz.guns.client.resource.pojo.model.BedrockModelPOJO;
 import com.tacz.guns.client.resource.pojo.model.BedrockVersion;
-import com.tacz.guns.compat.ar.ARCompat;
-import com.tacz.guns.compat.iris.IrisCompat;
 import com.tacz.guns.util.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -203,91 +201,91 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer vertexConsumer = bufferSource.getBuffer(renderType);
         part.render(poseStack, transformType, vertexConsumer, light, overlay);
-        if (!IrisCompat.endBatch(bufferSource)) {
-            bufferSource.endBatch(renderType);
-        }
+        // TODO: IrisCompat.endBatch() disabled - iris compat excluded from compilation
+        bufferSource.endBatch(renderType);
         part.visible = false;
         poseStack.popPose();
     }
 
     private void renderOcularStencil(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, boolean isScope) {
         if (!ocularNodePaths.isEmpty()) {
-            RenderSystem.colorMask(false, false, false, false);
-            RenderSystem.depthMask(false);
-            RenderSystem.stencilMask(0xFF);
-            RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+            GlStateManager._colorMask(false, false, false, false);
+            GlStateManager._depthMask(false);
+            GL11.glStencilMask(0xFF);
+            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
             // 绘制目镜
             for (int i = ocularNodePaths.size() - 1; i >= 0; i--) {
                 if (isScope == isScopeOcular.get(i)) {
-                    RenderSystem.stencilFunc(GL11.GL_GREATER, i + 1, 0xFF);
+                    GL11.glStencilFunc(GL11.GL_GREATER, i + 1, 0xFF);
                     renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularNodePaths.get(i));
                 }
             }
             // 恢复渲染状态
-            RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-            RenderSystem.depthMask(true);
-            RenderSystem.colorMask(true, true, true, true);
+            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+            GlStateManager._depthMask(true);
+            GlStateManager._colorMask(true, true, true, true);
         }
     }
 
     private void renderDivisionOnly(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay) {
         if (!divisionNodePaths.isEmpty()) {
-            RenderSystem.disableDepthTest();
+            GlStateManager._disableDepthTest();
             for (int i = 0; i < divisionNodePaths.size(); i++) {
-                RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
+                GL11.glStencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
                 renderTempPart(matrixStack, transformType, renderType, light, overlay, divisionNodePaths.get(i));
             }
-            RenderSystem.enableDepthTest();
+            GlStateManager._enableDepthTest();
         }
     }
 
     private void renderOcularAndDivision(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, boolean selective) {
         if (!ocularNodePaths.isEmpty()) {
             // 准备渲染圆形模板层
-            RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_INVERT);
-            RenderSystem.colorMask(false, false, false, false);
-            RenderSystem.depthMask(false);
+            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_INVERT);
+            GlStateManager._colorMask(false, false, false, false);
+            GlStateManager._depthMask(false);
             // 80是一个随便找的大小合适的数值。
             float rad = 80 * scopeViewRadiusModifier;
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {
-                rad *= IClientPlayerGunOperator.fromLocalPlayer(player).getClientAimingProgress(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false));
+                rad *= IClientPlayerGunOperator.fromLocalPlayer(player).getClientAimingProgress(Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
             }
             for (int i = 0; i < ocularNodePaths.size(); i++) {
                 if (selective && !isScopeOcular.get(i)) {
                     continue;
                 }
-                RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
+                GL11.glStencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
                 Vector3f ocularCenter = getBedrockPartCenter(matrixStack, ocularNodePaths.get(i));
                 float centerX = ocularCenter.x() * 16 * 90;
                 float centerY = ocularCenter.y() * 16 * 90;
-                BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-                builder.addVertex(centerX, centerY, -90.0F).setColor(255, 255, 255, 255);
+                // Use direct GL for stencil-only rendering (color/depth mask are off)
+                GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+                GL11.glVertex3f(centerX, centerY, -90.0F);
                 for (int j = 0; j <= 90; j++) {
                     float angle = (float) j * ((float) Math.PI * 2F) / 90.0F;
                     float sin = Mth.sin(angle);
                     float cos = Mth.cos(angle);
-                    builder.addVertex(centerX + cos * rad, centerY + sin * rad, -90.0F).setColor(255, 255, 255, 255);
+                    GL11.glVertex3f(centerX + cos * rad, centerY + sin * rad, -90.0F);
                 }
-                BufferUploader.drawWithShader(builder.buildOrThrow());
+                GL11.glEnd();
             }
-            RenderSystem.depthMask(true);
-            RenderSystem.colorMask(true, true, true, true);
-            RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+            GlStateManager._depthMask(true);
+            GlStateManager._colorMask(true, true, true, true);
+            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
             for (int i = 0; i < ocularNodePaths.size() && i < divisionNodePaths.size(); i++) {
                 if (i > Byte.MAX_VALUE) {
                     throw new IllegalArgumentException("Index of oculus is out of range for 127");
                 }
                 if (selective && !isScopeOcular.get(i)) {
-                    RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
+                    GL11.glStencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
                     renderTempPart(matrixStack, transformType, renderType, light, overlay, divisionNodePaths.get(i));
                 } else {
                     // 渲染目镜黑色遮罩
-                    RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
+                    GL11.glStencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
                     renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularNodePaths.get(i));
                     // 渲染划分
                     int b = ~(i + 1) & 0xFF;
-                    RenderSystem.stencilFunc(GL11.GL_EQUAL, b, 0xFF);
+                    GL11.glStencilFunc(GL11.GL_EQUAL, b, 0xFF);
                     renderTempPart(matrixStack, transformType, renderType, light, overlay, divisionNodePaths.get(i));
                 }
             }
@@ -295,19 +293,15 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
     }
 
     private void renderBoth(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay) {
-        // 当加速渲染加载则使用加速渲染提供的方法进行加速
-        if (ARCompat.shouldAccelerate()) {
-            renderBothAccelerated(matrixStack, transformType, renderType, light, overlay);
-            return;
-        }
+        // TODO: ARCompat.shouldAccelerate() disabled - AR compat excluded from compilation
 
         RenderHelper.enableItemEntityStencilTest();
         // 清空模板缓冲区、准备绘制模板缓冲
-        RenderSystem.clearStencil(0);
-        RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
+        GL11.glClearStencil(0);
+        GlStateManager._clear(GL11.GL_STENCIL_BUFFER_BIT);
         if (ocularRingPath != null) {
-            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-            RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+            GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
+            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
             // 渲染目镜外环
             renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularRingPath);
         }
@@ -315,7 +309,7 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         renderOcularStencil(matrixStack, transformType, renderType, light, overlay, true);
         // 渲染镜身
         if (scopeBodyPath != null) {
-            RenderSystem.stencilFunc(GL11.GL_EQUAL, 0, 0xFF);
+            GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
             renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath);
         }
         // 渲染目镜以写入模板桓冲值 (渲染其他的目镜)
@@ -323,28 +317,25 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         // 渲染目镜遮罩和划分
         renderOcularAndDivision(matrixStack, transformType, renderType, light, overlay, true);
         // 关闭模板缓冲
-        RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
+        GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
         RenderHelper.disableItemEntityStencilTest();
         // 渲染其他部分
         super.render(matrixStack, transformType, renderType, light, overlay);
     }
 
     private void renderSight(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay) {
-        if (ARCompat.shouldAccelerate()) {
-            renderSightAccelerated(matrixStack, transformType, renderType, light, overlay);
-            return;
-        }
+        // TODO: ARCompat.shouldAccelerate() disabled - AR compat excluded from compilation
 
         RenderHelper.enableItemEntityStencilTest();
         // 清空模板缓冲区、准备绘制模板缓冲
-        RenderSystem.clearStencil(0);
-        RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
+        GL11.glClearStencil(0);
+        GlStateManager._clear(GL11.GL_STENCIL_BUFFER_BIT);
         // 渲染目镜以写入模板桓冲值
         renderOcularStencil(matrixStack, transformType, renderType, light, overlay, false);
         // 渲染划分
         renderDivisionOnly(matrixStack, transformType, renderType, light, overlay);
         // 关闭模板缓冲
-        RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
+        GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
         RenderHelper.disableItemEntityStencilTest();
         // 渲染其他部分
         if (scopeBodyPath != null) {
@@ -354,300 +345,47 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
     }
 
     private void renderScope(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay) {
-        if (ARCompat.shouldAccelerate()) {
-            renderScopeAccelerated(matrixStack, transformType, renderType, light, overlay);
-            return;
-        }
+        // TODO: ARCompat.shouldAccelerate() disabled - AR compat excluded from compilation
 
         RenderHelper.enableItemEntityStencilTest();
         // 清空模板缓冲区、准备绘制模板缓冲
-        RenderSystem.clearStencil(0);
-        RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
+        GL11.glClearStencil(0);
+        GlStateManager._clear(GL11.GL_STENCIL_BUFFER_BIT);
         // 渲染目镜外环
         if (ocularRingPath != null) {
-            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-            RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+            GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
+            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
             renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularRingPath);
         }
         // 渲染目镜以写入模板桓冲值
         renderOcularStencil(matrixStack, transformType, renderType, light, overlay, false);
         // 渲染镜身
         if (scopeBodyPath != null) {
-            RenderSystem.stencilFunc(GL11.GL_EQUAL, 0, 0xFF);
+            GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
             renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath);
         }
         // 渲染目镜遮罩和划分
         renderOcularAndDivision(matrixStack, transformType, renderType, light, overlay, false);
         // 关闭模板缓冲
-        RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
+        GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
         RenderHelper.disableItemEntityStencilTest();
         // 渲染其他部分
         super.render(matrixStack, transformType, renderType, light, overlay);
     }
 
-    public void renderBothAccelerated(
-            PoseStack matrixStack,
-            ItemDisplayContext transformType,
-            RenderType renderType,
-            int light,
-            int overlay
-    ) {
-        // 缓存PoseStack防止之后坐标变换出现问题
-        var poseStack = new PoseStack();
-        poseStack.last().pose().set(matrixStack.last().pose());
-        poseStack.last().normal().set(matrixStack.last().normal());
-
-        // 设置外环的渲染层和渲染前后任务
-        // 清空模板缓冲区、准备绘制模板缓冲
-        ARCompat.setRenderLayer(-943);
-        ARCompat.setRenderBeforeFunction(() -> {
-            // 清除上模板残留, 这里其实可以按原始渲染方法移出去, 但为了统一先放入第一层渲染
-            RenderHelper.enableItemEntityStencilTest();
-            RenderSystem.clearStencil(0);
-            RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
-
-            // 渲染目镜外环所需的模板函数
-            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-            RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-        });
-
-        // 画完目镜外环后, 临时关闭模板缓冲区防止渲染异常
-        ARCompat.setRenderAfterFunction(RenderHelper::disableItemEntityStencilTest);
-
-        if (ocularRingPath != null) {
-            // 渲染目镜外环
-            renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularRingPath);
-        }
-
-        // 重置外环层, 还原现场, 进行下一步绘制
-        ARCompat.resetRenderLayer();
-        ARCompat.resetRenderBeforeFunction();
-        ARCompat.resetRenderAfterFunction();
-
-        // 设置镜身的渲染层和渲染前后任务
-        ARCompat.setRenderLayer(-943 + 1);
-        ARCompat.setRenderBeforeFunction(() -> {
-            // 重新启用上一层关闭的模板缓冲区
-            RenderHelper.enableItemEntityStencilTest();
-
-            // 我们在层中进行渲染, 需要关闭加速, 否则这里的渲染会被导向到加速管线中, 造成被延后和内存泄漏
-            ARCompat.disableAcceleration();
-
-            // 在层间操作已经绑定了VAO, Minecraft的标准绘制方法会改变全局VAO状态, 因此需要缓存VAO
-            int vao = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
-            // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
-            BufferUploader.invalidate();
-
-            // 渲染目镜以写入模板桓冲值 (暂时只渲染 ocular_scope)
-            renderOcularStencil(poseStack, transformType, renderType, light, overlay, true);
-
-            // 重新绑回VAO
-            GL30.glBindVertexArray(vao);
-
-            // 画完了, 重新开启加速
-            ARCompat.resetAcceleration();
-
-            // 设置镜身需要的模板函数
-            RenderSystem.stencilFunc(GL11.GL_EQUAL, 0, 0xFF);
-        });
-
-        // 画完镜身后, 渲染其他目镜及遮罩并关闭模板缓冲
-        ARCompat.setRenderAfterFunction(() -> {
-            // 我们在层中进行渲染, 需要关闭加速, 否则这里的渲染会被导向到加速管线中, 造成被延后和内存泄漏
-            ARCompat.disableAcceleration();
-
-            // 在层间操作已经绑定了VAO, Minecraft的标准绘制方法会改变全局VAO状态, 因此需要缓存VAO
-            int vao = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
-            // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
-            BufferUploader.invalidate();
-
-            // 渲染目镜以写入模板桓冲值 (渲染其他的目镜)
-            renderOcularStencil(poseStack, transformType, renderType, light, overlay, false);
-            // 渲染目镜遮罩和划分
-            renderOcularAndDivision(poseStack, transformType, renderType, light, overlay, true);
-
-            // 重新绑回VAO
-            GL30.glBindVertexArray(vao);
-
-            // 画完了, 重新开启加速
-            ARCompat.resetAcceleration();
-
-            // 关闭模板缓冲
-            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-            RenderHelper.disableItemEntityStencilTest();
-        });
-
-        if (scopeBodyPath != null) {
-            // 渲染镜身
-            renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath);
-        }
-
-        // 重置镜身层, 还原现场, 进行最后一步其他部分绘制
-        ARCompat.resetRenderLayer();
-        ARCompat.resetRenderBeforeFunction();
-        ARCompat.resetRenderAfterFunction();
-
-        // 设置其他的渲染层, 保证其在最后一部分渲染
-        ARCompat.setRenderLayer(-943 + 2);
-
-        // 渲染其他部分
-        super.render(matrixStack, transformType, renderType, light, overlay);
-
-        // 重置层, 还原现场, 完成配件渲染
-        ARCompat.resetRenderLayer();
+    // TODO: renderBothAccelerated disabled - AR compat excluded from compilation
+    public void renderBothAccelerated(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay) {
+        // No-op: Accelerated rendering not available
     }
 
+    // TODO: renderSightAccelerated disabled - AR compat excluded from compilation
     private void renderSightAccelerated(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay) {
-        // 缓存PoseStack防止之后坐标变换出现问题
-        var poseStack = new PoseStack();
-        poseStack.last().pose().set(matrixStack.last().pose());
-        poseStack.last().normal().set(matrixStack.last().normal());
-
-        // 设置层前任务, 清除模板缓冲并绘制目镜和划分
-        ARCompat.setRenderLayer(-943);
-        ARCompat.setRenderBeforeFunction(() -> {
-            // 清除上模板残留, 这里其实可以按原始渲染方法移出去, 但为了统一先放入第一层渲染
-            RenderHelper.enableItemEntityStencilTest();
-            RenderSystem.clearStencil(0);
-            RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
-
-            // 我们在层中进行渲染, 需要关闭加速, 否则这里的渲染会被导向到加速管线中, 造成被延后和内存泄漏
-            ARCompat.disableAcceleration();
-
-            // 在层间操作已经绑定了VAO, Minecraft的标准绘制方法会改变全局VAO状态, 因此需要缓存VAO
-            int vao = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
-            // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
-            BufferUploader.invalidate();
-
-            // 渲染目镜以写入模板桓冲值
-            renderOcularStencil(poseStack, transformType, renderType, light, overlay, false);
-            // 渲染划分
-            renderDivisionOnly(poseStack, transformType, renderType, light, overlay);
-
-            // 重新绑回VAO
-            GL30.glBindVertexArray(vao);
-
-            // 画完了, 重新开启加速
-            ARCompat.resetAcceleration();
-
-            // 关闭模板缓冲
-            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-            RenderHelper.disableItemEntityStencilTest();
-        });
-
-        // 渲染其他部分
-        if (scopeBodyPath != null) {
-            renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath);
-        }
-        super.render(matrixStack, transformType, renderType, light, overlay);
-
-        // 重置层, 还原现场, 完成渲染
-        ARCompat.resetRenderLayer();
-        ARCompat.resetRenderBeforeFunction();
+        // No-op: Accelerated rendering not available
     }
 
+    // TODO: renderScopeAccelerated disabled - AR compat excluded from compilation
     private void renderScopeAccelerated(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay) {
-        // 缓存PoseStack防止之后坐标变换出现问题
-        var poseStack = new PoseStack();
-        poseStack.last().pose().set(matrixStack.last().pose());
-        poseStack.last().normal().set(matrixStack.last().normal());
-
-        // 设置外环的渲染层和渲染前后任务
-        // 清空模板缓冲区、准备绘制模板缓冲
-        ARCompat.setRenderLayer(-943);
-        ARCompat.setRenderBeforeFunction(() -> {
-            // 清除上模板残留, 这里其实可以按原始渲染方法移出去, 但为了统一先放入第一层渲染
-            RenderHelper.enableItemEntityStencilTest();
-            RenderSystem.clearStencil(0);
-            RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
-
-            // 渲染目镜外环所需的模板函数
-            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-            RenderSystem.stencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-        });
-
-        // 画完目镜外环后, 临时关闭模板缓冲区防止渲染异常
-        ARCompat.setRenderAfterFunction(RenderHelper::disableItemEntityStencilTest);
-
-        // 渲染目镜外环
-        if (ocularRingPath != null) {
-            renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularRingPath);
-        }
-
-        // 重置外环层, 还原现场, 进行下一步绘制
-        ARCompat.resetRenderLayer();
-        ARCompat.resetRenderBeforeFunction();
-        ARCompat.resetRenderAfterFunction();
-
-        // 设置镜身的渲染层和渲染前后任务
-        ARCompat.setRenderLayer(-943 + 1);
-        ARCompat.setRenderBeforeFunction(() -> {
-            // 重新启用上一层关闭的模板缓冲区
-            RenderHelper.enableItemEntityStencilTest();
-
-            // 我们在层中进行渲染, 需要关闭加速, 否则这里的渲染会被导向到加速管线中, 造成被延后和内存泄漏
-            ARCompat.disableAcceleration();
-
-            // 在层间操作已经绑定了VAO, Minecraft的标准绘制方法会改变全局VAO状态, 因此需要缓存VAO
-            int vao = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
-            // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
-            BufferUploader.invalidate();
-
-            // 渲染目镜以写入模板桓冲值
-            renderOcularStencil(poseStack, transformType, renderType, light, overlay, false);
-
-            // 重新绑回VAO
-            GL30.glBindVertexArray(vao);
-
-            // 画完了, 重新开启加速
-            ARCompat.resetAcceleration();
-
-            // 设置镜身需要的模板函数
-            RenderSystem.stencilFunc(GL11.GL_EQUAL, 0, 0xFF);
-        });
-
-        // 画完镜身后, 渲染其他目镜及遮罩并关闭模板缓冲
-        ARCompat.setRenderAfterFunction(() -> {
-            // 我们在层中进行渲染, 需要关闭加速, 否则这里的渲染会被导向到加速管线中, 造成被延后和内存泄漏
-            ARCompat.disableAcceleration();
-
-            // 在层间操作已经绑定了VAO, Minecraft的标准绘制方法会改变全局VAO状态, 因此需要缓存VAO
-            int vao = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
-            // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
-            BufferUploader.invalidate();
-
-            // 渲染目镜遮罩和划分
-            renderOcularAndDivision(poseStack, transformType, renderType, light, overlay, false);
-
-            // 重新绑回VAO
-            GL30.glBindVertexArray(vao);
-
-            // 画完了, 重新开启加速
-            ARCompat.resetAcceleration();
-
-            // 关闭模板缓冲
-            RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
-            RenderHelper.disableItemEntityStencilTest();
-        });
-
-        // 渲染镜身
-        if (scopeBodyPath != null) {
-            renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath);
-        }
-
-        // 重置镜身层, 还原现场, 进行最后一步其他部分绘制
-        ARCompat.resetRenderLayer();
-        ARCompat.resetRenderBeforeFunction();
-        ARCompat.resetRenderAfterFunction();
-
-        // 设置其他的渲染层, 保证其在最后一部分渲染
-        ARCompat.setRenderLayer(-943 + 2);
-
-        // 渲染其他部分
-        super.render(matrixStack, transformType, renderType, light, overlay);
-
-        // 重置层, 还原现场, 完成配件渲染
-        ARCompat.resetRenderLayer();
+        // No-op: Accelerated rendering not available
     }
 
     private static class OcularWrapper {

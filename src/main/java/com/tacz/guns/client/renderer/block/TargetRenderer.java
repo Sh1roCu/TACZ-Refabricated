@@ -9,20 +9,23 @@ import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.client.resource.InternalAssetLoader;
 import com.tacz.guns.config.client.RenderConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Optional;
 
-public class TargetRenderer implements BlockEntityRenderer<TargetBlockEntity> {
+public class TargetRenderer implements BlockEntityRenderer<TargetBlockEntity, BlockEntityRenderState> {
     private static final String UPPER_NAME = "target_upper";
     private static final String HEAD_NAME = "head";
 
@@ -34,14 +37,19 @@ public class TargetRenderer implements BlockEntityRenderer<TargetBlockEntity> {
     }
 
     @Override
-    public void render(TargetBlockEntity blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
+    public BlockEntityRenderState createRenderState() {
+        return new BlockEntityRenderState();
+    }
+
+    @Override
+    public void submit(BlockEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         getModel().ifPresent(model -> {
-            BlockState blockState = blockEntity.getBlockState();
+            BlockState blockState = state.blockState;
             Direction facing = blockState.getValue(TargetBlock.FACING);
             BedrockPart headModel = model.getNode(HEAD_NAME);
             BedrockPart upperModel = model.getNode(UPPER_NAME);
-            float deg = -Mth.lerp(partialTick, blockEntity.oRot, blockEntity.rot);
-            upperModel.xRot = (float) Math.toRadians(deg);
+            // Note: rotation interpolation needs render state extraction in the future
+            upperModel.xRot = 0;
             headModel.visible = false;
 
             poseStack.pushPose();
@@ -49,18 +57,8 @@ public class TargetRenderer implements BlockEntityRenderer<TargetBlockEntity> {
             poseStack.mulPose(Axis.YN.rotationDegrees(facing.get2DDataValue() * 90));
             poseStack.mulPose(Axis.ZN.rotationDegrees(180));
             poseStack.translate(0, -1.275, 0.0125);
-            RenderType renderType = RenderType.entityTranslucent(InternalAssetLoader.TARGET_TEXTURE_LOCATION);
-            model.render(poseStack, ItemDisplayContext.NONE, renderType, combinedLightIn, combinedOverlayIn);
-            if (blockEntity.getOwner() != null) {
-                poseStack.translate(0, 1.25, 0);
-                poseStack.mulPose(Axis.XP.rotationDegrees(deg));
-                Minecraft minecraft = Minecraft.getInstance();
-                ResourceLocation skin;
-                skin = minecraft.getSkinManager().getInsecureSkin(blockEntity.getOwner().gameProfile()).texture();
-                headModel.visible = true;
-                RenderType skullRenderType = RenderType.entityCutout(skin);
-                headModel.render(poseStack, ItemDisplayContext.NONE, bufferIn.getBuffer(skullRenderType), combinedLightIn, OverlayTexture.NO_OVERLAY);
-            }
+            RenderType renderType = RenderTypes.entityTranslucent(InternalAssetLoader.TARGET_TEXTURE_LOCATION);
+            model.render(poseStack, ItemDisplayContext.NONE, renderType, state.lightCoords, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         });
     }
@@ -71,7 +69,7 @@ public class TargetRenderer implements BlockEntityRenderer<TargetBlockEntity> {
     }
 
     @Override
-    public boolean shouldRenderOffScreen(TargetBlockEntity blockEntity) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 }

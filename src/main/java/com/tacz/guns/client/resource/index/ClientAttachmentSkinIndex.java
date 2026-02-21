@@ -3,12 +3,12 @@ package com.tacz.guns.client.resource.index;
 import com.google.common.base.Preconditions;
 import com.tacz.guns.client.model.BedrockAttachmentModel;
 import com.tacz.guns.client.resource.pojo.skin.attachment.AttachmentSkin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.StringUtils;
 
 public class ClientAttachmentSkinIndex {
     private BedrockAttachmentModel model;
-    private ResourceLocation texture;
+    private Identifier texture;
     private String name;
 
     private ClientAttachmentSkinIndex() {
@@ -34,12 +34,12 @@ public class ClientAttachmentSkinIndex {
 
     private static void checkTextureAndModel(AttachmentSkin skinPojo, ClientAttachmentSkinIndex index) {
         // 检查模型
-        ResourceLocation modelLocation = skinPojo.getModel();
+        Identifier modelLocation = skinPojo.getModel();
         Preconditions.checkArgument(modelLocation != null, "display object missing model field");
         index.model = ClientAttachmentIndex.getOrLoadAttachmentModel(modelLocation);
         Preconditions.checkArgument(index.model != null, "there is no model data in the model file");
         // 检查默认材质
-        ResourceLocation textureLocation = skinPojo.getTexture();
+        Identifier textureLocation = skinPojo.getTexture();
         Preconditions.checkArgument(textureLocation != null, "missing default texture");
         index.texture = textureLocation;
     }
@@ -48,7 +48,7 @@ public class ClientAttachmentSkinIndex {
         return model;
     }
 
-    public ResourceLocation getTexture() {
+    public Identifier getTexture() {
         return texture;
     }
 

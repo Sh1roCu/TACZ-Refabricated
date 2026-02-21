@@ -9,7 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Marker;
@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class SyncedEntityDataMappingS2CPacket implements IHandshakeMessage {
     public static final CustomPacketPayload.Type<SyncedEntityDataMappingS2CPacket> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "server_synced_entity_data_mapping")
+            Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "server_synced_entity_data_mapping")
     );
     public static final StreamCodec<FriendlyByteBuf, SyncedEntityDataMappingS2CPacket> STREAM_CODEC = StreamCodec.of(
             SyncedEntityDataMappingS2CPacket::encode,
@@ -33,13 +33,13 @@ public class SyncedEntityDataMappingS2CPacket implements IHandshakeMessage {
     }
 
     private static final Marker HANDSHAKE = MarkerFactory.getMarker("TACZ_HANDSHAKE");
-    private Map<ResourceLocation, List<Pair<ResourceLocation, Integer>>> keyMap;
+    private Map<Identifier, List<Pair<Identifier, Integer>>> keyMap;
 
     public SyncedEntityDataMappingS2CPacket() {
         this.keyMap = new HashMap<>();
     }
 
-    private SyncedEntityDataMappingS2CPacket(Map<ResourceLocation, List<Pair<ResourceLocation, Integer>>> keyMap) {
+    private SyncedEntityDataMappingS2CPacket(Map<Identifier, List<Pair<Identifier, Integer>>> keyMap) {
         this.keyMap = keyMap;
     }
 
@@ -48,18 +48,18 @@ public class SyncedEntityDataMappingS2CPacket implements IHandshakeMessage {
         buffer.writeInt(keys.size());
         keys.forEach(key -> {
             int id = SyncedEntityData.instance().getInternalId(key);
-            buffer.writeResourceLocation(key.classKey().id());
-            buffer.writeResourceLocation(key.id());
+            buffer.writeIdentifier(key.classKey().id());
+            buffer.writeIdentifier(key.id());
             buffer.writeVarInt(id);
         });
     }
 
     public static SyncedEntityDataMappingS2CPacket decode(FriendlyByteBuf buffer) {
         int size = buffer.readInt();
-        Map<ResourceLocation, List<Pair<ResourceLocation, Integer>>> keyMap = new HashMap<>();
+        Map<Identifier, List<Pair<Identifier, Integer>>> keyMap = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            ResourceLocation classId = buffer.readResourceLocation();
-            ResourceLocation keyId = buffer.readResourceLocation();
+            Identifier classId = buffer.readIdentifier();
+            Identifier keyId = buffer.readIdentifier();
             int id = buffer.readVarInt();
             keyMap.computeIfAbsent(classId, c -> new ArrayList<>()).add(Pair.of(keyId, id));
         }

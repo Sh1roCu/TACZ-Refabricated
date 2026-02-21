@@ -1,15 +1,11 @@
 {
   "materials": [
     {
-      "item": {
-        "item": "minecraft:crying_obsidian"
-      },
+      "item": "minecraft:crying_obsidian",
       "count": 2
     },
     {
-      "item": {
-        "tag": "c:gems/diamond"
-      },
+      "item": "#c:gems/diamond",
       "count": 5
     }
   ],

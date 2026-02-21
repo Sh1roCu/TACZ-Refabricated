@@ -2,7 +2,7 @@ package com.tacz.guns.client.renderer.crosshair;
 
 import com.google.common.collect.Maps;
 import com.tacz.guns.GunMod;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Locale;
 import java.util.Map;
@@ -31,12 +31,12 @@ public enum CrosshairType {
     TRIDENT_1,
     TRIDENT_2;
 
-    private static final Map<CrosshairType, ResourceLocation> CACHE = Maps.newHashMap();
+    private static final Map<CrosshairType, Identifier> CACHE = Maps.newHashMap();
 
-    public static ResourceLocation getTextureLocation(CrosshairType type) {
-        ResourceLocation location = CACHE.get(type);
+    public static Identifier getTextureLocation(CrosshairType type) {
+        Identifier location = CACHE.get(type);
         if (location == null) {
-            location = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/crosshair/normal/%s.png".formatted(type.name().toLowerCase(Locale.US)));
+            location = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/crosshair/normal/%s.png".formatted(type.name().toLowerCase(Locale.US)));
             CACHE.put(type, location);
         }
         return location;

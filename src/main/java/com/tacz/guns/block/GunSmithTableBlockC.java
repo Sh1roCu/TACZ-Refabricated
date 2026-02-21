@@ -8,7 +8,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
@@ -23,11 +25,11 @@ import org.jetbrains.annotations.Nullable;
  * 双方块的枪械工作台，1x2x1
  */
 public class GunSmithTableBlockC extends AbstractGunSmithTableBlock {
-    public static final MapCodec<GunSmithTableBlockC> CODEC = simpleCodec((properties) -> new GunSmithTableBlockC());
+    public static final MapCodec<GunSmithTableBlockC> CODEC = simpleCodec(GunSmithTableBlockC::new);
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
 
-    public GunSmithTableBlockC() {
-        super();
+    public GunSmithTableBlockC(Properties properties) {
+        super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(HALF, DoubleBlockHalf.LOWER));
     }
 
@@ -57,16 +59,16 @@ public class GunSmithTableBlockC extends AbstractGunSmithTableBlock {
     @Override
     public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(world, pos, state, placer, stack);
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             BlockPos above = pos.above();
             world.setBlock(above, state.setValue(HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
-            world.blockUpdated(pos, Blocks.AIR);
+            world.updateNeighborsAt(pos, Blocks.AIR, null);
             state.updateNeighbourShapes(world, pos, Block.UPDATE_ALL);
         }
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor level, BlockPos currentPos, BlockPos facingPos) {
+    protected BlockState updateShape(BlockState state, LevelReader levelReader, ScheduledTickAccess scheduledTickAccess, BlockPos currentPos, Direction facing, BlockPos facingPos, BlockState facingState, RandomSource randomSource) {
         DoubleBlockHalf half = state.getValue(HALF);
 
         if (facing.getAxis() == Direction.Axis.Y) {
@@ -84,7 +86,7 @@ public class GunSmithTableBlockC extends AbstractGunSmithTableBlock {
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState blockState, Player player) {
         // 用于抑制创造模式下摧毁upper方块时lower的掉落
-        if (!level.isClientSide && player.isCreative()) {
+        if (!level.isClientSide() && player.isCreative()) {
             DoubleBlockHalf half = blockState.getValue(HALF);
             if (half == DoubleBlockHalf.UPPER) {
                 BlockPos blockpos = pos.below();

@@ -12,11 +12,7 @@
     "PPP"
   ],
   "key": {
-    "I": {
-      "tag": "c:gems/diamond"
-    },
-    "P": {
-      "tag": "minecraft:planks"
-    }
+    "I": "#c:gems/diamond",
+    "P": "#minecraft:planks"
   }
 }

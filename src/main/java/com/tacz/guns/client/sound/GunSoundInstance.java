@@ -6,7 +6,7 @@ import com.tacz.guns.client.resource.manager.SoundAssetsManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -15,10 +15,10 @@ import javax.annotation.Nullable;
 import javax.sound.sampled.AudioFormat;
 
 public class GunSoundInstance extends EntityBoundSoundInstance {
-    private final ResourceLocation registryName;
+    private final Identifier registryName;
     private final boolean mono;
 
-    public GunSoundInstance(SoundEvent soundEvent, SoundSource source, float volume, float pitch, Entity entity, int soundDistance, ResourceLocation registryName, boolean mono) {
+    public GunSoundInstance(SoundEvent soundEvent, SoundSource source, float volume, float pitch, Entity entity, int soundDistance, Identifier registryName, boolean mono) {
         super(soundEvent, source, volume, pitch, entity, 943);
         this.attenuation = Attenuation.NONE;
         this.registryName = registryName;
@@ -48,7 +48,7 @@ public class GunSoundInstance extends EntityBoundSoundInstance {
         return new SoundBuffer(soundData.byteBuffer(), soundData.audioFormat());
     }
 
-    public ResourceLocation getRegistryName() {
+    public Identifier getRegistryName() {
         return registryName;
     }
 }

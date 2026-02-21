@@ -5,23 +5,11 @@
     "count": 3
   },
   "ingredients": [
-    {
-      "item": "minecraft:flint"
-    },
-    {
-      "item": "minecraft:sugar"
-    },
-    {
-      "item": "minecraft:sugar"
-    },
-    {
-      "item": "minecraft:charcoal"
-    },
-    {
-      "item": "minecraft:charcoal"
-    },
-    {
-      "item": "minecraft:charcoal"
-    }
+    "minecraft:flint",
+    "minecraft:sugar",
+    "minecraft:sugar",
+    "minecraft:charcoal",
+    "minecraft:charcoal",
+    "minecraft:charcoal"
   ]
 }

@@ -12,9 +12,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ArmorStand.class)
 public class ArmorStandMixin {
-    @Definition(id = "getMinecartType", method = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;getMinecartType()Lnet/minecraft/world/entity/vehicle/AbstractMinecart$Type;")
-    @Definition(id = "RIDEABLE", field = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart$Type;RIDEABLE:Lnet/minecraft/world/entity/vehicle/AbstractMinecart$Type;")
-    @Expression("?.getMinecartType() == RIDEABLE")
+    @Definition(id = "isRideable", method = "Lnet/minecraft/world/entity/vehicle/minecart/AbstractMinecart;isRideable()Z")
+    @Expression("?.isRideable()")
     @ModifyExpressionValue(method = "method_6918", at = @At("MIXINEXTRAS:EXPRESSION"))
     private static boolean tacz$canBeRidden(boolean original, @Local(argsOnly = true) Entity entity) {
         if (entity instanceof IMinecart minecart)

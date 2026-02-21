@@ -10,22 +10,24 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import com.tacz.guns.compat.playeranimator.AnimationName;
 import com.tacz.guns.compat.playeranimator.PlayerAnimatorCompat;
-import dev.kosmx.playerAnim.api.layered.IAnimation;
-import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
-import dev.kosmx.playerAnim.api.layered.ModifierLayer;
-import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
-import dev.kosmx.playerAnim.core.util.Ease;
-import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
+import com.zigythebird.playeranimcore.animation.Animation;
+import com.zigythebird.playeranimcore.animation.layered.IAnimation;
+import com.zigythebird.playeranimcore.animation.layered.ModifierLayer;
+import com.zigythebird.playeranimcore.animation.layered.modifier.AbstractFadeModifier;
+import com.zigythebird.playeranimcore.easing.EasingType;
+import com.zigythebird.playeranimcore.enums.PlayState;
+import com.zigythebird.playeranim.animation.PlayerAnimationController;
+import com.zigythebird.playeranim.api.PlayerAnimationAccess;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.ItemStack;
 
 public class AnimationManager {
     public static boolean hasPlayerAnimator3rd(GunDisplayInstance display) {
-        ResourceLocation location = display.getPlayerAnimator3rd();
+        Identifier location = display.getPlayerAnimator3rd();
         if (location == null) {
             return false;
         }
@@ -38,36 +40,38 @@ public class AnimationManager {
 
     public static void playRotationAnimation(AbstractClientPlayer player, GunDisplayInstance display) {
         String animationName = AnimationName.EMPTY;
-        ResourceLocation dataId = PlayerAnimatorCompat.ROTATION_ANIMATION;
-        ResourceLocation animator3rd = display.getPlayerAnimator3rd();
+        Identifier dataId = PlayerAnimatorCompat.ROTATION_ANIMATION;
+        Identifier animator3rd = display.getPlayerAnimator3rd();
         if (animator3rd == null) {
             return;
         }
         if (!PlayerAnimatorAssetManager.get().containsKey(animator3rd)) {
             return;
         }
-        PlayerAnimatorAssetManager.get().getAnimations(animator3rd, animationName).ifPresent(keyframeAnimation -> {
-            var associatedData = PlayerAnimationAccess.getPlayerAssociatedData(player);
-            var modifierLayer = (ModifierLayer<IAnimation>) associatedData.get(dataId);
-            if (modifierLayer == null) {
+        PlayerAnimatorAssetManager.get().getAnimations(animator3rd, animationName).ifPresent(animation -> {
+            var animLayer = PlayerAnimationAccess.getPlayerAnimationLayer(player, dataId);
+            if (!(animLayer instanceof ModifierLayer<?> layer)) {
                 return;
             }
-            AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(8, Ease.INOUTSINE);
-            modifierLayer.replaceAnimationWithFade(fadeModifier, new KeyframeAnimationPlayer(keyframeAnimation));
+            @SuppressWarnings("unchecked")
+            ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) layer;
+            AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(8, EasingType.EASE_IN_OUT_SINE);
+            PlayerAnimationController controller = createController(player, animation);
+            modifierLayer.replaceAnimationWithFade(fadeModifier, controller);
         });
     }
 
     public static void playLowerAnimation(AbstractClientPlayer player, GunDisplayInstance display, float limbSwingAmount) {
-        // 如果玩家趴下，不播放下半身动画
+        // If player is lying down, don't play lower body animation
         if (isPlayerLie(player)) {
             return;
         }
-        // 如果玩家骑乘
+        // If player is riding
         if (player.getVehicle() != null) {
             playLoopAnimation(player, display, PlayerAnimatorCompat.LOWER_ANIMATION, AnimationName.RIDE_LOWER);
             return;
         }
-        // 如果玩家在天上，下半身动画就是站立动画
+        // If player is flying, lower body animation is standing
         if (isFlying(player)) {
             playLoopAnimation(player, display, PlayerAnimatorCompat.LOWER_ANIMATION, AnimationName.HOLD_LOWER);
             return;
@@ -99,7 +103,7 @@ public class AnimationManager {
         IGunOperator operator = IGunOperator.fromLivingEntity(player);
         float aimingProgress = operator.getSynAimingProgress();
         if (aimingProgress <= 0) {
-            // 疾跑时播放的动画
+            // Animation when sprinting
             if (!isFlying(player) && player.isSprinting()) {
                 if (isPlayerLie(player)) {
                     playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.LIE_MOVE);
@@ -111,7 +115,7 @@ public class AnimationManager {
                 return;
             }
 
-            // 行走时的动画
+            // Animation when walking
             if (!isFlying(player) && limbSwingAmount > 0.05) {
                 if (isPlayerLie(player)) {
                     playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.LIE_MOVE);
@@ -124,74 +128,83 @@ public class AnimationManager {
             }
 
             if (isPlayerLie(player)) {
-                // 趴下时的动画
+                // Animation when lying down
                 playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.LIE);
             } else {
-                // 普通待命
+                // Normal idle
                 playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.HOLD_UPPER);
             }
         } else {
             if (isPlayerLie(player)) {
-                // 趴下时瞄准
+                // Aiming while lying down
                 if (!isFlying(player) && limbSwingAmount > 0.05) {
                     playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.LIE_MOVE);
                 } else {
                     playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.LIE_AIM);
                 }
             } else {
-                // 普通瞄准
+                // Normal aiming
                 playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.AIM_UPPER);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static void playLoopAnimation(AbstractClientPlayer player, GunDisplayInstance display, ResourceLocation dataId, String animationName) {
-        ResourceLocation animator3rd = display.getPlayerAnimator3rd();
+    public static void playLoopAnimation(AbstractClientPlayer player, GunDisplayInstance display, Identifier dataId, String animationName) {
+        Identifier animator3rd = display.getPlayerAnimator3rd();
         if (animator3rd == null) {
             return;
         }
         if (!PlayerAnimatorAssetManager.get().containsKey(animator3rd)) {
             return;
         }
-        PlayerAnimatorAssetManager.get().getAnimations(animator3rd, animationName).ifPresent(keyframeAnimation -> {
-            var associatedData = PlayerAnimationAccess.getPlayerAssociatedData(player);
-            var modifierLayer = (ModifierLayer<IAnimation>) associatedData.get(dataId);
-            if (modifierLayer == null) {
+        PlayerAnimatorAssetManager.get().getAnimations(animator3rd, animationName).ifPresent(animation -> {
+            var animLayer = PlayerAnimationAccess.getPlayerAnimationLayer(player, dataId);
+            if (!(animLayer instanceof ModifierLayer<?>)) {
                 return;
             }
-            if (modifierLayer.getAnimation() instanceof KeyframeAnimationPlayer animationPlayer && animationPlayer.isActive()) {
-                Object extraDataName = animationPlayer.getData().extraData.get("name");
-                if (extraDataName instanceof String name && !animationName.equals(name)) {
-                    AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(8, Ease.INOUTSINE);
-                    modifierLayer.replaceAnimationWithFade(fadeModifier, new KeyframeAnimationPlayer(keyframeAnimation));
+            @SuppressWarnings("unchecked")
+            ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) animLayer;
+            IAnimation currentAnim = modifierLayer.getAnimation();
+            if (currentAnim instanceof PlayerAnimationController controller && controller.isActive()) {
+                Animation currentAnimation = controller.getCurrentAnimationInstance();
+                if (currentAnimation != null) {
+                    String currentName = currentAnimation.getNameOrId();
+                    if (currentName != null && !animationName.equals(currentName)) {
+                        AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(8, EasingType.EASE_IN_OUT_SINE);
+                        PlayerAnimationController newController = createController(player, animation);
+                        modifierLayer.replaceAnimationWithFade(fadeModifier, newController);
+                    }
                 }
                 return;
             }
-            AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(8, Ease.INOUTSINE);
-            modifierLayer.replaceAnimationWithFade(fadeModifier, new KeyframeAnimationPlayer(keyframeAnimation));
+            AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(8, EasingType.EASE_IN_OUT_SINE);
+            PlayerAnimationController newController = createController(player, animation);
+            modifierLayer.replaceAnimationWithFade(fadeModifier, newController);
         });
     }
 
     @SuppressWarnings("unchecked")
-    public static void playOnceAnimation(AbstractClientPlayer player, GunDisplayInstance display, ResourceLocation dataId, String animationName) {
-        ResourceLocation animator3rd = display.getPlayerAnimator3rd();
+    public static void playOnceAnimation(AbstractClientPlayer player, GunDisplayInstance display, Identifier dataId, String animationName) {
+        Identifier animator3rd = display.getPlayerAnimator3rd();
         if (animator3rd == null) {
             return;
         }
         if (!PlayerAnimatorAssetManager.get().containsKey(animator3rd)) {
             return;
         }
-        PlayerAnimatorAssetManager.get().getAnimations(animator3rd, animationName).ifPresent(keyframeAnimation -> {
-            var associatedData = PlayerAnimationAccess.getPlayerAssociatedData(player);
-            var modifierLayer = (ModifierLayer<IAnimation>) associatedData.get(dataId);
-            if (modifierLayer == null) {
+        PlayerAnimatorAssetManager.get().getAnimations(animator3rd, animationName).ifPresent(animation -> {
+            var animLayer = PlayerAnimationAccess.getPlayerAnimationLayer(player, dataId);
+            if (!(animLayer instanceof ModifierLayer<?>)) {
                 return;
             }
-            IAnimation animation = modifierLayer.getAnimation();
-            if (animation == null || !animation.isActive()) {
-                AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(8, Ease.INOUTSINE);
-                modifierLayer.replaceAnimationWithFade(fadeModifier, new KeyframeAnimationPlayer(keyframeAnimation));
+            @SuppressWarnings("unchecked")
+            ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) animLayer;
+            IAnimation currentAnim = modifierLayer.getAnimation();
+            if (currentAnim == null || !currentAnim.isActive()) {
+                AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(8, EasingType.EASE_IN_OUT_SINE);
+                PlayerAnimationController newController = createController(player, animation);
+                modifierLayer.replaceAnimationWithFade(fadeModifier, newController);
             }
         });
     }
@@ -209,18 +222,30 @@ public class AnimationManager {
 
 
     @SuppressWarnings("unchecked")
-    private static void stopAnimation(AbstractClientPlayer player, ResourceLocation dataId, int fadeTime) {
-        var associatedData = PlayerAnimationAccess.getPlayerAssociatedData(player);
-        var modifierLayer = (ModifierLayer<IAnimation>) associatedData.get(dataId);
-        if (modifierLayer != null && modifierLayer.isActive()) {
-            AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(fadeTime, Ease.INOUTSINE);
+    private static void stopAnimation(AbstractClientPlayer player, Identifier dataId, int fadeTime) {
+        var animLayer = PlayerAnimationAccess.getPlayerAnimationLayer(player, dataId);
+        if (animLayer instanceof ModifierLayer<?> && animLayer.isActive()) {
+            ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) animLayer;
+            AbstractFadeModifier fadeModifier = AbstractFadeModifier.standardFadeIn(fadeTime, EasingType.EASE_IN_OUT_SINE);
             modifierLayer.replaceAnimationWithFade(fadeModifier, null);
         }
     }
 
     private static boolean isPlayerLie(AbstractClientPlayer player) {
-        // MOJANG 的奇妙设计，趴下的姿势名称是 SWIMMING
+        // MOJANG's design: the lying down pose name is SWIMMING
         return !player.isSwimming() && player.getPose() == Pose.SWIMMING;
+    }
+
+    /**
+     * Creates a PlayerAnimationController that immediately triggers the given animation.
+     */
+    private static PlayerAnimationController createController(AbstractClientPlayer player, Animation animation) {
+        PlayerAnimationController controller = new PlayerAnimationController(
+                player,
+                (ctrl, data, setter) -> PlayState.CONTINUE
+        );
+        controller.triggerAnimation(animation);
+        return controller;
     }
 
     public void onFire(GunShootEvent event) {
@@ -323,7 +348,7 @@ public class AnimationManager {
         }
         ItemStack currentGunItem = event.getCurrentGunItem();
         ItemStack previousGunItem = event.getPreviousGunItem();
-        // 在切枪时，重置上半身动画
+        // When switching guns, reset upper body animation
         if (currentGunItem.getItem() instanceof IGun && previousGunItem.getItem() instanceof IGun) {
             stopAnimation(player, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, 8);
             stopAnimation(player, PlayerAnimatorCompat.ONCE_UPPER_ANIMATION, 8);

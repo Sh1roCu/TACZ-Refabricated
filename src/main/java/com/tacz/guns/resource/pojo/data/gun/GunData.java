@@ -10,7 +10,7 @@ import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
 import com.tacz.guns.resource.modifier.custom.RpmModifier;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class GunData {
     @SerializedName("ammo")
-    private ResourceLocation ammoId = null;
+    private Identifier ammoId = null;
 
     @SerializedName("ammo_amount")
     private int ammoAmount = 30;
@@ -106,21 +106,21 @@ public class GunData {
     private List<AttachmentType> allowAttachments = Lists.newArrayList();
 
     @SerializedName("exclusive_attachments")
-    private Map<ResourceLocation, AttachmentData> exclusiveAttachments = Maps.newHashMap();
+    private Map<Identifier, AttachmentData> exclusiveAttachments = Maps.newHashMap();
 
     @SerializedName("weight")
     private float weight = 0f;
 
     @SerializedName("builtin_attachments")
-    private Map<AttachmentType, ResourceLocation> builtInAttachments = Maps.newHashMap();
+    private Map<AttachmentType, Identifier> builtInAttachments = Maps.newHashMap();
 
     @SerializedName("script")
-    private ResourceLocation script = null;
+    private Identifier script = null;
 
     @SerializedName("script_param")
     private Map<String, Object> scriptParam = null;
 
-    public ResourceLocation getAmmoId() {
+    public Identifier getAmmoId() {
         return ammoId;
     }
 
@@ -268,16 +268,16 @@ public class GunData {
         return allowAttachments;
     }
 
-    public Map<AttachmentType, ResourceLocation> getBuiltInAttachments() {
+    public Map<AttachmentType, Identifier> getBuiltInAttachments() {
         return builtInAttachments;
     }
 
-    public Map<ResourceLocation, AttachmentData> getExclusiveAttachments() {
+    public Map<Identifier, AttachmentData> getExclusiveAttachments() {
         return exclusiveAttachments;
     }
 
     @Nullable
-    public ResourceLocation getScript() {
+    public Identifier getScript() {
         return script;
     }
 

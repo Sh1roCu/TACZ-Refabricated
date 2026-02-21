@@ -24,16 +24,16 @@ public class InteractKey {
     public static final KeyMapping INTERACT_KEY = new KeyMapping("key.tacz.interact.desc",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_O,
-            "key.category.tacz");
+            com.tacz.guns.util.InputExtraCheck.TACZ_CATEGORY);
 
     public static void onInteractKeyPress(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INTERACT_KEY.matches(event.getKey(), event.getScanCode())) {
+        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INTERACT_KEY.matches(new net.minecraft.client.input.KeyEvent(event.getKey(), event.getScanCode(), event.getModifiers()))) {
             doInteractLogic();
         }
     }
 
     public static void onInteractMousePress(InputEvent.MouseButton.Post event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INTERACT_KEY.matchesMouse(event.getButton())) {
+        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INTERACT_KEY.matchesMouse(new net.minecraft.client.input.MouseButtonEvent(0, 0, new net.minecraft.client.input.MouseButtonInfo(event.getButton(), event.getModifiers())))) {
             doInteractLogic();
         }
     }

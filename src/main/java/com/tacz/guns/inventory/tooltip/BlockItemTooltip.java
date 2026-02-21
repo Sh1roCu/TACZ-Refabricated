@@ -1,16 +1,16 @@
 package com.tacz.guns.inventory.tooltip;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 public class BlockItemTooltip implements TooltipComponent {
-    private final ResourceLocation blockId;
+    private final Identifier blockId;
 
-    public BlockItemTooltip(ResourceLocation blockId) {
+    public BlockItemTooltip(Identifier blockId) {
         this.blockId = blockId;
     }
 
-    public ResourceLocation getBlockId() {
+    public Identifier getBlockId() {
         return blockId;
     }
 }

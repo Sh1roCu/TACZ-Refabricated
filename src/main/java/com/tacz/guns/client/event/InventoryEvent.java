@@ -25,18 +25,18 @@ public class InventoryEvent {
         }
         Inventory inventory = player.getInventory();
         // 玩家切换选中框的情况
-        if (oldHotbarSelected != inventory.selected) {
+        if (oldHotbarSelected != inventory.getSelectedSlot()) {
             if (oldHotbarSelected == -1) {
                 IClientPlayerGunOperator.fromLocalPlayer(player).draw(ItemStack.EMPTY);
             } else {
                 IClientPlayerGunOperator.fromLocalPlayer(player).draw(inventory.getItem(oldHotbarSelected));
             }
-            oldHotbarSelected = inventory.selected;
-            oldHotbarSelectItem = inventory.getItem(inventory.selected).copy();
+            oldHotbarSelected = inventory.getSelectedSlot();
+            oldHotbarSelectItem = inventory.getItem(inventory.getSelectedSlot()).copy();
             return;
         }
         // 玩家选中的物品改变的情况
-        ItemStack currentItem = inventory.getItem(inventory.selected);
+        ItemStack currentItem = inventory.getItem(inventory.getSelectedSlot());
         if (currentItem.getItem() instanceof IAnimationItem item) {
             if (!item.isSame(oldHotbarSelectItem, currentItem)) {
                 IClientPlayerGunOperator.fromLocalPlayer(player).draw(oldHotbarSelectItem);

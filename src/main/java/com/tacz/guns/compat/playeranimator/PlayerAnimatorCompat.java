@@ -13,7 +13,7 @@ import com.tacz.guns.compat.playeranimator.animation.PlayerAnimatorLoader;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.io.File;
@@ -21,10 +21,10 @@ import java.util.function.Consumer;
 import java.util.zip.ZipFile;
 
 public class PlayerAnimatorCompat {
-    public static ResourceLocation LOWER_ANIMATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "lower_animation");
-    public static ResourceLocation LOOP_UPPER_ANIMATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "loop_upper_animation");
-    public static ResourceLocation ONCE_UPPER_ANIMATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "once_upper_animation");
-    public static ResourceLocation ROTATION_ANIMATION = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "rotation");
+    public static Identifier LOWER_ANIMATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "lower_animation");
+    public static Identifier LOOP_UPPER_ANIMATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "loop_upper_animation");
+    public static Identifier ONCE_UPPER_ANIMATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "once_upper_animation");
+    public static Identifier ROTATION_ANIMATION = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "rotation");
 
     private static final String PA = "playeranimator";
     private static boolean INSTALLED = false;

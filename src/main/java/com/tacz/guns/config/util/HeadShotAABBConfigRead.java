@@ -2,7 +2,7 @@ package com.tacz.guns.config.util;
 
 import com.google.common.collect.Maps;
 import com.tacz.guns.config.sync.SyncConfig;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.AABB;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HeadShotAABBConfigRead {
-    private static final Map<ResourceLocation, AABB> AABB_CHECK = Maps.newHashMap();
+    private static final Map<Identifier, AABB> AABB_CHECK = Maps.newHashMap();
     // 书写格式：touhou_little_maid:maid [-0.5, 1.0, -0.5, 0.5, 1.5, 0.5]
     // 生物 ID + 碰撞箱
     private static final Pattern REG = Pattern.compile("^([a-z0-9_.-]+:[a-z0-9/._-]+)\s*?\\[([-+]?[0-9]*\\.?[0-9]+),\s*?([-+]?[0-9]*\\.?[0-9]+),\s*?([-+]?[0-9]*\\.?[0-9]+),\s*?([-+]?[0-9]*\\.?[0-9]+),\s*?([-+]?[0-9]*\\.?[0-9]+),\s*?([-+]?[0-9]*\\.?[0-9]+),*?\s*?]");
@@ -27,7 +27,7 @@ public class HeadShotAABBConfigRead {
     public static void addCheck(String text) {
         Matcher matcher = REG.matcher(text);
         if (matcher.find()) {
-            ResourceLocation id = ResourceLocation.parse(matcher.group(1));
+            Identifier id = Identifier.parse(matcher.group(1));
             double x1 = Double.parseDouble(matcher.group(2));
             double y1 = Double.parseDouble(matcher.group(3));
             double z1 = Double.parseDouble(matcher.group(4));
@@ -43,7 +43,7 @@ public class HeadShotAABBConfigRead {
         AABB_CHECK.clear();
     }
 
-    public static AABB getAABB(ResourceLocation id) {
+    public static AABB getAABB(Identifier id) {
         return AABB_CHECK.get(id);
     }
 }

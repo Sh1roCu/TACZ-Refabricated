@@ -16,8 +16,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class TargetMinecartItem extends Item {
-    public TargetMinecartItem() {
-        super((new Item.Properties()).stacksTo(1));
+    public TargetMinecartItem(Item.Properties properties) {
+        super(properties);
     }
 
     @NotNull
@@ -30,10 +30,10 @@ public class TargetMinecartItem extends Item {
             return InteractionResult.FAIL;
         } else {
             ItemStack itemstack = context.getItemInHand();
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock baseRailBlock ? blockstate.getValue(baseRailBlock.getShapeProperty()) /*baseRailBlock.getRailDirection(blockstate, level, blockpos, null)*/ : RailShape.NORTH_SOUTH;
                 double yOffset = 0;
-                if (railshape.isAscending()) {
+                if (railshape.isSlope()) {
                     yOffset = 0.5;
                 }
                 TargetMinecart targetMinecart = new TargetMinecart(level, (double) blockpos.getX() + 0.5, (double) blockpos.getY() + 0.0625 + yOffset, (double) blockpos.getZ() + 0.5);
@@ -44,7 +44,7 @@ public class TargetMinecartItem extends Item {
                 level.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockpos);
             }
             itemstack.shrink(1);
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
     }
 }

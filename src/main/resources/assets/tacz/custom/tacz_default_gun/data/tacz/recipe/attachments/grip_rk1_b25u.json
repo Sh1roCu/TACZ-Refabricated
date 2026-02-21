@@ -1,15 +1,11 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 16
     },
     {
-      "item": {
-        "tag": "c:leathers"
-      },
+      "item": "#c:leathers",
       "count": 5
     }
   ],

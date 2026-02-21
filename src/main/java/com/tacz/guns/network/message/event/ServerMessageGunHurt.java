@@ -11,19 +11,19 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
-public record ServerMessageGunHurt(int bulletId, int hurtEntityId, int attackerId, ResourceLocation gunId,
-                                   ResourceLocation gunDisplayId,
+public record ServerMessageGunHurt(int bulletId, int hurtEntityId, int attackerId, Identifier gunId,
+                                   Identifier gunDisplayId,
                                    float amount, boolean isHeadShot,
                                    float headshotMultiplier) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<ServerMessageGunHurt> TYPE = new CustomPacketPayload.Type<>(
-            ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "server_gun_hurt")
+            Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "server_gun_hurt")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, ServerMessageGunHurt> STREAM_CODEC = StreamCodec.of(
             ServerMessageGunHurt::encode,
@@ -39,8 +39,8 @@ public record ServerMessageGunHurt(int bulletId, int hurtEntityId, int attackerI
         buf.writeInt(message.bulletId);
         buf.writeInt(message.hurtEntityId);
         buf.writeInt(message.attackerId);
-        buf.writeResourceLocation(message.gunId);
-        buf.writeResourceLocation(message.gunDisplayId);
+        buf.writeIdentifier(message.gunId);
+        buf.writeIdentifier(message.gunDisplayId);
         buf.writeFloat(message.amount);
         buf.writeBoolean(message.isHeadShot);
         buf.writeFloat(message.headshotMultiplier);
@@ -50,8 +50,8 @@ public record ServerMessageGunHurt(int bulletId, int hurtEntityId, int attackerI
         int bulletId = buf.readInt();
         int hurtEntityId = buf.readInt();
         int attackerId = buf.readInt();
-        ResourceLocation gunId = buf.readResourceLocation();
-        ResourceLocation gunDisplayId = buf.readResourceLocation();
+        Identifier gunId = buf.readIdentifier();
+        Identifier gunDisplayId = buf.readIdentifier();
         float amount = buf.readFloat();
         boolean isHeadShot = buf.readBoolean();
         float headshotMultiplier = buf.readFloat();

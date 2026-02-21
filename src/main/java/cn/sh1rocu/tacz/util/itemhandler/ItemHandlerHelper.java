@@ -90,7 +90,7 @@ public class ItemHandlerHelper {
         }
 
         // drop remaining itemstack into the level
-        if (!remainder.isEmpty() && !level.isClientSide) {
+        if (!remainder.isEmpty() && !level.isClientSide()) {
             ItemEntity entityitem = new ItemEntity(level, player.getX(), player.getY() + 0.5, player.getZ(), remainder);
             entityitem.setPickUpDelay(40);
             entityitem.setDeltaMovement(entityitem.getDeltaMovement().multiply(0, 1, 0));

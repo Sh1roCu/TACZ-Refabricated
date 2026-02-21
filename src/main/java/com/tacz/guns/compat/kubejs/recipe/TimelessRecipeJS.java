@@ -122,19 +122,19 @@ public class TimelessRecipeJS /*extends RecipeJS*/ {
 //        return jsonObject;
 //    }
 //
-//    private ResourceLocation getIdFromJson(JsonObject jsonObject) {
-//        return ResourceLocation.fromNamespaceAndPath(GsonHelper.getAsString(jsonObject, "id"));
+//    private Identifier getIdFromJson(JsonObject jsonObject) {
+//        return Identifier.fromNamespaceAndPath(GsonHelper.getAsString(jsonObject, "id"));
 //    }
 //
 //    private String getGunTypeFromJson(JsonObject jsonObject) {
-//        ResourceLocation gunId = getIdFromJson(jsonObject);
+//        Identifier gunId = getIdFromJson(jsonObject);
 //        return TimelessAPI.getCommonGunIndex(gunId).map(CommonGunIndex::getType).orElse("");
 //    }
 //
 //    private ItemStack getGunItemFromJson(JsonObject jsonObject) {
-//        ResourceLocation gunId = getIdFromJson(jsonObject);
+//        Identifier gunId = getIdFromJson(jsonObject);
 //        int ammoCount;
-//        EnumMap<AttachmentType, ResourceLocation> attachments;
+//        EnumMap<AttachmentType, Identifier> attachments;
 //        GunResult gunResult = CommonAssetsManager.GSON.fromJson(jsonObject, GunResult.class);
 //        if (gunResult != null) {
 //            ammoCount = Math.max(0, gunResult.getAmmoCount());
@@ -155,7 +155,7 @@ public class TimelessRecipeJS /*extends RecipeJS*/ {
 //    }
 //
 //    private String getAttachmentTypeFromJson(JsonObject jsonObject) {
-//        ResourceLocation attachmentId = getIdFromJson(jsonObject);
+//        Identifier attachmentId = getIdFromJson(jsonObject);
 //        return TimelessAPI.getCommonAttachmentIndex(attachmentId).map(attachmentIndex ->
 //                attachmentIndex.getType()
 //                        .name()
@@ -164,12 +164,12 @@ public class TimelessRecipeJS /*extends RecipeJS*/ {
 //    }
 //
 //    private ItemStack getAttachmentItemFromJson(JsonObject jsonObject) {
-//        ResourceLocation attachmentId = getIdFromJson(jsonObject);
+//        Identifier attachmentId = getIdFromJson(jsonObject);
 //        return AttachmentItemBuilder.create().setId(attachmentId).build();
 //    }
 //
 //    private ItemStack getAmmoItemFromJson(JsonObject jsonObject) {
-//        ResourceLocation ammoId = getIdFromJson(jsonObject);
+//        Identifier ammoId = getIdFromJson(jsonObject);
 //        return AmmoItemBuilder.create().setId(ammoId).build();
 //    }
 }

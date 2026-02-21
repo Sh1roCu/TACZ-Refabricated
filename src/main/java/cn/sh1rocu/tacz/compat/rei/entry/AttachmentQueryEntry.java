@@ -9,7 +9,7 @@ import com.tacz.guns.api.item.builder.GunItemBuilder;
 import com.tacz.guns.compat.jei.category.AttachmentQueryCategory;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -29,9 +29,9 @@ public class AttachmentQueryEntry {
      */
     private List<ItemStack> extraAllowGunStacks;
 
-    private ResourceLocation attachmentId;
+    private Identifier attachmentId;
 
-    public AttachmentQueryEntry(ResourceLocation attachmentId, GunTabType type) {
+    public AttachmentQueryEntry(Identifier attachmentId, GunTabType type) {
         this.attachmentStack = AttachmentItemBuilder.create().setId(attachmentId).build();
         this.allowGunStacks = Lists.newArrayList();
         this.extraAllowGunStacks = Lists.newArrayList();
@@ -55,7 +55,7 @@ public class AttachmentQueryEntry {
         return entries;
     }
 
-    public ResourceLocation getAttachmentId() {
+    public Identifier getAttachmentId() {
         return attachmentId;
     }
 

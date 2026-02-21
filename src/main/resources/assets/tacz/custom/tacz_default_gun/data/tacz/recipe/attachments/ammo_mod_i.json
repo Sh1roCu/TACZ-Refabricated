@@ -1,20 +1,14 @@
 {
   "materials": [
     {
-      "item": {
-        "item": "minecraft:crying_obsidian"
-      },
+      "item": "minecraft:crying_obsidian",
       "count": 2
     },
     {
-      "item": {
-        "item": "minecraft:fire_charge"
-      }
+      "item": "minecraft:fire_charge"
     },
     {
-      "item": {
-        "tag": "c:rods/blaze"
-      },
+      "item": "#c:rods/blaze",
       "count": 4
     }
   ],

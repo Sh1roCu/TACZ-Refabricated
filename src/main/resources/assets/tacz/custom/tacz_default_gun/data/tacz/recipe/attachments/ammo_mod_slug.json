@@ -1,15 +1,11 @@
 {
   "materials": [
     {
-      "item": {
-        "item": "minecraft:crying_obsidian"
-      },
+      "item": "minecraft:crying_obsidian",
       "count": 3
     },
     {
-      "item": {
-        "tag": "c:ores/netherite_scrap"
-      }
+      "item": "#c:ores/netherite_scrap"
     }
   ],
   "result": {

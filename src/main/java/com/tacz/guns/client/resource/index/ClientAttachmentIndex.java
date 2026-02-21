@@ -15,7 +15,7 @@ import com.tacz.guns.resource.pojo.AttachmentIndexPOJO;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
 import com.tacz.guns.util.ColorHex;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -25,12 +25,12 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ClientAttachmentIndex {
-    private final Map<ResourceLocation, ClientAttachmentSkinIndex> skinIndexMap = Maps.newHashMap();
+    private final Map<Identifier, ClientAttachmentSkinIndex> skinIndexMap = Maps.newHashMap();
     private String name;
     private @Nullable BedrockAttachmentModel attachmentModel;
-    private @Nullable ResourceLocation modelTexture;
-    private @Nullable Pair<BedrockAttachmentModel, ResourceLocation> lodModel;
-    private ResourceLocation slotTexture;
+    private @Nullable Identifier modelTexture;
+    private @Nullable Pair<BedrockAttachmentModel, Identifier> lodModel;
+    private Identifier slotTexture;
     private AttachmentData data;
     private float[] viewsFov;
     private float @Nullable [] zoom;
@@ -40,13 +40,13 @@ public class ClientAttachmentIndex {
     private boolean showMuzzle;
     private @Nullable String adapterNodeName;
     private @Nullable String tooltipKey;
-    private Map<String, ResourceLocation> sounds;
+    private Map<String, Identifier> sounds;
     private @Nullable LaserConfig laserConfig;
 
     private ClientAttachmentIndex() {
     }
 
-    public static ClientAttachmentIndex getInstance(ResourceLocation registryName, AttachmentIndexPOJO indexPOJO) throws IllegalArgumentException {
+    public static ClientAttachmentIndex getInstance(Identifier registryName, AttachmentIndexPOJO indexPOJO) throws IllegalArgumentException {
         ClientAttachmentIndex index = new ClientAttachmentIndex();
         checkIndex(indexPOJO, index);
         AttachmentDisplay display = checkDisplay(indexPOJO, index);
@@ -68,7 +68,7 @@ public class ClientAttachmentIndex {
 
     @Nonnull
     private static AttachmentDisplay checkDisplay(AttachmentIndexPOJO indexPOJO, ClientAttachmentIndex index) {
-        ResourceLocation pojoDisplay = indexPOJO.getDisplay();
+        Identifier pojoDisplay = indexPOJO.getDisplay();
         Preconditions.checkArgument(pojoDisplay != null, "index object missing display field");
         AttachmentDisplay display = ClientAssetsManager.INSTANCE.getAttachmentDisplay(pojoDisplay);
         Preconditions.checkArgument(display != null, "there is no corresponding display file");
@@ -122,7 +122,7 @@ public class ClientAttachmentIndex {
     }
 
     private static void checkData(AttachmentIndexPOJO indexPOJO, ClientAttachmentIndex index) {
-        ResourceLocation dataId = indexPOJO.getData();
+        Identifier dataId = indexPOJO.getData();
         Preconditions.checkArgument(dataId != null, "index object missing pojoData field");
         AttachmentData data = CommonAssetsManager.get().getAttachmentData(dataId);
         Preconditions.checkArgument(data != null, "there is no corresponding data file");
@@ -152,7 +152,7 @@ public class ClientAttachmentIndex {
     }
 
     @Nullable
-    public static BedrockAttachmentModel getOrLoadAttachmentModel(@Nullable ResourceLocation modelLocation) {
+    public static BedrockAttachmentModel getOrLoadAttachmentModel(@Nullable Identifier modelLocation) {
         if (modelLocation == null) {
             return null;
         }
@@ -180,7 +180,7 @@ public class ClientAttachmentIndex {
     private static void checkLod(AttachmentDisplay display, ClientAttachmentIndex index) {
         AttachmentLod gunLod = display.getAttachmentLod();
         if (gunLod != null) {
-            ResourceLocation texture = gunLod.getModelTexture();
+            Identifier texture = gunLod.getModelTexture();
             if (gunLod.getModelLocation() == null) {
                 return;
             }
@@ -206,7 +206,7 @@ public class ClientAttachmentIndex {
 
 
     private static void checkSounds(AttachmentDisplay display, ClientAttachmentIndex index) {
-        Map<String, ResourceLocation> displaySounds = display.getSounds();
+        Map<String, Identifier> displaySounds = display.getSounds();
         if (displaySounds == null) {
             index.sounds = Maps.newHashMap();
             return;
@@ -229,16 +229,16 @@ public class ClientAttachmentIndex {
     }
 
     @Nullable
-    public ResourceLocation getModelTexture() {
+    public Identifier getModelTexture() {
         return modelTexture;
     }
 
     @Nullable
-    public Pair<BedrockAttachmentModel, ResourceLocation> getLodModel() {
+    public Pair<BedrockAttachmentModel, Identifier> getLodModel() {
         return lodModel;
     }
 
-    public ResourceLocation getSlotTexture() {
+    public Identifier getSlotTexture() {
         return slotTexture;
     }
 
@@ -260,7 +260,7 @@ public class ClientAttachmentIndex {
 
     @Deprecated
     @Nullable
-    public ClientAttachmentSkinIndex getSkinIndex(@Nullable ResourceLocation skinName) {
+    public ClientAttachmentSkinIndex getSkinIndex(@Nullable Identifier skinName) {
         return null;
     }
 
@@ -281,7 +281,7 @@ public class ClientAttachmentIndex {
         return showMuzzle;
     }
 
-    public Map<String, ResourceLocation> getSounds() {
+    public Map<String, Identifier> getSounds() {
         return sounds;
     }
 

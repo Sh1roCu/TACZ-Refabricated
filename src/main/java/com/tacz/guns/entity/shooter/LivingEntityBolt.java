@@ -5,7 +5,7 @@ import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
@@ -32,7 +32,7 @@ public class LivingEntityBolt {
         if (!(currentGunItem.getItem() instanceof AbstractGunItem iGun)) {
             return;
         }
-        ResourceLocation gunId = iGun.getGunId(currentGunItem);
+        Identifier gunId = iGun.getGunId(currentGunItem);
         TimelessAPI.getCommonGunIndex(gunId).ifPresent(gunIndex -> {
             // 判断是否正在射击冷却
             if (shoot.getShootCoolDown() != 0) {
@@ -92,7 +92,7 @@ public class LivingEntityBolt {
             data.isBolting = false;
             return;
         }
-        ResourceLocation gunId = iGun.getGunId(currentGunItem);
+        Identifier gunId = iGun.getGunId(currentGunItem);
         Optional<CommonGunIndex> gunIndex = TimelessAPI.getCommonGunIndex(gunId);
         data.isBolting = gunIndex.map(index -> iGun.tickBolt(data, currentGunItem, shooter)).orElse(false);
     }

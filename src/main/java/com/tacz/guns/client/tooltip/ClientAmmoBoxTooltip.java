@@ -27,7 +27,7 @@ public class ClientAmmoBoxTooltip implements ClientTooltipComponent {
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(Font font) {
         return 28;
     }
 
@@ -37,13 +37,13 @@ public class ClientAmmoBoxTooltip implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderText(Font font, int pX, int pY, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
-        font.drawInBatch(ammoName, pX + 20, pY + 4, 0xffaa00, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
-        font.drawInBatch(count, pX + 20, pY + 15, 0x666666, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+    public void renderText(GuiGraphics guiGraphics, Font font, int pX, int pY) {
+        guiGraphics.drawString(font, ammoName, pX + 20, pY + 4, 0xffaa00);
+        guiGraphics.drawString(font, count, pX + 20, pY + 15, 0x666666);
     }
 
     @Override
-    public void renderImage(Font pFont, int pX, int pY, GuiGraphics pGuiGraphics) {
+    public void renderImage(Font pFont, int pX, int pY, int width, int height, GuiGraphics pGuiGraphics) {
         pGuiGraphics.renderItem(ammo, pX, pY + 5);
     }
 }

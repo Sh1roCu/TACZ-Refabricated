@@ -1,19 +1,19 @@
 package com.tacz.guns.client.resource.pojo.skin.attachment;
 
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class AttachmentSkin {
     @SerializedName("parent")
-    private ResourceLocation parent;
+    private Identifier parent;
     @SerializedName("name")
     private String name;
     @SerializedName("model")
-    private ResourceLocation model;
+    private Identifier model;
     @SerializedName("texture")
-    private ResourceLocation texture;
+    private Identifier texture;
 
-    public ResourceLocation getParent() {
+    public Identifier getParent() {
         return parent;
     }
 
@@ -21,11 +21,11 @@ public class AttachmentSkin {
         return name;
     }
 
-    public ResourceLocation getModel() {
+    public Identifier getModel() {
         return model;
     }
 
-    public ResourceLocation getTexture() {
+    public Identifier getTexture() {
         return texture;
     }
 }

@@ -13,7 +13,7 @@ import com.tacz.guns.util.ColorHex;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.commands.arguments.ParticleArgument;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,12 +23,12 @@ import java.util.Objects;
 public class ClientAmmoIndex {
     private String name;
     private @Nullable BedrockAmmoModel ammoModel;
-    private @Nullable ResourceLocation modelTextureLocation;
-    private ResourceLocation slotTextureLocation;
+    private @Nullable Identifier modelTextureLocation;
+    private Identifier slotTextureLocation;
     private @Nullable BedrockAmmoModel ammoEntityModel;
-    private @Nullable ResourceLocation ammoEntityTextureLocation;
+    private @Nullable Identifier ammoEntityTextureLocation;
     private @Nullable BedrockAmmoModel shellModel;
-    private @Nullable ResourceLocation shellTextureLocation;
+    private @Nullable Identifier shellTextureLocation;
     private int stackSize;
     private @Nullable AmmoParticle particle;
     private float[] tracerColor = new float[]{1f, 1f, 1f};
@@ -68,7 +68,7 @@ public class ClientAmmoIndex {
 
     @NotNull
     private static AmmoDisplay checkDisplay(AmmoIndexPOJO ammoIndexPOJO) {
-        ResourceLocation pojoDisplay = ammoIndexPOJO.getDisplay();
+        Identifier pojoDisplay = ammoIndexPOJO.getDisplay();
         Preconditions.checkArgument(pojoDisplay != null, "index object missing display field");
 
         AmmoDisplay display = ClientAssetsManager.INSTANCE.getAmmoDisplay(pojoDisplay);
@@ -78,7 +78,7 @@ public class ClientAmmoIndex {
 
     private static void checkTextureAndModel(AmmoDisplay display, ClientAmmoIndex index) {
         // 检查模型
-        ResourceLocation modelLocation = display.getModelLocation();
+        Identifier modelLocation = display.getModelLocation();
         if (modelLocation == null) {
             return;
         }
@@ -105,7 +105,7 @@ public class ClientAmmoIndex {
         AmmoEntityDisplay ammoEntity = display.getAmmoEntity();
         if (ammoEntity != null && ammoEntity.getModelLocation() != null && ammoEntity.getModelTexture() != null) {
             index.ammoEntityTextureLocation = ammoEntity.getModelTexture();
-            ResourceLocation modelLocation = ammoEntity.getModelLocation();
+            Identifier modelLocation = ammoEntity.getModelLocation();
             BedrockModelPOJO modelPOJO = ClientAssetsManager.INSTANCE.getBedrockModelPOJO(modelLocation);
             if (modelPOJO == null) {
                 return;
@@ -125,7 +125,7 @@ public class ClientAmmoIndex {
         ShellDisplay shellDisplay = display.getShellDisplay();
         if (shellDisplay != null && shellDisplay.getModelLocation() != null && shellDisplay.getModelTexture() != null) {
             index.shellTextureLocation = shellDisplay.getModelTexture();
-            ResourceLocation modelLocation = shellDisplay.getModelLocation();
+            Identifier modelLocation = shellDisplay.getModelLocation();
             BedrockModelPOJO modelPOJO = ClientAssetsManager.INSTANCE.getBedrockModelPOJO(modelLocation);
             if (modelPOJO == null) {
                 return;
@@ -193,11 +193,11 @@ public class ClientAmmoIndex {
     }
 
     @Nullable
-    public ResourceLocation getModelTextureLocation() {
+    public Identifier getModelTextureLocation() {
         return modelTextureLocation;
     }
 
-    public ResourceLocation getSlotTextureLocation() {
+    public Identifier getSlotTextureLocation() {
         return slotTextureLocation;
     }
 
@@ -211,7 +211,7 @@ public class ClientAmmoIndex {
     }
 
     @Nullable
-    public ResourceLocation getAmmoEntityTextureLocation() {
+    public Identifier getAmmoEntityTextureLocation() {
         return ammoEntityTextureLocation;
     }
 
@@ -221,7 +221,7 @@ public class ClientAmmoIndex {
     }
 
     @Nullable
-    public ResourceLocation getShellTextureLocation() {
+    public Identifier getShellTextureLocation() {
         return shellTextureLocation;
     }
 

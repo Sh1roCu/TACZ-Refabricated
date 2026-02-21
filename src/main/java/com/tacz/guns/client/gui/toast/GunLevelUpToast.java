@@ -2,9 +2,10 @@ package com.tacz.guns.client.gui.toast;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +17,7 @@ public class GunLevelUpToast implements Toast {
     private final Component title;
     private final Component subTitle;
     private final ItemStack icon;
+    private Visibility wantedVisibility = Visibility.SHOW;
 
     public GunLevelUpToast(ItemStack icon, Component titleComponent, @Nullable Component subtitle) {
         this.icon = icon;
@@ -25,7 +27,17 @@ public class GunLevelUpToast implements Toast {
 
     @NotNull
     @Override
-    public Visibility render(@NotNull GuiGraphics gui, ToastComponent toastComponent, long timeSinceLastVisible) {
+    public Visibility getWantedVisibility() {
+        return wantedVisibility;
+    }
+
+    @Override
+    public void update(ToastManager toastManager, long timeSinceLastVisible) {
+        wantedVisibility = timeSinceLastVisible >= 5000L ? Visibility.HIDE : Visibility.SHOW;
+    }
+
+    @Override
+    public void render(@NotNull GuiGraphics gui, @NotNull Font font, long timeSinceLastVisible) {
         // todo 这个类没有实际使用，先不管了
 //        RenderSystem.setShader(GameRenderer::getPositionTexShader);
 //        RenderSystem.setShaderTexture(0, TEXTURE);
@@ -58,6 +70,5 @@ public class GunLevelUpToast implements Toast {
 //            }
 //        }
 //        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(this.icon, 8, 8);
-        return timeSinceLastVisible >= 5000L ? Visibility.HIDE : Visibility.SHOW;
     }
 }

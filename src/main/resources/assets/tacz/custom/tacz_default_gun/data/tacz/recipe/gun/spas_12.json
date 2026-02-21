@@ -1,27 +1,19 @@
 {
   "materials": [
     {
-      "item": {
-        "tag": "c:ingots/iron"
-      },
+      "item": "#c:ingots/iron",
       "count": 110
     },
     {
-      "item": {
-        "tag": "c:ingots/gold"
-      },
+      "item": "#c:ingots/gold",
       "count": 20
     },
     {
-      "item": {
-        "tag": "c:gems/diamond"
-      },
+      "item": "#c:gems/diamond",
       "count": 2
     },
     {
-      "item": {
-        "tag": "c:gems/lapis"
-      },
+      "item": "#c:gems/lapis",
       "count": 5
     }
   ],

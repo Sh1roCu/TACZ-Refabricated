@@ -1,15 +1,11 @@
 {
   "materials": [
     {
-      "item": {
-        "item": "minecraft:crying_obsidian"
-      },
+      "item": "minecraft:crying_obsidian",
       "count": 3
     },
     {
-      "item": {
-        "item": "minecraft:end_crystal"
-      }
+      "item": "minecraft:end_crystal"
     }
   ],
   "result": {

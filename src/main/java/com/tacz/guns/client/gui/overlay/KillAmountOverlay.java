@@ -1,6 +1,6 @@
 package com.tacz.guns.client.gui.overlay;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import com.tacz.guns.api.item.IGun;
@@ -8,19 +8,17 @@ import com.tacz.guns.config.client.RenderConfig;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class KillAmountOverlay implements LayeredDraw.Layer {
+public class KillAmountOverlay {
     private static long killTimestamp = -1L;
     private static int killAmount = 0;
 
     public static final KillAmountOverlay INSTANCE = new KillAmountOverlay();
 
-    @Override
     public void render(GuiGraphics graphics, @NotNull DeltaTracker deltaTracker) {
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();
@@ -60,18 +58,22 @@ public class KillAmountOverlay implements LayeredDraw.Layer {
         }
         int color = Mth.hsvToRgb(hue, 0.75f, 1) + (alpha << 24);
 
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        GlStateManager._enableBlend();
+        GlStateManager._blendFuncSeparate(
+                com.mojang.blaze3d.opengl.GlConst.GL_SRC_ALPHA,
+                com.mojang.blaze3d.opengl.GlConst.GL_ONE_MINUS_SRC_ALPHA,
+                com.mojang.blaze3d.opengl.GlConst.GL_ONE,
+                com.mojang.blaze3d.opengl.GlConst.GL_ZERO);
 
-        PoseStack poseStack = graphics.pose();
+        org.joml.Matrix3x2fStack poseMatrix = graphics.pose();
 
-        poseStack.pushPose();
+        poseMatrix.pushMatrix();
         {
-            poseStack.scale(0.5f, 0.5f, 1);
+            poseMatrix.scale(0.5f, 0.5f);
             graphics.drawString(mc.font, text, (int) (width - fontWith / 2.0f), (height - 45) * 2 - 1, color);
         }
-        poseStack.popPose();
-        RenderSystem.disableBlend();
+        poseMatrix.popMatrix();
+        GlStateManager._disableBlend();
     }
 
     public static void markTimestamp() {

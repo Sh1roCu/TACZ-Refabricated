@@ -4,7 +4,7 @@ import com.tacz.guns.api.item.gun.GunItemManager;
 import com.tacz.guns.init.ModItems;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 
-public class REIPlugin implements me.shedaniel.rei.api.common.plugins.REIPlugin<REIPlugin> {
+public class REIPlugin implements me.shedaniel.rei.api.common.plugins.REICommonPlugin {
     @Override
     public void registerItemComparators(ItemComparatorRegistry registry) {
         registry.register(REISubtype.getAmmoSubtype(), ModItems.AMMO);
@@ -12,11 +12,5 @@ public class REIPlugin implements me.shedaniel.rei.api.common.plugins.REIPlugin<
         registry.register(REISubtype.getAmmoBoxSubtype(), ModItems.AMMO_BOX);
         GunItemManager.getAllGunItems().forEach(item ->
                 registry.register(REISubtype.getGunSubtype(), item));
-    }
-
-
-    @Override
-    public Class<REIPlugin> getPluginProviderClass() {
-        return REIPlugin.class;
     }
 }

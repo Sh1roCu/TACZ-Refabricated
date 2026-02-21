@@ -49,15 +49,14 @@
   },
   "mixins": [
     "tacz.mixins.json",
-    "tacz.fabric.mixins.json",
-    "tacz.compat.acceleratedrendering.mixins.json"
+    "tacz.fabric.mixins.json"
   ],
   "accessWidener": "tacz.accesswidener",
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": [
-      "1.21.1"
+      "1.21.11"
     ],
     "forgeconfigapiport": "*"
   }

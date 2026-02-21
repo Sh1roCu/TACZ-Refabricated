@@ -9,7 +9,7 @@ import com.tacz.guns.resource.pojo.GunIndexPOJO;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +50,7 @@ public class ClientGunIndex {
     }
 
     private static void checkData(GunIndexPOJO gunIndexPOJO, ClientGunIndex index) {
-        ResourceLocation pojoData = gunIndexPOJO.getData();
+        Identifier pojoData = gunIndexPOJO.getData();
         Preconditions.checkArgument(pojoData != null, "index object missing pojoData field");
         GunData data = CommonAssetsManager.get().getGunData(pojoData);
         Preconditions.checkArgument(data != null, "there is no corresponding data file");
@@ -60,7 +60,7 @@ public class ClientGunIndex {
 
     @NotNull
     private static GunDisplay checkDisplay(GunIndexPOJO gunIndexPOJO) {
-        ResourceLocation pojoDisplay = gunIndexPOJO.getDisplay();
+        Identifier pojoDisplay = gunIndexPOJO.getDisplay();
         Preconditions.checkArgument(pojoDisplay != null, "index object missing display field");
         GunDisplay display = ClientAssetsManager.INSTANCE.getGunDisplay(pojoDisplay);
         Preconditions.checkArgument(display != null, "there is no corresponding display file");

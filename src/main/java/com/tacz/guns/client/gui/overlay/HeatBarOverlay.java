@@ -14,23 +14,21 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 
-public class HeatBarOverlay implements LayeredDraw.Layer {
-    private static final ResourceLocation HEATBASE = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/heat_base.png");
+public class HeatBarOverlay {
+    private static final Identifier HEATBASE = Identifier.fromNamespaceAndPath(GunMod.MOD_ID, "textures/hud/heat_base.png");
     private static final DecimalFormat HEAT_FORMAT_PERCENT = new DecimalFormat("0.0%");
     private static float heatScale = 0.25f;
 
     public static final HeatBarOverlay INSTANCE = new HeatBarOverlay();
 
-    @Override
     public void render(GuiGraphics graphics, @NotNull DeltaTracker deltaTracker) {
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();
@@ -47,16 +45,16 @@ public class HeatBarOverlay implements LayeredDraw.Layer {
         if (!(stack.getItem() instanceof IGun iGun)) {
             return;
         }
-        ResourceLocation gunId = iGun.getGunId(stack);
+        Identifier gunId = iGun.getGunId(stack);
         GunData gunData = TimelessAPI.getClientGunIndex(gunId).map(ClientGunIndex::getGunData).orElse(null);
         GunDisplayInstance display = TimelessAPI.getGunDisplay(stack).orElse(null);
         if (gunData == null || display == null) {
             return;
         }
 
-        PoseStack poseStack = graphics.pose();
+        org.joml.Matrix3x2fStack poseMatrix = graphics.pose();
         if (gunData.getHeatData() != null && iGun.hasHeatData(stack)) {
-            poseStack.pushPose();
+            poseMatrix.pushMatrix();
             GunHeatData heatData = gunData.getHeatData();
             float percent = iGun.getHeatAmount(stack) / heatData.getHeatMax();
 
@@ -65,12 +63,12 @@ public class HeatBarOverlay implements LayeredDraw.Layer {
             if (heatScale < scaleValue) heatScale += 0.05f;
             if (heatScale > scaleValue) heatScale -= 0.025f;
             if (heatScale > scaleValue - 0.03 && heatScale < scaleValue + 0.055) heatScale = scaleValue;
-            poseStack.scale(heatScale, heatScale, 1);
+            poseMatrix.scale(heatScale, heatScale);
 
             boolean locked = iGun.isOverheatLocked(stack);
             int tickCount = mc.gui.getGuiTicks();
             renderOverheat(percent, graphics, (int) (width / heatScale), (int) (height / heatScale), locked, tickCount);
-            poseStack.popPose();
+            poseMatrix.popMatrix();
         }
     }
 
@@ -78,15 +76,8 @@ public class HeatBarOverlay implements LayeredDraw.Layer {
                                       boolean locked, int tickCount) {
         int barColor = getHeatColor(heatPercentage, locked, tickCount);
         pGraphics.fill(w / 2 - 30, h / 2 + 30, w / 2 - 30 + (int) (heatPercentage * 60), h / 2 + 34, barColor);
-        if (locked) {
-            if (tickCount % 20 < 10) {
-                pGraphics.setColor(1, 0.1f, 0.1f, 1);
-            } else {
-                pGraphics.setColor(1, 1, 0.1f, 1);
-            }
-        }
-        pGraphics.blit(HEATBASE, w / 2 - 64, h / 2 - 44, 0, 0, 128, 128, 128, 128);
-        pGraphics.setColor(1, 1, 1, 1);
+        // TODO: In 1.21.11 GuiGraphics.setColor was removed; overheat tinting is not applied
+        pGraphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, HEATBASE, w / 2 - 64, h / 2 - 44, 0f, 0f, 128, 128, 128, 128);
 
         Font font = Minecraft.getInstance().fontFilterFishy;
         String percentString = locked ? "!OVERHEAT!" : HEAT_FORMAT_PERCENT.format(heatPercentage);
@@ -102,9 +93,9 @@ public class HeatBarOverlay implements LayeredDraw.Layer {
         if (percent < 0.4) return 0x9FFFFFFF;
         int color;
         if (percent <= 0.65) {
-            color = FastColor.ARGB32.lerp(percent * 4 - 1.6f, 0x9FFFFFFF, 0x9FFFFF00);
+            color = ARGB.srgbLerp(percent * 4 - 1.6f, 0x9FFFFFFF, 0x9FFFFF00);
         } else {
-            color = FastColor.ARGB32.lerp((percent - 0.65f) / 0.35f, 0x9FFFFF00, 0x9FFF0000);
+            color = ARGB.srgbLerp((percent - 0.65f) / 0.35f, 0x9FFFFF00, 0x9FFF0000);
         }
         return color;
     }
