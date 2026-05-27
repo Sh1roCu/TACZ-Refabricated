@@ -1,6 +1,5 @@
 package cn.sh1rocu.tacz.client;
 
-import cn.sh1rocu.simplebedrockmodel.api.event.RenderHandEvent;
 import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
 import cn.sh1rocu.tacz.api.event.*;
 import cn.sh1rocu.tacz.api.extension.IItem;
