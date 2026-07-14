@@ -1,6 +1,6 @@
 package com.tacz.guns.client.animation.screen;
 
-import cn.sh1rocu.tacz.api.event.RenderTickEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderTickEvent;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.client.gui.GunRefitScreen;
 import net.fabricmc.api.EnvType;

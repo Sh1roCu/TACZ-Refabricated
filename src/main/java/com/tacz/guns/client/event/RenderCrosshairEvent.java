@@ -1,6 +1,6 @@
 package com.tacz.guns.client.event;
 
-import cn.sh1rocu.tacz.api.event.RenderTickEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderTickEvent;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;

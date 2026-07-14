@@ -1,6 +1,6 @@
 package com.tacz.guns.client.event;
 
-import cn.sh1rocu.tacz.api.event.RenderTickEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderTickEvent;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
 import com.tacz.guns.client.renderer.item.AnimateGeoItemRenderer;

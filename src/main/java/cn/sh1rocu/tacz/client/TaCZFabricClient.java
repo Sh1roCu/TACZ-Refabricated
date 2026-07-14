@@ -1,5 +1,6 @@
 package cn.sh1rocu.tacz.client;
 
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderTickEvent;
 import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
 import cn.sh1rocu.tacz.api.event.*;
 import cn.sh1rocu.tacz.api.extension.IItem;
@@ -47,7 +48,7 @@ public class TaCZFabricClient implements ClientModInitializer {
     private void subscribeEvents() {
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> CommonRegistry.onLoadComplete());
 
-        RenderTickEvent.CALLBACK.register(RefitTransform::tickInterpolation);
+        RenderTickEvent.EVENT.register(RefitTransform::tickInterpolation);
 
         ViewportEvent.CAMERA.register(CameraSetupEvent::applyLevelCameraAnimation);
         BeforeRenderHandEvent.CALLBACK.register(CameraSetupEvent::applyItemInHandCameraAnimation);
@@ -83,13 +84,13 @@ public class TaCZFabricClient implements ClientModInitializer {
 
         TextureStitchEvent.POST.register(ReloadResourceEvent::onTextureStitchEventPost);
 
-        RenderTickEvent.CALLBACK.register(RenderCrosshairEvent::onRenderTick);
+        RenderTickEvent.EVENT.register(RenderCrosshairEvent::onRenderTick);
 
         RenderLivingEvent.POST.register(RenderHeadShotAABB::onRenderEntity);
 
         ClientTickEvents.START_CLIENT_TICK.register(TickAnimationEvent::tickAnimation);
         ClientTickEvents.END_CLIENT_TICK.register(TickAnimationEvent::tickAnimation);
-        RenderTickEvent.CALLBACK.register(TickAnimationEvent::tickAnimation);
+        RenderTickEvent.EVENT.register(TickAnimationEvent::tickAnimation);
 
         ItemTooltipCallback.EVENT.register(TooltipEvent::onTooltip);
 
