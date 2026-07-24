@@ -16,6 +16,7 @@ import com.tacz.guns.client.resource.pojo.display.gun.MuzzleFlash;
 import com.tacz.guns.compat.iris.IrisCompat;
 import com.tacz.guns.resource.modifier.custom.SilenceModifier;
 import it.unimi.dsi.fastutil.Pair;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -70,7 +71,7 @@ public class MuzzleFlashRender implements IFunctionalRenderer {
             float scaleTime = TIME_RANGE / 2.0f;
             scale = time < scaleTime ? (scale * (time / scaleTime)) : scale;
             muzzleFlashStartMark = false;
-            MultiBufferSource.BufferSource multiBufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
+            MultiBufferSource multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
             // 推送到指定位置
             PoseStack poseStack2 = new PoseStack();
@@ -98,8 +99,6 @@ public class MuzzleFlashRender implements IFunctionalRenderer {
                 MUZZLE_FLASH_MODEL.renderToBuffer(poseStack2, multiBufferSource.getBuffer(renderTypeLight), light, overlay);
             }
             poseStack2.popPose();
-
-            multiBufferSource.endBatch();
         }
     }
 

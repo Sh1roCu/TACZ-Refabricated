@@ -420,7 +420,7 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
             ResourceLocation type = tabConfig.id();
             int xOffset = leftPos + 157 + 24 * i;
 
-            ItemStack icon = tabConfig.icon().apply(Minecraft.getInstance().level.registryAccess());
+            ItemStack icon = tabConfig.icon();
 
             TypeButton typeButton = new TypeButton(xOffset, topPos + 2, icon, b -> {
                 this.selectedType = type;

@@ -50,8 +50,7 @@
     "client.MouseHandlerMixin",
     "client.RenderTargetMixin",
     "client.SoundEngineMixin",
-    "client.TextureAtlasMixin",
-    "compat.simplebedrockmodel.FirstPersonRenderHandlerMixin"
+    "client.TextureAtlasMixin"
   ],
   "injectors": {
     "defaultRequire": 1
