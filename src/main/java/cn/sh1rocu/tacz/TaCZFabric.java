@@ -140,5 +140,6 @@ public class TaCZFabric implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(SyncedEntityDataEvent::onServerTick);
 
         ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(TravelToDimensionEvent::onTravelToDimension);
+        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(TravelToDimensionEvent::onTravelToDimension);
     }
 }
