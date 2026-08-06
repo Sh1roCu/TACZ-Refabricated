@@ -445,8 +445,6 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             // 重新绑回VAO
             GL30.glBindVertexArray(vao);
 
-            // 画完了, 重新开启加速
-            ARCompat.resetAcceleration();
 
             // 设置镜身需要的模板函数
             RenderSystem.stencilFunc(GL11.GL_EQUAL, 0, 0xFF);
@@ -528,8 +526,6 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             // 重新绑回VAO
             GL30.glBindVertexArray(vao);
 
-            // 画完了, 重新开启加速
-            ARCompat.resetAcceleration();
 
             // 关闭模板缓冲
             RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0, 0xFF);
@@ -600,8 +596,6 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             // 重新绑回VAO
             GL30.glBindVertexArray(vao);
 
-            // 画完了, 重新开启加速
-            ARCompat.resetAcceleration();
 
             // 设置镜身需要的模板函数
             RenderSystem.stencilFunc(GL11.GL_EQUAL, 0, 0xFF);
