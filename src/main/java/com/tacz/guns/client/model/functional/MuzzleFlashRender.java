@@ -71,7 +71,12 @@ public class MuzzleFlashRender implements IFunctionalRenderer {
             float scaleTime = TIME_RANGE / 2.0f;
             scale = time < scaleTime ? (scale * (time / scaleTime)) : scale;
             muzzleFlashStartMark = false;
-            MultiBufferSource multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+            MultiBufferSource.BufferSource multiBufferSource;
+            if (IrisCompat.isPackInUseQuick()) {
+                multiBufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
+            } else {
+                multiBufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+            }
 
             // 推送到指定位置
             PoseStack poseStack2 = new PoseStack();
@@ -99,6 +104,9 @@ public class MuzzleFlashRender implements IFunctionalRenderer {
                 MUZZLE_FLASH_MODEL.renderToBuffer(poseStack2, multiBufferSource.getBuffer(renderTypeLight), light, overlay);
             }
             poseStack2.popPose();
+            if (IrisCompat.isPackInUseQuick()) {
+                multiBufferSource.endBatch();
+            }
         }
     }
 
