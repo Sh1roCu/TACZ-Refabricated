@@ -4,6 +4,7 @@ import cn.sh1rocu.simplebedrockmodel.api.event.RenderHandEvent;
 import com.tacz.guns.api.client.animation.statemachine.AnimationStateMachine;
 import com.tacz.guns.api.client.other.KeepingItemRenderer;
 import com.tacz.guns.api.item.IGun;
+import com.github.mcmodderanchor.simplebedrockmodel.v1.client.handler.FirstPersonRenderHandler;
 import com.tacz.guns.client.compat.RecordingCompatHelper;
 import com.tacz.guns.client.renderer.item.AnimateGeoItemRenderer;
 import net.fabricmc.api.EnvType;
@@ -23,6 +24,11 @@ public class FirstPersonRenderEvent {
     public static void onRenderHand(RenderHandEvent event) {
         LocalPlayer localPlayer = Minecraft.getInstance().player;
         if (localPlayer == null) {
+            return;
+        }
+        // If the library's FirstPersonRenderHandler already has an active animation instance,
+        // it's handling the render. Skip to avoid duplicate hand rendering.
+        if (FirstPersonRenderHandler.getActiveAnimationInstance() != null) {
             return;
         }
         if (event.getHand() == InteractionHand.OFF_HAND) {
