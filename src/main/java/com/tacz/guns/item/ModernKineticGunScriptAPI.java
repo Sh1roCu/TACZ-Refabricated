@@ -160,7 +160,7 @@ public class ModernKineticGunScriptAPI {
             GunFireEvent.CALLBACK.invoker().post(gunFireEvent);
             boolean fire = !gunFireEvent.isCanceled();
             if (fire) {
-                NetworkHandler.sendToTrackingEntity(new ServerMessageGunFire(shooter.getId(), itemStack), shooter);
+                NetworkHandler.sendToTrackingEntityAndSelf(shooter, new ServerMessageGunFire(shooter.getId(), itemStack));
                 // 削减弹药
                 if (consumeAmmo) {
                     if (!this.reduceAmmoOnce()) {

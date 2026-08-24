@@ -54,7 +54,7 @@ public class LivingEntityMelee {
         if (gunMeleeEvent.isCanceled()) {
             return;
         }
-        NetworkHandler.sendToTrackingEntity(new ServerMessageGunMelee(shooter.getId(), currentGunItem), shooter);
+        NetworkHandler.sendToTrackingEntityAndSelf(shooter, new ServerMessageGunMelee(shooter.getId(), currentGunItem));
         if (currentGunItem.getItem() instanceof AbstractGunItem logicGun) {
             data.meleeTimestamp = System.currentTimeMillis();
 

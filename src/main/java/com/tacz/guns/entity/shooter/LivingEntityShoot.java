@@ -145,7 +145,7 @@ public class LivingEntityShoot {
             return ShootResult.FORGE_EVENT_CANCEL;
         }
 
-        NetworkHandler.sendToTrackingEntity(new ServerMessageGunShoot(shooter.getId(), currentGunItem), shooter);
+        NetworkHandler.sendToTrackingEntityAndSelf(shooter, new ServerMessageGunShoot(shooter.getId(), currentGunItem));
         data.lastShootTimestamp = data.shootTimestamp;
         data.heatTimestamp = System.currentTimeMillis();
         data.shootTimestamp = timestamp;
