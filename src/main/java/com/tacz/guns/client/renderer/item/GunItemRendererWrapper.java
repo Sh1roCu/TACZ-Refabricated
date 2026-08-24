@@ -38,6 +38,8 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
+
+import java.lang.reflect.Method;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -199,14 +201,15 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
                 xRotOffset = Mth.lerp(partialTick, lp.xBobO, lp.xBob);
                 yRotOffset = Mth.lerp(partialTick, lp.yBobO, lp.yBob);
             } else if (viewPlayer instanceof RemotePlayer remotePlayer) {
-                // Flashback adds xBob/yBob to RemotePlayer via MixinRemotePlayer
+                // Flashback adds RemotePlayerExt interface to RemotePlayer via MixinRemotePlayer.
+                // Use the interface methods via reflection (field access via getDeclaredField
+                // fails in production because Mixin @Unique fields get renamed).
                 try {
-                    xRotOffset = Mth.lerp(partialTick,
-                            (float) RemotePlayer.class.getDeclaredField("flashback$xBobO").get(remotePlayer),
-                            (float) RemotePlayer.class.getDeclaredField("flashback$xBob").get(remotePlayer));
-                    yRotOffset = Mth.lerp(partialTick,
-                            (float) RemotePlayer.class.getDeclaredField("flashback$yBobO").get(remotePlayer),
-                            (float) RemotePlayer.class.getDeclaredField("flashback$yBob").get(remotePlayer));
+                    Class<?> extClass = Class.forName("com.moulberry.flashback.ext.RemotePlayerExt");
+                    Method getXBob = extClass.getMethod("flashback$getXBob", float.class);
+                    Method getYBob = extClass.getMethod("flashback$getYBob", float.class);
+                    xRotOffset = (float) getXBob.invoke(remotePlayer, partialTick);
+                    yRotOffset = (float) getYBob.invoke(remotePlayer, partialTick);
                 } catch (Exception ignored) {
                     // Fallback: no bob offset
                 }
