@@ -3,6 +3,7 @@ package com.tacz.guns.client.gameplay;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.client.compat.RecordingCompatHelper;
 import com.tacz.guns.network.message.ClientMessagePlayerAim;
 import com.tacz.guns.resource.modifier.custom.AdsModifier;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
@@ -10,6 +11,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class LocalPlayerAim {
@@ -44,7 +46,9 @@ public class LocalPlayerAim {
     }
 
     public void tickAimingProgress() {
-        ItemStack mainHandItem = player.getMainHandItem();
+        // During replay, use the spectating player's held item instead of the local player's
+        Player viewPlayer = RecordingCompatHelper.getViewPlayer();
+        ItemStack mainHandItem = viewPlayer != null ? viewPlayer.getMainHandItem() : player.getMainHandItem();
         // 如果主手物品不是枪械，则取消瞄准状态并将 aimingProgress 归零，返回。
         if (!(mainHandItem.getItem() instanceof IGun iGun)) {
             data.clientAimingProgress = 0;

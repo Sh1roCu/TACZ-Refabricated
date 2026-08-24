@@ -34,7 +34,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
@@ -315,20 +314,6 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
                 renderSlotTexture(poseStack, pBuffer, pPackedLight, pPackedOverlay, gunIndex.getSlotTexture());
                 return;
             }
-            // 第三人称渲染时，更新动画状态机，让动画数据写入模型（如刀刃伸缩等）
-            if (transformType == THIRD_PERSON_RIGHT_HAND) {
-                var animationStateMachine = gunIndex.getAnimationStateMachine();
-                if (animationStateMachine != null) {
-                    LocalPlayer player = Minecraft.getInstance().player;
-                    float partialTick = Minecraft.getInstance().getFrameTime();
-                    animationStateMachine.processContextIfExist(context -> {
-                        updateContext(context, stack, player, partialTick);
-                    });
-                    animationStateMachine.update();
-                    // 缩放动画位移，避免第三人称下模型飞离玩家手部
-                    gunModel.scaleAnimationOffset(0.15f);
-                }
-            }
             // 移动到模型原点
             poseStack.translate(0.5, 2, 0.5);
             // 反转模型
@@ -340,10 +325,6 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
             // 渲染枪械模型
             RenderType renderType = RenderType.entityCutout(gunTexture);
             gunModel.render(poseStack, stack, transformType, renderType, pPackedLight, pPackedOverlay);
-            // 渲染完成后，清除动画数据，避免影响其他视角
-            if (transformType == THIRD_PERSON_RIGHT_HAND) {
-                gunModel.cleanAnimationTransform();
-            }
         }, () -> {
             // 没有这个 gunID，渲染个错误材质提醒别人
             renderSlotTexture(poseStack, pBuffer, pPackedLight, pPackedOverlay, MissingTextureAtlasSprite.getLocation());
