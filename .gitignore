@@ -118,3 +118,4 @@ runs/
 !gradle-wrapper.jar
 !libs
 /src/main/generated/.cache/
+/cyber_armorer

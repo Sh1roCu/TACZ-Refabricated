@@ -1,5 +1,6 @@
 package cn.sh1rocu.tacz.client;
 
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderHandEvent;
 import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
 import cn.sh1rocu.tacz.api.event.*;
 import cn.sh1rocu.tacz.api.extension.IItem;
@@ -61,7 +62,7 @@ public class TaCZFabricClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.DISCONNECT.register(CommonNetworkCacheEvent::onClientPlayerLoggingIn);
 
-        // RenderHandEvent.EVENT.register(FirstPersonRenderEvent::onRenderHand);
+        RenderHandEvent.EVENT.register(FirstPersonRenderEvent::onRenderHand);
 
         RenderItemInHandBobEvent.VIEW.register(FirstPersonRenderGunEvent::cancelItemInHandViewBobbing);
         GunFireEvent.CALLBACK.register(FirstPersonRenderGunEvent::onGunFire);

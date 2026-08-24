@@ -26,12 +26,14 @@ import com.tacz.guns.util.RenderDistance;
 import com.tacz.guns.util.math.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -164,11 +166,16 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
     }
 
     @Override
-    public void renderFirstPerson(LocalPlayer player, ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource,
+    public void renderFirstPerson(LocalPlayer localPlayer, ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource,
                                   int light, float partialTick) {
         if (!(stack.getItem() instanceof IGun)) {
             return;
         }
+
+        // Always resolve the view player from recording compat (handles replay spectator)
+        final Player viewPlayer = com.tacz.guns.client.compat.RecordingCompatHelper.getViewPlayer() != null
+                ? com.tacz.guns.client.compat.RecordingCompatHelper.getViewPlayer()
+                : localPlayer;
 
         TimelessAPI.getGunDisplay(stack).ifPresent(display -> {
             BedrockGunModel gunModel = display.getGunModel();
@@ -180,17 +187,33 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
             // 在渲染之前，先更新动画，让动画数据写入模型
             if (animationStateMachine != null) {
                 animationStateMachine.processContextIfExist(context -> {
-                    updateContext(context, stack, player, partialTick);
+                    updateContext(context, stack, viewPlayer, partialTick);
                 });
                 animationStateMachine.update();
             }
 
             poseStack.pushPose();
             // 逆转原版施加在手上的延滞效果，改为写入模型动画数据中
-            float xRotOffset = Mth.lerp(partialTick, player.xBobO, player.xBob);
-            float yRotOffset = Mth.lerp(partialTick, player.yBobO, player.yBob);
-            float xRot = player.getViewXRot(partialTick) - xRotOffset;
-            float yRot = player.getViewYRot(partialTick) - yRotOffset;
+            float xRotOffset = 0;
+            float yRotOffset = 0;
+            if (viewPlayer instanceof LocalPlayer lp) {
+                xRotOffset = Mth.lerp(partialTick, lp.xBobO, lp.xBob);
+                yRotOffset = Mth.lerp(partialTick, lp.yBobO, lp.yBob);
+            } else if (viewPlayer instanceof RemotePlayer remotePlayer) {
+                // Flashback adds xBob/yBob to RemotePlayer via MixinRemotePlayer
+                try {
+                    xRotOffset = Mth.lerp(partialTick,
+                            (float) RemotePlayer.class.getDeclaredField("flashback$xBobO").get(remotePlayer),
+                            (float) RemotePlayer.class.getDeclaredField("flashback$xBob").get(remotePlayer));
+                    yRotOffset = Mth.lerp(partialTick,
+                            (float) RemotePlayer.class.getDeclaredField("flashback$yBobO").get(remotePlayer),
+                            (float) RemotePlayer.class.getDeclaredField("flashback$yBob").get(remotePlayer));
+                } catch (Exception ignored) {
+                    // Fallback: no bob offset
+                }
+            }
+            float xRot = viewPlayer.getViewXRot(partialTick) - xRotOffset;
+            float yRot = viewPlayer.getViewYRot(partialTick) - yRotOffset;
             poseStack.mulPose(Axis.XP.rotationDegrees(xRot * -0.1F));
             poseStack.mulPose(Axis.YP.rotationDegrees(yRot * -0.1F));
             BedrockPart rootNode = gunModel.getRootNode();
@@ -207,7 +230,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
             // 基岩版模型是上下颠倒的，需要翻转过来。
             poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
             // 应用持枪姿态变换，如第一人称摄像机定位
-            FirstPersonRenderGunEvent.applyFirstPersonGunTransform(player, stack, poseStack, gunModel, partialTick);
+            FirstPersonRenderGunEvent.applyFirstPersonGunTransform(viewPlayer, stack, poseStack, gunModel, partialTick);
 
             // 开启第一人称弹壳和火焰渲染
             MuzzleFlashRender.isSelf = true;
@@ -292,6 +315,20 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
                 renderSlotTexture(poseStack, pBuffer, pPackedLight, pPackedOverlay, gunIndex.getSlotTexture());
                 return;
             }
+            // 第三人称渲染时，更新动画状态机，让动画数据写入模型（如刀刃伸缩等）
+            if (transformType == THIRD_PERSON_RIGHT_HAND) {
+                var animationStateMachine = gunIndex.getAnimationStateMachine();
+                if (animationStateMachine != null) {
+                    LocalPlayer player = Minecraft.getInstance().player;
+                    float partialTick = Minecraft.getInstance().getFrameTime();
+                    animationStateMachine.processContextIfExist(context -> {
+                        updateContext(context, stack, player, partialTick);
+                    });
+                    animationStateMachine.update();
+                    // 缩放动画位移，避免第三人称下模型飞离玩家手部
+                    gunModel.scaleAnimationOffset(0.15f);
+                }
+            }
             // 移动到模型原点
             poseStack.translate(0.5, 2, 0.5);
             // 反转模型
@@ -303,6 +340,10 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
             // 渲染枪械模型
             RenderType renderType = RenderType.entityCutout(gunTexture);
             gunModel.render(poseStack, stack, transformType, renderType, pPackedLight, pPackedOverlay);
+            // 渲染完成后，清除动画数据，避免影响其他视角
+            if (transformType == THIRD_PERSON_RIGHT_HAND) {
+                gunModel.cleanAnimationTransform();
+            }
         }, () -> {
             // 没有这个 gunID，渲染个错误材质提醒别人
             renderSlotTexture(poseStack, pBuffer, pPackedLight, pPackedOverlay, MissingTextureAtlasSprite.getLocation());
