@@ -23,9 +23,6 @@ import com.tacz.guns.inventory.tooltip.AttachmentItemTooltip;
 import com.tacz.guns.inventory.tooltip.BlockItemTooltip;
 import com.tacz.guns.inventory.tooltip.GunTooltip;
 import com.tacz.guns.item.AmmoBoxItem;
-import committee.nova.mkb.api.IKeyBinding;
-import committee.nova.mkb.keybinding.KeyConflictContext;
-import committee.nova.mkb.keybinding.KeyModifier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -50,24 +47,24 @@ public class ClientSetupEvent {
 
     public static void registerKeyMappings() {
         // 注册键位
-        registerKeyBinding(InspectKey.INSPECT_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(ReloadKey.RELOAD_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(ShootKey.SHOOT_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(InteractKey.INTERACT_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(FireSelectKey.FIRE_SELECT_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(AimKey.AIM_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(CrawlKey.CRAWL_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(RefitKey.REFIT_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(ZoomKey.ZOOM_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(MeleeKey.MELEE_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE);
-        registerKeyBinding(ConfigKey.OPEN_CONFIG_KEY, KeyConflictContext.IN_GAME, KeyModifier.ALT);
+        registerKeyBinding(InspectKey.INSPECT_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(ReloadKey.RELOAD_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(ShootKey.SHOOT_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(InteractKey.INTERACT_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(FireSelectKey.FIRE_SELECT_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(AimKey.AIM_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(CrawlKey.CRAWL_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(RefitKey.REFIT_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(ZoomKey.ZOOM_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(MeleeKey.MELEE_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.NONE*/);
+        registerKeyBinding(ConfigKey.OPEN_CONFIG_KEY/*, KeyConflictContext.IN_GAME, KeyModifier.ALT*/);
     }
 
-    private static void registerKeyBinding(KeyMapping keyMapping, KeyConflictContext keyConflictContext, KeyModifier keyModifier) {
+    private static void registerKeyBinding(KeyMapping keyMapping/*, KeyConflictContext keyConflictContext, KeyModifier keyModifier*/) {
         KeyBindingHelper.registerKeyBinding(keyMapping);
-        var iKey = (IKeyBinding) keyMapping;
-        iKey.setKeyConflictContext(keyConflictContext);
-        iKey.setKeyModifierAndCode(keyModifier, iKey.getKey());
+//        var iKey = (IKeyBinding) keyMapping;
+//        iKey.setKeyConflictContext(keyConflictContext);
+//        iKey.setKeyModifierAndCode(keyModifier, iKey.getKey());
     }
 
     public static void registerClientTooltips() {

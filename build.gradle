@@ -190,8 +190,7 @@ dependencies {
     modImplementation(include("dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.3"))
     modImplementation(include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.3"))
 
-    // MKB
-    modImplementation(include("maven.modrinth:modernkeybinding:1.20.X-1.2.0"))
+    modRuntimeOnly "curse.maven:nonconflictkeys-fabric-865546:4572953"
 
     // Forge Config API Port
     modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.2"

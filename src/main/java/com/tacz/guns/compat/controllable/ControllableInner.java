@@ -14,7 +14,6 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.client.input.*;
 import com.tacz.guns.client.resource.pojo.display.gun.ControllableData;
-import committee.nova.mkb.keybinding.KeyConflictContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -119,7 +118,7 @@ public class ControllableInner {
         @Override
         public boolean isActive() {
             LocalPlayer player = Minecraft.getInstance().player;
-            return !KeyConflictContext.GUI.isActive() && player != null && IGun.mainHandHoldGun(player);
+            return /*!KeyConflictContext.GUI.isActive() &&*/ player != null && IGun.mainHandHoldGun(player);
         }
 
         @Override
