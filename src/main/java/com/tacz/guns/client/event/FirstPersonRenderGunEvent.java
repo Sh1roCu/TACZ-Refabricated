@@ -12,6 +12,7 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.nbt.AttachmentItemDataAccessor;
 import com.tacz.guns.client.animation.screen.RefitTransform;
+import com.tacz.guns.client.compat.RecordingCompatHelper;
 import com.tacz.guns.client.model.BedrockAttachmentModel;
 import com.tacz.guns.client.model.BedrockGunModel;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
@@ -32,6 +33,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -112,11 +114,16 @@ public class FirstPersonRenderGunEvent {
         return false;
     }
 
-    public static void applyFirstPersonGunTransform(LocalPlayer player, ItemStack gunItemStack, PoseStack poseStack, BedrockGunModel model, float partialTicks) {
+    public static void applyFirstPersonGunTransform(Player player, ItemStack gunItemStack, PoseStack poseStack, BedrockGunModel model, float partialTicks) {
         // 配合运动曲线，计算改装枪口的打开进度
         float refitScreenOpeningProgress = REFIT_OPENING_DYNAMICS.update(RefitTransform.getOpeningProgress());
         // 配合运动曲线，计算瞄准进度
-        float aimingProgress = AIMING_DYNAMICS.update(IClientPlayerGunOperator.fromLocalPlayer(player).getClientAimingProgress(partialTicks));
+        // Use local player for gun operator data (TaczEventInjector manages aim state on local player during replay)
+        LocalPlayer localPlayer = Minecraft.getInstance().player;
+        float aimingProgress = 0;
+        if (localPlayer != null) {
+            aimingProgress = AIMING_DYNAMICS.update(IClientPlayerGunOperator.fromLocalPlayer(localPlayer).getClientAimingProgress(partialTicks));
+        }
         // 应用枪械动态，如后坐力、持枪跳跃等
         applyGunMovements(model, aimingProgress, partialTicks);
         // 应用各种摄像机定位组的变换（默认持枪、瞄准、改装界面等）
@@ -250,11 +257,11 @@ public class FirstPersonRenderGunEvent {
         if (jumpingTimeStamp == -1) {
             jumpingTimeStamp = System.currentTimeMillis();
         }
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null) {
-            double posY = Mth.lerp(partialTicks, Minecraft.getInstance().player.yOld, Minecraft.getInstance().player.getY());
-            float velocityY = (float) (posY - Minecraft.getInstance().player.yOld) / partialTicks;
-            if (player.onGround()) {
+        Player viewPlayer = RecordingCompatHelper.getViewPlayer();
+        if (viewPlayer != null) {
+            double posY = Mth.lerp(partialTicks, viewPlayer.yOld, viewPlayer.getY());
+            float velocityY = (float) (posY - viewPlayer.yOld) / partialTicks;
+            if (viewPlayer.onGround()) {
                 if (!lastOnGround) {
                     jumpingSwayProgress = velocityY / -0.1f;
                     if (jumpingSwayProgress > 1) {

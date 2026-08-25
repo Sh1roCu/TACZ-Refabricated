@@ -12,6 +12,7 @@ import com.tacz.guns.api.client.animation.statemachine.LuaAnimationStateMachine;
 import com.tacz.guns.api.client.event.BeforeRenderHandEvent;
 import com.tacz.guns.api.item.IAnimationItem;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
+import com.tacz.guns.client.compat.RecordingCompatHelper;
 import com.tacz.guns.client.animation.statemachine.ItemAnimationStateContext;
 import com.tacz.guns.client.model.BedrockAnimatedModel;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
@@ -219,13 +220,22 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
     /**
      * 渲染第一人称，暂时只用于玩家，入口参见 {@link com.tacz.guns.client.event.FirstPersonRenderEvent}
      */
-    public void renderFirstPerson(LocalPlayer player, ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource,
+    public void renderFirstPerson(LocalPlayer localPlayer, ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource,
                                   int light, float partialTick) {
+        Player viewPlayer = RecordingCompatHelper.getViewPlayer();
+        if (viewPlayer == null) {
+            viewPlayer = localPlayer;
+        }
+        final Player player = viewPlayer;
         M model = getModel(stack);
         if (model != null) {
             poseStack.pushPose();
-            float xRotOffset = Mth.lerp(partialTick, player.xBobO, player.xBob);
-            float yRotOffset = Mth.lerp(partialTick, player.yBobO, player.yBob);
+            float xRotOffset = 0;
+            float yRotOffset = 0;
+            if (player instanceof LocalPlayer lp) {
+                xRotOffset = Mth.lerp(partialTick, lp.xBobO, lp.xBob);
+                yRotOffset = Mth.lerp(partialTick, lp.yBobO, lp.yBob);
+            }
             float xRot = player.getViewXRot(partialTick) - xRotOffset;
             float yRot = player.getViewYRot(partialTick) - yRotOffset;
             poseStack.mulPose(Axis.XP.rotationDegrees(xRot * -0.1F));
@@ -374,21 +384,23 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
             public void triggerDraw() {
                 if (drawn) return;
                 drawn = true;
-                tryInit(lastItem, Minecraft.getInstance().player, 0);
-                if (Minecraft.getInstance().player == null) return;
+                net.minecraft.world.entity.player.Player viewPlayer = RecordingCompatHelper.getViewPlayer();
+                tryInit(lastItem, viewPlayer, 0);
+                if (viewPlayer == null) return;
                 TimelessAPI.getGunDisplay(lastItem).ifPresent(display -> {
                     SoundPlayManager.stopPlayGunSound();
-                    SoundPlayManager.playDrawSound(Minecraft.getInstance().player, display);
+                    SoundPlayManager.playDrawSound(viewPlayer, display);
                 });
             }
 
             @Override
             public void triggerPutAway() {
                 tryExit(lastItem, getPutAwayTime(lastItem));
-                if (Minecraft.getInstance().player == null) return;
+                net.minecraft.world.entity.player.Player viewPlayer = RecordingCompatHelper.getViewPlayer();
+                if (viewPlayer == null) return;
                 TimelessAPI.getGunDisplay(lastItem).ifPresent(display -> {
                     SoundPlayManager.stopPlayGunSound();
-                    SoundPlayManager.playPutAwaySound(Minecraft.getInstance().player, display);
+                    SoundPlayManager.playPutAwaySound(viewPlayer, display);
                 });
             }
         };

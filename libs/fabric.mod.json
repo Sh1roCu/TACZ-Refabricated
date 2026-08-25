@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "simplebedrockmodel",
+  "version": "2.3.0.1+mc1.20.1",
+  "name": "SimpleBedrockModel",
+  "description": "SimpleBedrockModel Unofficial Fabric port",
+  "authors": [
+    "Sh1roCu"
+  ],
+  "contact": {},
+  "license": "LGPL-3.0",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "cn.sh1rocu.simplebedrockmodel.client.SimpleBedrockModelClient"
+    ],
+    "main": [
+      "cn.sh1rocu.simplebedrockmodel.SimpleBedrockModel"
+    ]
+  },
+  "mixins": [
+    "simplebedrockmodel.mixins.json",
+    "simplebedrockmodel.fabric.mixins.json"
+  ],
+  "accessWidener": "simplebedrockmodel.accesswidener",
+  "depends": {
+    "fabricloader": "\u003e\u003d0.17.2",
+    "fabric": "*",
+    "minecraft": "1.20.1"
+  },
+  "jars": [
+    {
+      "file": "META-INF/jars/mae-1.1.1.jar"
+    }
+  ]
+}

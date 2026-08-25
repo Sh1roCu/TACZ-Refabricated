@@ -1,0 +1,88 @@
+{
+  "mappings": {
+    "cn/sh1rocu/simplebedrockmodel/mixin/client/CameraMixin": {
+      "Lnet/minecraft/client/Camera;setRotation(FF)V": "Lnet/minecraft/class_4184;method_19325(FF)V",
+      "setRotation": "Lnet/minecraft/class_4184;method_19325(FF)V",
+      "setup": "Lnet/minecraft/class_4184;method_19321(Lnet/minecraft/class_1922;Lnet/minecraft/class_1297;ZZF)V"
+    },
+    "cn/sh1rocu/simplebedrockmodel/mixin/client/GameRendererMixin": {
+      "getFov": "Lnet/minecraft/class_757;method_3196(Lnet/minecraft/class_4184;FZ)D"
+    },
+    "cn/sh1rocu/simplebedrockmodel/mixin/client/ItemInHandRendererMixin": {
+      "renderArmWithItem": "Lnet/minecraft/class_759;method_3228(Lnet/minecraft/class_742;FFLnet/minecraft/class_1268;FLnet/minecraft/class_1799;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V"
+    },
+    "cn/sh1rocu/simplebedrockmodel/mixin/client/MinecraftMixin": {
+      "<init>": "Lnet/minecraft/class_310;<init>(Lnet/minecraft/class_542;)V",
+      "Lcom/mojang/blaze3d/platform/Window;updateVsync(Z)V": "Lnet/minecraft/class_1041;method_4497(Z)V",
+      "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V": "Lnet/minecraft/class_3695;method_15407()V",
+      "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V": "Lnet/minecraft/class_3695;method_15405(Ljava/lang/String;)V",
+      "runTick": "Lnet/minecraft/class_310;method_1523(Z)V"
+    },
+    "cn/sh1rocu/simplebedrockmodel/mixin/client/PlayerRendererMixin": {
+      "renderLeftHand": "Lnet/minecraft/class_1007;method_4221(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;ILnet/minecraft/class_742;)V",
+      "renderRightHand": "Lnet/minecraft/class_1007;method_4220(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;ILnet/minecraft/class_742;)V"
+    },
+    "cn/sh1rocu/simplebedrockmodel/mixin/client/accessor/MinecraftAccessor": {
+      "pausePartialTick": "field_1741:F"
+    },
+    "com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/ServerPlayNetHandlerMixin": {
+      "Lnet/minecraft/server/level/ServerPlayer;stopUsingItem()V": "Lnet/minecraft/class_3222;method_6021()V",
+      "handlePlayerAction": "Lnet/minecraft/class_3244;method_12066(Lnet/minecraft/class_2846;)V"
+    },
+    "com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/client/GameRendererMixin": {
+      "bobHurt": "Lnet/minecraft/class_757;method_3198(Lnet/minecraft/class_4587;F)V",
+      "bobView": "Lnet/minecraft/class_757;method_3186(Lnet/minecraft/class_4587;F)V",
+      "getFov": "Lnet/minecraft/class_757;method_3196(Lnet/minecraft/class_4184;FZ)D"
+    },
+    "com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/client/ItemInHandRendererMixin": {
+      "tick": "Lnet/minecraft/class_759;method_3220()V"
+    },
+    "com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/client/PlayerModelMixin": {
+      "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V": "Lnet/minecraft/class_591;method_17087(Lnet/minecraft/class_1309;FFFFF)V"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "cn/sh1rocu/simplebedrockmodel/mixin/client/CameraMixin": {
+        "Lnet/minecraft/client/Camera;setRotation(FF)V": "Lnet/minecraft/class_4184;method_19325(FF)V",
+        "setRotation": "Lnet/minecraft/class_4184;method_19325(FF)V",
+        "setup": "Lnet/minecraft/class_4184;method_19321(Lnet/minecraft/class_1922;Lnet/minecraft/class_1297;ZZF)V"
+      },
+      "cn/sh1rocu/simplebedrockmodel/mixin/client/GameRendererMixin": {
+        "getFov": "Lnet/minecraft/class_757;method_3196(Lnet/minecraft/class_4184;FZ)D"
+      },
+      "cn/sh1rocu/simplebedrockmodel/mixin/client/ItemInHandRendererMixin": {
+        "renderArmWithItem": "Lnet/minecraft/class_759;method_3228(Lnet/minecraft/class_742;FFLnet/minecraft/class_1268;FLnet/minecraft/class_1799;FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V"
+      },
+      "cn/sh1rocu/simplebedrockmodel/mixin/client/MinecraftMixin": {
+        "<init>": "Lnet/minecraft/class_310;<init>(Lnet/minecraft/class_542;)V",
+        "Lcom/mojang/blaze3d/platform/Window;updateVsync(Z)V": "Lnet/minecraft/class_1041;method_4497(Z)V",
+        "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V": "Lnet/minecraft/class_3695;method_15407()V",
+        "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V": "Lnet/minecraft/class_3695;method_15405(Ljava/lang/String;)V",
+        "runTick": "Lnet/minecraft/class_310;method_1523(Z)V"
+      },
+      "cn/sh1rocu/simplebedrockmodel/mixin/client/PlayerRendererMixin": {
+        "renderLeftHand": "Lnet/minecraft/class_1007;method_4221(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;ILnet/minecraft/class_742;)V",
+        "renderRightHand": "Lnet/minecraft/class_1007;method_4220(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;ILnet/minecraft/class_742;)V"
+      },
+      "cn/sh1rocu/simplebedrockmodel/mixin/client/accessor/MinecraftAccessor": {
+        "pausePartialTick": "field_1741:F"
+      },
+      "com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/ServerPlayNetHandlerMixin": {
+        "Lnet/minecraft/server/level/ServerPlayer;stopUsingItem()V": "Lnet/minecraft/class_3222;method_6021()V",
+        "handlePlayerAction": "Lnet/minecraft/class_3244;method_12066(Lnet/minecraft/class_2846;)V"
+      },
+      "com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/client/GameRendererMixin": {
+        "bobHurt": "Lnet/minecraft/class_757;method_3198(Lnet/minecraft/class_4587;F)V",
+        "bobView": "Lnet/minecraft/class_757;method_3186(Lnet/minecraft/class_4587;F)V",
+        "getFov": "Lnet/minecraft/class_757;method_3196(Lnet/minecraft/class_4184;FZ)D"
+      },
+      "com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/client/ItemInHandRendererMixin": {
+        "tick": "Lnet/minecraft/class_759;method_3220()V"
+      },
+      "com/github/mcmodderanchor/simplebedrockmodel/v1/mixin/client/PlayerModelMixin": {
+        "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V": "Lnet/minecraft/class_591;method_17087(Lnet/minecraft/class_1309;FFFFF)V"
+      }
+    }
+  }
+}

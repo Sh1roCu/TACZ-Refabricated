@@ -53,6 +53,9 @@ public class ServerMessageGunFireSelect implements FabricPacket {
         if (level == null) {
             return;
         }
+        if (Minecraft.getInstance().player != null && message.shooterId == Minecraft.getInstance().player.getId()) {
+            return;
+        }
         if (level.getEntity(message.shooterId) instanceof LivingEntity shooter) {
             GunFireSelectEvent gunFireSelectEvent = new GunFireSelectEvent(shooter, message.gunItemStack, LogicalSide.CLIENT);
             GunFireSelectEvent.CALLBACK.invoker().post(gunFireSelectEvent);

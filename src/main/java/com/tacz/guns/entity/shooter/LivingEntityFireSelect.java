@@ -32,7 +32,7 @@ public class LivingEntityFireSelect {
         if (fireSelectEvent.isCanceled()) {
             return;
         }
-        NetworkHandler.sendToTrackingEntity(new ServerMessageGunFireSelect(shooter.getId(), currentGunItem), shooter);
+        NetworkHandler.sendToTrackingEntityAndSelf(shooter, new ServerMessageGunFireSelect(shooter.getId(), currentGunItem));
         if (iGun instanceof AbstractGunItem logicGun) {
             logicGun.fireSelect(data, currentGunItem);
             // 刷新配件缓存
