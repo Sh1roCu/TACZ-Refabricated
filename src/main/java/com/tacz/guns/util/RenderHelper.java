@@ -8,6 +8,7 @@ import com.tacz.guns.compat.optifine.OptifineCompat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -70,7 +71,7 @@ public final class RenderHelper {
         GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
 
-    public static void renderFirstPersonArm(LocalPlayer player, HumanoidArm hand, PoseStack matrixStack, int combinedLight) {
+    public static void renderFirstPersonArm(AbstractClientPlayer player, HumanoidArm hand, PoseStack matrixStack, int combinedLight) {
         Minecraft mc = Minecraft.getInstance();
         EntityRenderDispatcher renderManager = mc.getEntityRenderDispatcher();
         PlayerRenderer renderer = (PlayerRenderer) renderManager.getRenderer(player);
