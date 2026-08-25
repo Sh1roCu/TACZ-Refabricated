@@ -7,7 +7,6 @@ import com.tacz.guns.client.compat.RecordingCompatHelper;
 import com.tacz.guns.client.model.BedrockAnimatedModel;
 import com.tacz.guns.client.model.IFunctionalRenderer;
 import com.tacz.guns.util.RenderHelper;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +36,7 @@ public class LeftHandRender implements IFunctionalRenderer {
                 PoseStack poseStack2 = new PoseStack();
                 poseStack2.last().normal().mul(normal);
                 poseStack2.last().pose().mul(pose);
-                RenderHelper.renderFirstPersonArm(viewPlayer instanceof AbstractClientPlayer acp ? acp : Minecraft.getInstance().player, HumanoidArm.LEFT, poseStack2, light1);
+                RenderHelper.renderFirstPersonArm(viewPlayer instanceof net.minecraft.client.player.LocalPlayer lp ? lp : Minecraft.getInstance().player, HumanoidArm.LEFT, poseStack2, light1);
                 Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
             });
         }

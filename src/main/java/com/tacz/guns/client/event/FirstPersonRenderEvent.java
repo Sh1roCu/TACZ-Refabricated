@@ -67,9 +67,6 @@ public class FirstPersonRenderEvent {
                     lastStateMachine.exit();
                 }
                 lastStateMachine = machine;
-                // Reset static positioning state so the new weapon doesn't inherit
-                // stale scope view interpolation from the previous weapon
-                FirstPersonRenderGunEvent.resetPositioningState();
             }
 
             // 物品处于后台时，阻止状态机初始化
