@@ -73,6 +73,24 @@ public class FirstPersonRenderGunEvent {
     private static int currentViewIndex = -1;
 
     /**
+     * Reset static positioning state when switching weapons during replay.
+     * Without this, stale scope view interpolation data from the previous weapon
+     * causes the new weapon to render off-center.
+     */
+    public static void resetPositioningState() {
+        SWITCH_VIEW_DYNAMICS = null;
+        oldAimingViewMatrix = null;
+        oldViewIndex = 0;
+        currentViewIndex = -1;
+        // Reset shoot sway so old weapon's recoil doesn't carry over
+        shootTimeStamp = -1;
+        // Reset jumping sway so old weapon's jump state doesn't carry over
+        jumpingSwayProgress = 0;
+        jumpingTimeStamp = -1;
+        lastOnGround = false;
+    }
+
+    /**
      * 当主手拿着枪械物品的时候，取消应用在它上面的 viewBobbing，以便应用自定义的跑步/走路动画。
      */
     public static void cancelItemInHandViewBobbing(RenderItemInHandBobEvent.BobView event) {
