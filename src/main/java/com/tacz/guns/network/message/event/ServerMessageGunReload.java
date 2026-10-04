@@ -53,6 +53,9 @@ public class ServerMessageGunReload implements FabricPacket {
         if (level == null) {
             return;
         }
+        if (Minecraft.getInstance().player != null && message.shooterId == Minecraft.getInstance().player.getId()) {
+            return;
+        }
         if (level.getEntity(message.shooterId) instanceof LivingEntity shooter) {
             GunReloadEvent gunReloadEvent = new GunReloadEvent(shooter, message.gunItemStack, LogicalSide.CLIENT);
             GunReloadEvent.CALLBACK.invoker().post(gunReloadEvent);

@@ -66,7 +66,7 @@ public class LivingEntityReload {
             if (gunReloadEvent.isCanceled()) {
                 return;
             }
-            NetworkHandler.sendToTrackingEntity(new ServerMessageGunReload(shooter.getId(), currentGunItem), shooter);
+            NetworkHandler.sendToTrackingEntityAndSelf(shooter, new ServerMessageGunReload(shooter.getId(), currentGunItem));
             Bolt boltType = gunIndex.getGunData().getBolt();
             int ammoCount = gunItem.getCurrentAmmoCount(currentGunItem) + (gunItem.hasBulletInBarrel(currentGunItem) && boltType != Bolt.OPEN_BOLT ? 1 : 0);
             if (ammoCount <= 0) {

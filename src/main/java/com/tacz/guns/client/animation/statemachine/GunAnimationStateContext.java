@@ -11,6 +11,7 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.api.util.LuaNbtAccessor;
+import com.tacz.guns.client.compat.RecordingCompatHelper;
 import com.tacz.guns.client.model.BedrockGunModel;
 import com.tacz.guns.client.model.functional.ShellRender;
 import com.tacz.guns.client.resource.GunDisplayInstance;
@@ -48,7 +49,14 @@ public class GunAnimationStateContext extends ItemAnimationStateContext {
     }
 
     private <T> Optional<T> processGunOperator(Function<IClientPlayerGunOperator, T> processor) {
-        LocalPlayer player = Minecraft.getInstance().player;
+        // Use the view player if it's a LocalPlayer (for replay support)
+        net.minecraft.world.entity.player.Player viewPlayer = RecordingCompatHelper.getViewPlayer();
+        LocalPlayer player;
+        if (viewPlayer instanceof LocalPlayer lp) {
+            player = lp;
+        } else {
+            player = Minecraft.getInstance().player;
+        }
         if (player != null) {
             return Optional.ofNullable(processor.apply(IClientPlayerGunOperator.fromLocalPlayer(player)));
         }

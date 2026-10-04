@@ -67,6 +67,17 @@ public class BedrockAnimatedModel extends BedrockModel implements AnimationListe
         return constraintPath;
     }
 
+    /**
+     * 缩放动画位移偏移量，用于第三人称渲染时缩小动画幅度，避免模型飞离玩家手部
+     */
+    public void scaleAnimationOffset(float factor) {
+        for (ModelRendererWrapper rendererWrapper : modelMap.values()) {
+            rendererWrapper.setOffsetX(rendererWrapper.getOffsetX() * factor);
+            rendererWrapper.setOffsetY(rendererWrapper.getOffsetY() * factor);
+            rendererWrapper.setOffsetZ(rendererWrapper.getOffsetZ() * factor);
+        }
+    }
+
     public void cleanAnimationTransform() {
         for (ModelRendererWrapper rendererWrapper : modelMap.values()) {
             rendererWrapper.setOffsetX(0);

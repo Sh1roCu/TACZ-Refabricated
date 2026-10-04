@@ -86,8 +86,10 @@ public class LocalPlayerBolt {
         }
         bolt();
         if (data.isBolting) {
-            // 对于客户端来说，膛内弹药被填入的状态同步到客户端的瞬间，bolt 过程才算完全结束
-            if (iGun.hasBulletInBarrel(mainHandItem)) {
+            // 使用服务端同步的 isBolting 实体数据来判断拉栓是否完成，
+            // 而不是依赖物品 NBT 同步（hasBulletInBarrel），因为 NBT 同步有网络延迟，
+            // 在多人游戏中会导致客户端认为拉栓未完成而卡死。
+            if (!IGunOperator.fromLivingEntity(player).getSynIsBolting()) {
                 data.isBolting = false;
             }
         }

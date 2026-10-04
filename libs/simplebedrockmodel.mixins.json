@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.mcmodderanchor.simplebedrockmodel.v1.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "simplebedrockmodel.refmap.json",
+  "mixins": [
+    "ServerPlayNetHandlerMixin"
+  ],
+  "client": [
+    "client.GameRendererMixin",
+    "client.ItemInHandRendererMixin",
+    "client.PlayerModelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

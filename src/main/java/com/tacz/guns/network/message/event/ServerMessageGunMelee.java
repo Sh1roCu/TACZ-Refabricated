@@ -53,6 +53,9 @@ public class ServerMessageGunMelee implements FabricPacket {
         if (level == null) {
             return;
         }
+        if (Minecraft.getInstance().player != null && message.shooterId == Minecraft.getInstance().player.getId()) {
+            return;
+        }
         if (level.getEntity(message.shooterId) instanceof LivingEntity shooter) {
             GunMeleeEvent gunMeleeEvent = new GunMeleeEvent(shooter, message.gunItemStack, LogicalSide.CLIENT);
             GunMeleeEvent.CALLBACK.invoker().post(gunMeleeEvent);

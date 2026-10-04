@@ -56,6 +56,10 @@ public class ServerMessageGunDraw implements FabricPacket {
         if (level == null) {
             return;
         }
+        // Skip if this is the local player (client prediction already handled it)
+        if (Minecraft.getInstance().player != null && message.entityId == Minecraft.getInstance().player.getId()) {
+            return;
+        }
         if (level.getEntity(message.entityId) instanceof LivingEntity livingEntity) {
             GunDrawEvent gunDrawEvent = new GunDrawEvent(livingEntity, message.previousGunItem, message.currentGunItem, LogicalSide.CLIENT);
             GunDrawEvent.CALLBACK.invoker().post(gunDrawEvent);

@@ -26,6 +26,7 @@ import com.tacz.guns.util.RenderDistance;
 import com.tacz.guns.util.math.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -37,6 +38,8 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Matrix4f;
+
+import java.lang.reflect.Method;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -164,11 +167,16 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
     }
 
     @Override
-    public void renderFirstPerson(LocalPlayer player, ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource,
+    public void renderFirstPerson(LocalPlayer localPlayer, ItemStack stack, ItemDisplayContext ctx, PoseStack poseStack, MultiBufferSource bufferSource,
                                   int light, float partialTick) {
         if (!(stack.getItem() instanceof IGun)) {
             return;
         }
+
+        // Always resolve the view player from recording compat (handles replay spectator)
+        final Player viewPlayer = com.tacz.guns.client.compat.RecordingCompatHelper.getViewPlayer() != null
+                ? com.tacz.guns.client.compat.RecordingCompatHelper.getViewPlayer()
+                : localPlayer;
 
         TimelessAPI.getGunDisplay(stack).ifPresent(display -> {
             BedrockGunModel gunModel = display.getGunModel();
@@ -180,17 +188,34 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
             // 在渲染之前，先更新动画，让动画数据写入模型
             if (animationStateMachine != null) {
                 animationStateMachine.processContextIfExist(context -> {
-                    updateContext(context, stack, player, partialTick);
+                    updateContext(context, stack, viewPlayer, partialTick);
                 });
                 animationStateMachine.update();
             }
 
             poseStack.pushPose();
             // 逆转原版施加在手上的延滞效果，改为写入模型动画数据中
-            float xRotOffset = Mth.lerp(partialTick, player.xBobO, player.xBob);
-            float yRotOffset = Mth.lerp(partialTick, player.yBobO, player.yBob);
-            float xRot = player.getViewXRot(partialTick) - xRotOffset;
-            float yRot = player.getViewYRot(partialTick) - yRotOffset;
+            float xRotOffset = 0;
+            float yRotOffset = 0;
+            if (viewPlayer instanceof LocalPlayer lp) {
+                xRotOffset = Mth.lerp(partialTick, lp.xBobO, lp.xBob);
+                yRotOffset = Mth.lerp(partialTick, lp.yBobO, lp.yBob);
+            } else if (viewPlayer instanceof RemotePlayer remotePlayer) {
+                // Flashback adds RemotePlayerExt interface to RemotePlayer via MixinRemotePlayer.
+                // Use the interface methods via reflection (field access via getDeclaredField
+                // fails in production because Mixin @Unique fields get renamed).
+                try {
+                    Class<?> extClass = Class.forName("com.moulberry.flashback.ext.RemotePlayerExt");
+                    Method getXBob = extClass.getMethod("flashback$getXBob", float.class);
+                    Method getYBob = extClass.getMethod("flashback$getYBob", float.class);
+                    xRotOffset = (float) getXBob.invoke(remotePlayer, partialTick);
+                    yRotOffset = (float) getYBob.invoke(remotePlayer, partialTick);
+                } catch (Exception ignored) {
+                    // Fallback: no bob offset
+                }
+            }
+            float xRot = viewPlayer.getViewXRot(partialTick) - xRotOffset;
+            float yRot = viewPlayer.getViewYRot(partialTick) - yRotOffset;
             poseStack.mulPose(Axis.XP.rotationDegrees(xRot * -0.1F));
             poseStack.mulPose(Axis.YP.rotationDegrees(yRot * -0.1F));
             BedrockPart rootNode = gunModel.getRootNode();
@@ -207,7 +232,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
             // 基岩版模型是上下颠倒的，需要翻转过来。
             poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
             // 应用持枪姿态变换，如第一人称摄像机定位
-            FirstPersonRenderGunEvent.applyFirstPersonGunTransform(player, stack, poseStack, gunModel, partialTick);
+            FirstPersonRenderGunEvent.applyFirstPersonGunTransform(viewPlayer, stack, poseStack, gunModel, partialTick);
 
             // 开启第一人称弹壳和火焰渲染
             MuzzleFlashRender.isSelf = true;
