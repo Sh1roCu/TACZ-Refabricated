@@ -1,5 +1,6 @@
 package com.tacz.guns.client.event;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.tacz.guns.api.DefaultAssets;
@@ -375,7 +376,14 @@ public class FirstPersonRenderGunEvent {
         Vector3f inverseTranslation = new Vector3f(originTranslation);
         inverseTranslation.sub(animatedTranslation);
         inverseTranslation.mulDirection(poseStack.last().pose());
+        // Apply per-axis constraint weights in view space.
+        Matrix4f modelView = RenderSystem.getModelViewMatrix();
+        modelView.transformDirection(inverseTranslation);
         inverseTranslation.mul(translationICA.x() - 1, translationICA.y() - 1, 1 - translationICA.z()); // 基岩版模型的旋转导致 xy 轴要反过来
+        // Convert back while accounting for the Bedrock axis flip below.
+        inverseTranslation.z = -inverseTranslation.z;
+        modelView.invert(new Matrix4f()).transformDirection(inverseTranslation);
+        inverseTranslation.z = -inverseTranslation.z;
         // 计算约束旋转需要的反向旋转。因需要插值，获取的是欧拉角
         Vector3f inverseRotation = new Vector3f(rotation);
         inverseRotation.mul(rotationICA.x() - 1, rotationICA.y() - 1, rotationICA.z() - 1);
