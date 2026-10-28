@@ -1,4 +1,4 @@
-package com.tacz.guns.compat.oculus;
+package com.tacz.guns.compat.iris;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 

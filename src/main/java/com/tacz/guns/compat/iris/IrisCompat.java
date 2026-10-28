@@ -2,7 +2,6 @@ package com.tacz.guns.compat.iris;
 
 import com.tacz.guns.compat.iris.legacy.IrisCompatLegacy;
 import com.tacz.guns.compat.iris.newly.IrisCompatNewly;
-import com.tacz.guns.compat.oculus.IUnflushableWrapper;
 import com.tacz.guns.init.CompatRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
