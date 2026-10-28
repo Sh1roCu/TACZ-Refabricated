@@ -14,16 +14,18 @@ import com.tacz.guns.init.ModRecipe;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.network.message.ServerMessageSyncGunPack;
 import com.tacz.guns.resource.filter.RecipeFilter;
-import com.tacz.guns.resource.index.CommonAmmoIndex;
-import com.tacz.guns.resource.index.CommonAttachmentIndex;
-import com.tacz.guns.resource.index.CommonBlockIndex;
-import com.tacz.guns.resource.index.CommonGunIndex;
+import com.tacz.guns.resource.index.*;
 import com.tacz.guns.resource.manager.*;
 import com.tacz.guns.resource.network.CommonNetworkCache;
 import com.tacz.guns.resource.network.DataType;
+import com.tacz.guns.resource.pojo.AttachmentVariantIndexPOJO;
+import com.tacz.guns.resource.pojo.SlotAdapterIndexPOJO;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
+import com.tacz.guns.resource.pojo.data.attachment.SlotAdapterData;
+import com.tacz.guns.resource.pojo.data.attachment.VariantData;
 import com.tacz.guns.resource.pojo.data.block.BlockData;
 import com.tacz.guns.resource.pojo.data.block.TabConfig;
+import com.tacz.guns.resource.pojo.data.gun.BuiltInAttachment;
 import com.tacz.guns.resource.pojo.data.gun.ExtraDamage;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import com.tacz.guns.resource.pojo.data.gun.Ignite;
@@ -53,6 +55,7 @@ public class CommonAssetsManager implements ICommonResourceProvider {
             .registerTypeAdapter(Pair.class, new PairSerializer())
             .registerTypeAdapter(GunSmithTableIngredient.class, new GunSmithTableIngredientSerializer())
             .registerTypeAdapter(GunSmithTableResult.class, new GunSmithTableResultSerializer())
+            .registerTypeAdapter(BuiltInAttachment.class, new BuiltInAttachmentSerializer())
             .registerTypeAdapter(ExtraDamage.DistanceDamagePair.class, new DistanceDamagePairSerializer())
             .registerTypeAdapter(Vec3.class, new Vec3Serializer())
             .registerTypeAdapter(Ignite.class, new IgniteSerializer())
@@ -67,10 +70,14 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     private final List<INetworkCacheReloadListener> listeners = new ArrayList<>();
     private CommonDataManager<GunData> gunData;
     private CommonDataManager<AttachmentData> attachmentData;
+    private CommonDataManager<VariantData> attachmentVariantData;
+    private CommonDataManager<SlotAdapterData> slotAdapterData;
     private CommonDataManager<BlockData> blockData;
     private CommonDataManager<CommonAmmoIndex> ammoIndex;
     private CommonDataManager<CommonGunIndex> gunIndex;
     private CommonDataManager<CommonAttachmentIndex> attachmentIndex;
+    private CommonDataManager<CommonAttachmentVariantIndex> attachmentVariantIndex;
+    private CommonDataManager<CommonSlotAdapterIndex> slotAdapterIndex;
     private CommonDataManager<CommonBlockIndex> blockIndex;
     private RecipeFilterManager recipeFilterManager;
     private LootInjectionManager lootInjectionManager;
@@ -81,8 +88,10 @@ public class CommonAssetsManager implements ICommonResourceProvider {
 
     public void reloadAndRegister(Consumer<PreparableReloadListener> register) {
         // 这里会顺序重载，所以需要把index这种依赖data的放在后面
-        gunData = register(new CommonDataManager<>(DataType.GUN_DATA, GunData.class, GSON, "data/guns", "GunDataLoader"));
+        gunData = register(new GunDataManager());
         attachmentData = register(new AttachmentDataManager());
+        attachmentVariantData = register(new CommonDataManager<>(DataType.ATTACHMENT_VARIANT_DATA, VariantData.class, GSON, "data/attachment_variants", "AttachmentVariantDataLoader"));
+        slotAdapterData = register(new CommonDataManager<>(DataType.SLOT_ADAPTER_DATA, SlotAdapterData.class, GSON, "data/slot_adapters", "SlotAdapterDataLoader"));
         attachmentsTagManager = register(new AttachmentsTagManager());
         recipeFilterManager = register(new RecipeFilterManager());
         lootInjectionManager = new LootInjectionManager();
@@ -91,8 +100,20 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         register.accept(scriptManager);
 
         ammoIndex = register(new CommonDataManager<>(DataType.AMMO_INDEX, CommonAmmoIndex.class, GSON, "index/ammo", "AmmoIndexLoader"));
-        gunIndex = register(new CommonDataManager<>(DataType.GUN_INDEX, CommonGunIndex.class, GSON, "index/guns", "GunIndexLoader"));
+        gunIndex = register(new GunIndexManager());
         attachmentIndex = register(new CommonDataManager<>(DataType.ATTACHMENT_INDEX, CommonAttachmentIndex.class, GSON, "index/attachments", "AttachmentIndexLoader"));
+        attachmentVariantIndex = register(new CommonDataManager<>(DataType.ATTACHMENT_VARIANT_INDEX, CommonAttachmentVariantIndex.class, GSON, "index/attachment_variants", "AttachmentVariantIndexLoader") {
+            @Override
+            protected CommonAttachmentVariantIndex parseJson(com.google.gson.JsonElement element) {
+                return CommonAttachmentVariantIndex.getInstance(getGson().fromJson(element, AttachmentVariantIndexPOJO.class));
+            }
+        });
+        slotAdapterIndex = register(new CommonDataManager<>(DataType.SLOT_ADAPTER_INDEX, CommonSlotAdapterIndex.class, GSON, "index/slot_adapters", "SlotAdapterIndexLoader") {
+            @Override
+            protected CommonSlotAdapterIndex parseJson(com.google.gson.JsonElement element) {
+                return CommonSlotAdapterIndex.getInstance(getGson().fromJson(element, SlotAdapterIndexPOJO.class));
+            }
+        });
         blockIndex = register(new CommonDataManager<>(DataType.BLOCK_INDEX, CommonBlockIndex.class, GSON, "index/blocks", "BlockIndexLoader"));
 
         listeners.forEach(register);
@@ -126,6 +147,18 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     @Override
     public AttachmentData getAttachmentData(ResourceLocation id) {
         return attachmentData.getData(id);
+    }
+
+    @Nullable
+    @Override
+    public VariantData getAttachmentVariantData(ResourceLocation id) {
+        return attachmentVariantData.getData(id);
+    }
+
+    @Nullable
+    @Override
+    public SlotAdapterData getSlotAdapterData(ResourceLocation id) {
+        return slotAdapterData.getData(id);
     }
 
     @Nullable
@@ -175,9 +208,31 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         return attachmentIndex.getData(attachmentId);
     }
 
+    @Nullable
+    @Override
+    public CommonAttachmentVariantIndex getAttachmentVariantIndex(ResourceLocation variantId) {
+        return attachmentVariantIndex.getData(variantId);
+    }
+
+    @Nullable
+    @Override
+    public CommonSlotAdapterIndex getSlotAdapterIndex(ResourceLocation adapterId) {
+        return slotAdapterIndex.getData(adapterId);
+    }
+
     @Override
     public Set<Map.Entry<ResourceLocation, CommonAttachmentIndex>> getAllAttachments() {
         return attachmentIndex.getAllData().entrySet();
+    }
+
+    @Override
+    public Set<Map.Entry<ResourceLocation, CommonAttachmentVariantIndex>> getAllAttachmentVariants() {
+        return attachmentVariantIndex.getAllData().entrySet();
+    }
+
+    @Override
+    public Set<Map.Entry<ResourceLocation, CommonSlotAdapterIndex>> getAllSlotAdapters() {
+        return slotAdapterIndex.getAllData().entrySet();
     }
 
     @Override

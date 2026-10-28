@@ -3,6 +3,7 @@ package com.tacz.guns.network.message;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
+import com.tacz.guns.util.time.GunTime;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
@@ -35,9 +36,12 @@ public class ClientMessageSyncBaseTimestamp implements FabricPacket {
         return TYPE;
     }
 
-    public void handle(ServerPlayer player, PacketSender responseSender) {
-        long timestamp = System.currentTimeMillis();
-        ShooterDataHolder dataHolder = IGunOperator.fromLivingEntity(player).getDataHolder();
+    public void handle(ServerPlayer entity, PacketSender responseSender) {
+        long timestamp = GunTime.nowMillis();
+        if (entity == null) {
+            return;
+        }
+        ShooterDataHolder dataHolder = IGunOperator.fromLivingEntity(entity).getDataHolder();
         dataHolder.baseTimestamp = timestamp;
         GunMod.LOGGER.debug(MARKER, "Update server base timestamp: {}", dataHolder.baseTimestamp);
     }

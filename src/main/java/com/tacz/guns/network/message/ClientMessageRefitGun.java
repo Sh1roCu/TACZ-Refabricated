@@ -1,11 +1,13 @@
 package com.tacz.guns.network.message;
 
 import com.tacz.guns.GunMod;
+import com.tacz.guns.advancement.GunRefitTrigger;
 import com.tacz.guns.api.item.IAttachment;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.resource.modifier.AttachmentPropertyManager;
+import com.tacz.guns.util.VirtualOemAttachment;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
@@ -45,6 +47,9 @@ public class ClientMessageRefitGun implements FabricPacket {
     }
 
     public void handle(ServerPlayer player, PacketSender responseSender) {
+        if (player == null) {
+            return;
+        }
         Inventory inventory = player.getInventory();
         ItemStack attachmentItem = inventory.getItem(attachmentSlotIndex);
         ItemStack gunItem = inventory.getItem(gunSlotIndex);
@@ -62,10 +67,12 @@ public class ClientMessageRefitGun implements FabricPacket {
                 }
                 AttachmentType realType = iAttachment.getType(attachmentItem);
                 ItemStack oldAttachmentItem = iGun.getAttachment(gunItem, realType);
+                ItemStack beforeRefit = gunItem.copy();
                 iGun.installAttachment(gunItem, attachmentItem);
+                GunRefitTrigger.INSTANCE.trigger(player, beforeRefit, gunItem);
                 // 刷新配件数据
                 AttachmentPropertyManager.postChangeEvent(player, gunItem);
-                inventory.setItem(attachmentSlotIndex, oldAttachmentItem);
+                inventory.setItem(attachmentSlotIndex, VirtualOemAttachment.isMarked(oldAttachmentItem) ? ItemStack.EMPTY : oldAttachmentItem);
                 // 如果卸载的是扩容弹匣，吐出所有子弹
                 if (realType == AttachmentType.EXTENDED_MAG) {
                     iGun.dropAllAmmo(player, gunItem);

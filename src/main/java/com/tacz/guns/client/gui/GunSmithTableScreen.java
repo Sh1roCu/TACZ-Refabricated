@@ -30,7 +30,8 @@ import com.tacz.guns.inventory.GunSmithTableMenu;
 import com.tacz.guns.network.message.ClientMessageCraft;
 import com.tacz.guns.resource.filter.RecipeFilter;
 import com.tacz.guns.resource.pojo.data.block.TabConfig;
-import com.tacz.guns.util.RenderDistance;
+import com.tacz.guns.util.RenderHelper;
+import com.tacz.guns.util.time.GunTime;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -47,13 +48,12 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -82,6 +82,8 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
     private boolean filterEnabled = false;
     private GunPackList filterList;
     private boolean autoByHandFilterApplied = false;
+    private List<FormattedCharSequence> emptyByHandFilterMessage = List.of();
+    private int emptyByHandFilterMessageY;
 
     public GunSmithTableScreen(GunSmithTableMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -245,6 +247,35 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
         this.getPlayerIngredientCount(this.selectedRecipe);
     }
 
+    private void applyRequestedRecipeSelection() {
+        ResourceLocation recipeId = this.menu.consumeRecipeSelection();
+        if (recipeId == null || this.minecraft.level == null
+                || !this.menu.canSelectRecipe(recipeId, this.minecraft.level.getRecipeManager())) {
+            return;
+        }
+        GunSmithTableRecipe recipe = this.getSelectedRecipe(recipeId);
+        if (recipe == null) {
+            return;
+        }
+        ResourceLocation type = recipe.getTab();
+        List<ResourceLocation> recipeList = this.recipes.get(type);
+        if (recipeList == null || !recipeList.contains(recipeId)) {
+            // User filters can hide a valid recipe; table restrictions still apply in classifyRecipes.
+            this.filterList.clearFilters();
+            this.classifyRecipes();
+            recipeList = this.recipes.get(type);
+        }
+        if (recipeList == null || !recipeList.contains(recipeId)) {
+            return;
+        }
+        this.selectedType = type;
+        this.selectedRecipeList = recipeList;
+        this.selectedRecipe = recipe;
+        this.typePage = new ArrayList<>(this.recipeKeys.keySet()).indexOf(type) / 7;
+        this.indexPage = recipeList.indexOf(recipeId) / 6;
+        this.filterEnabled = false;
+    }
+
     public void setIndexPage(int indexPage) {
         this.indexPage = indexPage;
     }
@@ -303,6 +334,7 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
         this.filterList.setLeftPos(leftPos);
 
         this.classifyRecipes();
+        this.applyRequestedRecipeSelection();
         this.updateSelectedRecipeAfterFiltering();
         this.clearWidgets();
 
@@ -320,11 +352,33 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
             this.addScaleButtons();
             this.addUrlButton();
         }
-        this.addCraftButton();
+        this.addEmptyByHandFilterHint();
+        if (this.emptyByHandFilterMessage.isEmpty()) {
+            this.addCraftButton();
+        }
+    }
+
+    private void addEmptyByHandFilterHint() {
+        this.emptyByHandFilterMessage = List.of();
+        if (!this.recipes.isEmpty() || !this.filterList.isByHandSelected() || !this.shouldFilterByMainHand()) {
+            return;
+        }
+        this.emptyByHandFilterMessage = this.font.split(
+                Component.translatable("gui.tacz.gun_smith_table.filter.hand.empty"), 184);
+        int messageHeight = this.emptyByHandFilterMessage.size() * (this.font.lineHeight + 2);
+        this.emptyByHandFilterMessageY = topPos + (this.imageHeight + 1 - messageHeight - 10 - 18) / 2;
+        this.addRenderableWidget(new FlatColorButton(leftPos + 190, this.emptyByHandFilterMessageY + messageHeight + 10, 100, 18,
+                Component.translatable("gui.tacz.gun_smith_table.filter.hand.clear"), b -> {
+            this.filterList.setByHandSelected(false);
+            this.typePage = 0;
+            this.indexPage = 0;
+            this.init();
+        }));
     }
 
     private void addCraftButton() {
-        this.addRenderableWidget(new ImageButton(leftPos + 289, topPos + 162, 48, 18, 138, 164, 18, TEXTURE, b -> {
+        boolean hasRecipe = this.selectedRecipe != null;
+        ImageButton craftButton = this.addRenderableWidget(new ImageButton(leftPos + 289, topPos + 162, 48, 18, 138, 164, hasRecipe ? 18 : 0, TEXTURE, b -> {
             if (this.selectedRecipe != null && playerIngredientCount != null) {
                 // 检查是否能合成，不能就不发包
                 List<GunSmithTableIngredient> inputs = selectedRecipe.getInputs();
@@ -344,6 +398,7 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
                 ClientPlayNetworking.send(new ClientMessageCraft(this.selectedRecipe.getId(), this.menu.containerId));
             }
         }));
+        craftButton.active = hasRecipe;
     }
 
     private void addUrlButton() {
@@ -435,6 +490,9 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
     }
 
     private void addIndexPageButtons() {
+        if (this.selectedRecipeList == null || this.selectedRecipeList.isEmpty()) {
+            return;
+        }
         this.addRenderableWidget(new ImageButton(leftPos + 143, topPos + 56, 96, 6, 40, 166, 6, TEXTURE, b -> {
             if (this.indexPage > 0) {
                 this.indexPage--;
@@ -453,6 +511,9 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
     }
 
     private void addTypePageButtons() {
+        if (this.recipes.isEmpty()) {
+            return;
+        }
         this.addRenderableWidget(new ImageButton(leftPos + 136, topPos + 4, 18, 20, 0, 162, 20, TEXTURE, b -> {
             if (this.typePage > 0) {
                 this.typePage--;
@@ -482,7 +543,8 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
 
     @Override
     public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
-        if (pMouseX > leftPos + 143 && pMouseX < leftPos + 143 + 94 && pMouseY > topPos + 66 && pMouseY < topPos + 66 + 85) {
+        if (selectedRecipeList != null && !selectedRecipeList.isEmpty()
+                && pMouseX > leftPos + 143 && pMouseX < leftPos + 143 + 94 && pMouseY > topPos + 66 && pMouseY < topPos + 66 + 85) {
             if (pDelta > 0) {
                 this.indexPage = Math.max(0, this.indexPage - 1);
             } else {
@@ -499,6 +561,14 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         drawModCenteredString(graphics, font, Component.translatable("gui.tacz.gun_smith_table.preview"), leftPos + 108, topPos + 5, 0x555555);
+        if (!this.emptyByHandFilterMessage.isEmpty()) {
+            int hintY = this.emptyByHandFilterMessageY;
+            for (FormattedCharSequence line : this.emptyByHandFilterMessage) {
+                graphics.drawString(font, line, leftPos + 240 - font.width(line) / 2, hintY, 0x444444, false);
+                hintY += font.lineHeight + 2;
+            }
+            return;
+        }
         if (selectedType != null) {
             var config = recipeKeys.get(selectedType);
             if (config != null) {
@@ -506,7 +576,7 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
             }
         }
         graphics.drawString(font, Component.translatable("gui.tacz.gun_smith_table.ingredient"), leftPos + 254, topPos + 50, 0x555555, false);
-        drawModCenteredString(graphics, font, Component.translatable("gui.tacz.gun_smith_table.craft"), leftPos + 312, topPos + 167, 0xFFFFFF);
+        drawModCenteredString(graphics, font, Component.translatable("gui.tacz.gun_smith_table.craft"), leftPos + 312, topPos + 167, this.selectedRecipe != null ? 0xFFFFFF : 0x888888);
         if (!this.filterEnabled && this.selectedRecipe != null) {
             this.renderLeftModel(this.selectedRecipe);
             this.renderPackInfo(graphics, this.selectedRecipe);
@@ -515,9 +585,9 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
         if (selectedRecipeList != null && !selectedRecipeList.isEmpty()) {
             renderIngredient(graphics);
         }
-
         ((ScreenAccessor) this).tacz$getRenderables().stream().filter(w -> w instanceof ResultButton)
                 .forEach(w -> ((ResultButton) w).renderTooltips(stack -> graphics.renderTooltip(font, stack, mouseX, mouseY)));
+        this.renderIngredientTooltip(graphics, mouseX, mouseY);
     }
 
     private void renderPackInfo(GuiGraphics gui, GunSmithTableRecipe recipe) {
@@ -611,7 +681,7 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
                 Ingredient ingredient = smithTableIngredient.getIngredient();
 
                 ItemStack[] items = ingredient.getItems();
-                int itemIndex = ((int) (System.currentTimeMillis() / 1_000)) % items.length;
+                int itemIndex = ((int) (GunTime.nowMillis() / 1_000)) % items.length;
                 ItemStack item = items[itemIndex];
 
                 gui.renderFakeItem(item, offsetX, offsetY);
@@ -639,11 +709,52 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
         }
     }
 
+    private void renderIngredientTooltip(GuiGraphics gui, int mouseX, int mouseY) {
+        if (this.selectedRecipe == null) {
+            return;
+        }
+        List<GunSmithTableIngredient> inputs = this.selectedRecipe.getInputs();
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 2; j++) {
+                int index = i * 2 + j;
+                if (index >= inputs.size()) {
+                    return;
+                }
+                int offsetX = leftPos + 254 + 45 * j;
+                int offsetY = topPos + 62 + 17 * i;
+                if (mouseX < offsetX || mouseX >= offsetX + 16 || mouseY < offsetY || mouseY >= offsetY + 16) {
+                    continue;
+                }
+
+                ItemStack[] items = inputs.get(index).getIngredient().getItems();
+                if (items.length == 0) {
+                    return;
+                }
+                int itemIndex = ((int) (GunTime.nowMillis() / 1_000)) % items.length;
+                ItemStack item = items[itemIndex];
+                if (!item.isEmpty()) {
+                    gui.renderComponentTooltip(font, getIngredientTooltip(item), mouseX, mouseY/*, item*/);
+                }
+                return;
+            }
+        }
+    }
+
+    private List<Component> getIngredientTooltip(ItemStack item) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        TooltipFlag tooltipFlag = Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
+        List<Component> tooltip = new ArrayList<>(item.getTooltipLines(player, tooltipFlag));
+        for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
+            if (/*!tab.hasSearchBar() &&*/ tab.contains(item)) {
+                tooltip.add(Math.min(1, tooltip.size()), tab.getDisplayName().copy().withStyle(ChatFormatting.BLUE));
+                break;
+            }
+        }
+        return tooltip;
+    }
+
     @SuppressWarnings("deprecation")
     private void renderLeftModel(GunSmithTableRecipe recipe) {
-        // 先标记一下，渲染高模
-        RenderDistance.markGuiRenderTimestamp();
-
         float rotationPeriod = 8f;
         int xPos = leftPos + 60;
         int yPos = topPos + 50;
@@ -672,17 +783,17 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
         posestack.translate(8.0D, 8.0D, 0.0D);
         posestack.scale(1.0F, -1.0F, 1.0F);
         posestack.scale(scale, scale, scale);
-        float rot = (System.currentTimeMillis() % (int) (rotationPeriod * 1000)) * (360f / (rotationPeriod * 1000));
+        float rot = (GunTime.nowMillis() % (int) (rotationPeriod * 1000)) * (360f / (rotationPeriod * 1000));
         posestack.mulPose(Axis.XP.rotationDegrees(rotPitch));
         posestack.mulPose(Axis.YP.rotationDegrees(rot));
         RenderSystem.applyModelViewMatrix();
         PoseStack tmpPose = new PoseStack();
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        MultiBufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         Lighting.setupForFlatItems();
 
         Minecraft.getInstance().getItemRenderer().renderStatic(recipe.getOutput(), ItemDisplayContext.FIXED, 0xf000f0, OverlayTexture.NO_OVERLAY, tmpPose, bufferSource, null, 0);
 
-        bufferSource.endBatch();
+        RenderHelper.endBatch(bufferSource);
         RenderSystem.enableDepthTest();
         Lighting.setupFor3DItems();
         posestack.popPose();
@@ -699,7 +810,12 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
     protected void renderBg(@NotNull GuiGraphics gui, float partialTick, int mouseX, int mouseY) {
         this.renderBackground(gui);
         gui.blit(SIDE, leftPos, topPos, 0, 0, 134, 187);
-        gui.blit(TEXTURE, leftPos + 136, topPos + 27, 0, 0, 208, 160);
+        if (!this.emptyByHandFilterMessage.isEmpty()) {
+            // Reuse the ingredient panel's frame as one panel without interior dividers.
+            gui.blitNineSliced(TEXTURE, leftPos + 136, topPos, 208, this.imageHeight + 1, 4, 96, 107, 112, 19);
+        } else {
+            gui.blit(TEXTURE, leftPos + 136, topPos + 27, 0, 0, 208, 160);
+        }
     }
 
     @Override

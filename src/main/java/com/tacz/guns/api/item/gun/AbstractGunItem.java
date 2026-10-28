@@ -17,8 +17,11 @@ import com.tacz.guns.inventory.tooltip.GunTooltip;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.pojo.data.gun.FeedType;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
-import com.tacz.guns.util.AllowAttachmentTagMatcher;
 import com.tacz.guns.util.AttachmentDataUtils;
+import com.tacz.guns.util.DefaultGunAttachments;
+import com.tacz.guns.util.GunAmmoUnloadHelper;
+import com.tacz.guns.util.SlotAdapterHelper;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -34,6 +37,7 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class AbstractGunItem extends Item implements IGun, IAnimationItem, IItem {
@@ -47,14 +51,12 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 开始拉栓时调用，返回 bolt 状态
-     *
      * @return bolt 状态。ture 代表开始 bolt，false 则代表不开始。
      */
     public abstract boolean startBolt(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter);
 
     /**
      * 拉栓 tick 时调用，返回是否仍在 bolt 状态
-     *
      * @return 是否仍在 bolt 状态
      */
     public abstract boolean tickBolt(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter);
@@ -71,7 +73,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 换弹时每个 tick 调用
-     *
      * @return 如果返回的类型是 NOT_RELOADING 则下一个 tick 不再继续调用
      */
     public abstract ReloadState tickReload(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter);
@@ -80,6 +81,27 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      * 尝试打断换弹时调用
      */
     public abstract void interruptReload(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter);
+
+    /**
+     * 主动卸弹的行为入口，由操作者完成空闲检查后调用。
+     * 默认清空弹匣和膛内弹；枪械实现可覆写此方法或分发到逻辑脚本。
+     */
+    public void unloadAmmo(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter) {
+        unloadAmmo(gunItem, shooter, true, -1);
+    }
+
+    /**
+     * 按数量结算卸弹，不触发主动卸弹回调，供默认行为和脚本 API 复用。
+     *
+     * @param unloadBarrel 是否同时卸出闭膛枪的膛内一发
+     * @param amount 弹匣卸出数量；0 保留弹匣，-1 清空弹匣
+     * @return 实际卸出总数（含膛内）；无效取值、缺少枪械定义、背包直读或客户端调用返回 0
+     */
+    public int unloadAmmo(ItemStack gunItem, LivingEntity shooter, boolean unloadBarrel, int amount) {
+        return TimelessAPI.getCommonGunIndex(getGunId(gunItem))
+                .map(index -> GunAmmoUnloadHelper.unloadAmmo(shooter, gunItem, this, index, unloadBarrel, amount))
+                .orElse(0);
+    }
 
     /**
      * 切换开火模式时调用
@@ -95,32 +117,27 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      * 过热 tick 处理<br/>
      * 默认不做任何事情
      */
-    public void tickHeat(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter) {
-    }
-
-    ;
+    public void tickHeat(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter) {};
 
     /**
      * 初始化子弹角度和速度
-     *
-     * @param dataHolder     状态数据
-     * @param gunItem        枪械物品
-     * @param shooter        射击者
-     * @param projectile     子弹
-     * @param bulletCnt      多弹丸的子弹序数
+     * @param dataHolder 状态数据
+     * @param gunItem 枪械物品
+     * @param shooter 射击者
+     * @param projectile 子弹
+     * @param bulletCnt 多弹丸的子弹序数
      * @param processedSpeed 修正后的子弹初速
-     * @param inaccuracy     修正后的子弹不准确度
-     * @param pitch          射击方向
-     * @param yaw            射击方向
+     * @param inaccuracy 修正后的子弹不准确度
+     * @param pitch 射击方向
+     * @param yaw 射击方向
      */
     public void doBulletSpread(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter, Projectile projectile,
-                               int bulletCnt, float processedSpeed, float inaccuracy, float pitch, float yaw) {
+                                        int bulletCnt, float processedSpeed, float inaccuracy, float pitch, float yaw) {
         projectile.shootFromRotation(shooter, pitch, yaw, 0.0F, processedSpeed, inaccuracy);
     }
 
     /**
      * 换弹前的检查，完成如下检查：枪内弹药是否已经填满？玩家背包是否有可用弹药？是否为背包直读？
-     *
      * @param shooter 准备换弹的实体
      * @param gunItem 枪械物品
      * @return 是否满足换弹条件
@@ -168,8 +185,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
     /**
      * 将枪内的弹药全部退至背包（如果背包满了会丢到地上）。不会退枪膛内的弹药。
      * 目前，仅更换弹匣配件时调用。
-     *
-     * @param player  玩家
+     * @param player 玩家
      * @param gunItem 枪械物品
      */
     @Override
@@ -225,9 +241,8 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 枪械寻弹和扣除背包弹药逻辑
-     *
-     * @param itemHandler   目标实体的背包
-     * @param gunItem       枪械物品
+     * @param itemHandler 目标实体的背包
+     * @param gunItem 枪械物品
      * @param needAmmoCount 需要的弹药 (物品) 数量
      * @return 寻找到的弹药 (物品) 数量
      */
@@ -238,9 +253,8 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 枪械寻弹和扣除背包弹药逻辑
-     *
-     * @param itemHandler   目标实体的背包
-     * @param gunItem       枪械物品
+     * @param itemHandler 目标实体的背包
+     * @param gunItem 枪械物品
      * @param needAmmoCount 需要的弹药 (物品) 数量
      * @return 寻找到的弹药 (物品) 数量
      */
@@ -275,8 +289,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 扣除虚拟弹药逻辑，该方法具有通用的实现，放在此处
-     *
-     * @param gunItem       枪械物品
+     * @param gunItem 枪械物品
      * @param needAmmoCount 需要的弹药(物品)数量
      * @return 找到的弹药(物品)数量
      */
@@ -295,9 +308,9 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
         IAttachment iAttachment = IAttachment.getIAttachmentOrNull(attachmentItem);
         IGun iGun = IGun.getIGunOrNull(gun);
         if (iGun != null && iAttachment != null) {
-            ResourceLocation gunId = iGun.getGunId(gun);
+            AttachmentType attachmentType = iAttachment.getType(attachmentItem);
             ResourceLocation attachmentId = iAttachment.getAttachmentId(attachmentItem);
-            return AllowAttachmentTagMatcher.match(gunId, attachmentId);
+            return SlotAdapterHelper.allowsAttachment(gun, attachmentType, attachmentId);
         }
         return false;
     }
@@ -353,6 +366,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
                         .setAmmoCount(gunData.getAmmoAmount())
                         .setHeatData(gunData.hasHeatData())
                         .setAmmoInBarrel(true)
+                        .putAllVirtualAttachment(DefaultGunAttachments.defaults(entry.getKey()))
                         .build();
                 stacks.add(itemStack);
             }
@@ -393,7 +407,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 获取是否使用弹药直读
-     *
      * @param gun 枪械
      * @return 是否使用弹药直读
      */
@@ -413,7 +426,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 获取是否有供给弹药直读的弹药
-     *
      * @param gun 枪械
      * @return 是否有供给弹药直读的弹药
      */
@@ -449,7 +461,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 获取 RPM
-     *
      * @param gun 枪械
      * @return RPM 数值
      */
@@ -471,7 +482,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 获取是否可以趴下射击
-     *
      * @param gun 枪械
      * @return 是否可以趴下射击
      */

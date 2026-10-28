@@ -7,16 +7,18 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
 import org.jetbrains.annotations.Nullable;
 
+import static cn.sh1rocu.tacz.TaCZFabric.*;
+
 public abstract class ClientPlayerNetworkEvent extends BaseEvent {
     private final MultiPlayerGameMode multiPlayerGameMode;
     private final LocalPlayer player;
     private final Connection connection;
 
-    public static final Event<LoggingOutCallback> LOGGING_OUT = EventFactory.createArrayBacked(LoggingOutCallback.class, callbacks -> event -> {
+    public static final Event<LoggingOutCallback> LOGGING_OUT = EventFactory.createWithPhases(LoggingOutCallback.class, callbacks -> event -> {
         for (LoggingOutCallback callback : callbacks) {
             callback.post(event);
         }
-    });
+    }, HIGHEST, HIGH, Event.DEFAULT_PHASE, LOW, LOWEST);
 
     public static final Event<CloneCallback> CLONE = EventFactory.createArrayBacked(CloneCallback.class, callbacks -> event -> {
         for (CloneCallback callback : callbacks) {

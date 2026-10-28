@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
+import com.tacz.guns.util.time.GunTime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -42,7 +43,7 @@ public class ServerMessageSyncBaseTimestamp implements FabricPacket {
 
     @Environment(EnvType.CLIENT)
     public void handle(LocalPlayer player, PacketSender responseSender) {
-        long timestamp = System.currentTimeMillis();
+        long timestamp = GunTime.nowMillis();
         updateBaseTimestamp(timestamp);
         responseSender.sendPacket(new ClientMessageSyncBaseTimestamp());
     }

@@ -1,20 +1,23 @@
 package com.tacz.guns.compat.playeranimator;
 
+import cn.sh1rocu.tacz.api.event.RenderPlayerEvent;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.event.common.GunDrawEvent;
 import com.tacz.guns.api.event.common.GunMeleeEvent;
 import com.tacz.guns.api.event.common.GunReloadEvent;
 import com.tacz.guns.api.event.common.GunShootEvent;
+import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.resource.GunDisplayInstance;
-import com.tacz.guns.compat.playeranimator.animation.AnimationDataRegisterFactory;
-import com.tacz.guns.compat.playeranimator.animation.AnimationManager;
-import com.tacz.guns.compat.playeranimator.animation.PlayerAnimatorAssetManager;
-import com.tacz.guns.compat.playeranimator.animation.PlayerAnimatorLoader;
+import com.tacz.guns.compat.playeranimator.animation.*;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -34,6 +37,8 @@ public class PlayerAnimatorCompat {
         if (isInstalled()) {
             AnimationDataRegisterFactory.registerData();
             AnimationManager manager = new AnimationManager();
+            ClientTickEvents.END_CLIENT_TICK.register(manager::onClientTick);
+            RenderPlayerEvent.PRE.register((manager::onRenderPlayer));
             GunShootEvent.CALLBACK.register(manager::onFire);
             GunReloadEvent.CALLBACK.register(manager::onReload);
             GunMeleeEvent.CALLBACK.register(manager::onMelee);
@@ -67,6 +72,12 @@ public class PlayerAnimatorCompat {
         return false;
     }
 
+    public static boolean canPlayAnimation(LivingEntity entity) {
+        return IGun.getIGunOrNull(entity.getMainHandItem()) != null
+                && entity.getPose() != Pose.SLEEPING && !entity.onClimbable()
+                && !entity.isSwimming() && entity.getPose() != Pose.FALL_FLYING;
+    }
+
     public static void stopAllAnimation(LivingEntity livingEntity) {
         if (isInstalled() && livingEntity instanceof AbstractClientPlayer player) {
             AnimationManager.stopAllAnimation(player);
@@ -89,6 +100,11 @@ public class PlayerAnimatorCompat {
 
     public static boolean isInstalled() {
         return INSTALLED;
+    }
+
+    public static Runnable captureModelState(PlayerModel<?> model) {
+        return isInstalled() ? PlayerAnimatorModelState.capture(model) : () -> {
+        };
     }
 
     public static void registerReloadListener(Consumer<IdentifiableResourceReloadListener> register) {

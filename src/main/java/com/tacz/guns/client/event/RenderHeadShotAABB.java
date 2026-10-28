@@ -17,8 +17,9 @@ import net.minecraft.world.phys.AABB;
 @Environment(EnvType.CLIENT)
 public class RenderHeadShotAABB {
     public static void onRenderEntity(RenderLivingEvent.Post<?, ?> event) {
-        boolean canRender = Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes();
-        if (!canRender) {
+        Minecraft minecraft = Minecraft.getInstance();
+        boolean canRender = minecraft.getEntityRenderDispatcher().shouldRenderHitBoxes();
+        if (!canRender || minecraft.showOnlyReducedInfo()) {
             return;
         }
         if (!RenderConfig.HEAD_SHOT_DEBUG_HITBOX.get()) {

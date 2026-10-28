@@ -33,11 +33,17 @@ public class NetworkHandler {
         ServerPlayNetworking.registerGlobalReceiver(ClientMessageCraft.TYPE, ClientMessageCraft::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessagePlayerZoom.TYPE, ClientMessagePlayerZoom::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessageRefitGun.TYPE, ClientMessageRefitGun::handle);
+        ServerPlayNetworking.registerGlobalReceiver(ClientMessageInstallVirtualAttachment.TYPE, ClientMessageInstallVirtualAttachment::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessageUnloadAttachment.TYPE, ClientMessageUnloadAttachment::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessagePlayerBoltGun.TYPE, ClientMessagePlayerBoltGun::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessagePlayerMelee.TYPE, ClientMessagePlayerMelee::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessageSyncBaseTimestamp.TYPE, ClientMessageSyncBaseTimestamp::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessageLaserColor.TYPE, ClientMessageLaserColor::handle);
+        ServerPlayNetworking.registerGlobalReceiver(ClientMessageAmmoStorageInteract.TYPE, ClientMessageAmmoStorageInteract::handle);
+        ServerPlayNetworking.registerGlobalReceiver(ClientMessageAmmoStorageClick.TYPE, ClientMessageAmmoStorageClick::handle);
+        ServerPlayNetworking.registerGlobalReceiver(ClientMessageSetAttachmentVariant.TYPE, ClientMessageSetAttachmentVariant::handle);
+        ServerPlayNetworking.registerGlobalReceiver(ClientMessageSetSlotAdapter.TYPE, ClientMessageSetSlotAdapter::handle);
+        ServerPlayNetworking.registerGlobalReceiver(ClientMessagePlayerUnloadGun.TYPE, ClientMessagePlayerUnloadGun::handle);
 
         HandshakeNetworking.register(AcknowledgeC2SPacket.ID, AcknowledgeC2SPacket.class);
         HandshakeNetworking.register(SyncedEntityDataMappingS2CPacket.TYPE, SyncedEntityDataMappingS2CPacket.class);
@@ -57,7 +63,9 @@ public class NetworkHandler {
             });
         });
 
+        ClientPlayNetworking.registerGlobalReceiver(ServerMessageAmmoStorageContents.TYPE, ServerMessageAmmoStorageContents::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageSound.TYPE, ServerMessageSound::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ServerMessageBulletHitBlock.TYPE, ServerMessageBulletHitBlock::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageCraft.TYPE, ServerMessageCraft::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageRefreshRefitScreen.TYPE, ServerMessageRefreshRefitScreen::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageSwapItem.TYPE, ServerMessageSwapItem::handle);
@@ -67,12 +75,15 @@ public class NetworkHandler {
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageUpdateEntityData.TYPE, ServerMessageUpdateEntityData::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageSyncGunPack.TYPE, ServerMessageSyncGunPack::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunDraw.TYPE, ServerMessageGunDraw::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunFinishReload.TYPE, ServerMessageGunFinishReload::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunFire.TYPE, ServerMessageGunFire::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunFirePost.TYPE, ServerMessageGunFirePost::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunFireSelect.TYPE, ServerMessageGunFireSelect::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunMelee.TYPE, ServerMessageGunMelee::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunReload.TYPE, ServerMessageGunReload::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunShoot.TYPE, ServerMessageGunShoot::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageSyncBaseTimestamp.TYPE, ServerMessageSyncBaseTimestamp::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunUnload.TYPE, ServerMessageGunUnload::handle);
     }
 
     @SuppressWarnings("UnstableApiUsage")

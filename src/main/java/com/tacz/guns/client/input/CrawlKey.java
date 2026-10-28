@@ -1,11 +1,11 @@
 package com.tacz.guns.client.input;
 
-import cn.sh1rocu.tacz.api.event.InputEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.config.client.KeyConfig;
 import com.tacz.guns.config.sync.SyncConfig;
+import dev.architectury.event.events.common.TickEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
@@ -21,68 +21,58 @@ public class CrawlKey {
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_C,
             "key.category.tacz");
+    private static boolean controllerCrawlDown;
 
-    public static void onCrawlPress(InputEvent.Key event) {
-        if (isInGame() && CRAWL_KEY.matches(event.getKey(), event.getScanCode())) {
-            if (!SyncConfig.ENABLE_CRAWL.get()) {
-                return;
-            }
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player == null || player.isSpectator() || player.isPassenger()) {
-                return;
-            }
-            if (!(player instanceof IClientPlayerGunOperator operator)) {
-                return;
-            }
-            if (player.getMainHandItem().getItem() instanceof IGun iGun) {
-                // 如果不允许下蹲，则禁止进行下蹲
-                if (!iGun.isCanCrawl(player.getMainHandItem())) {
-                    IClientPlayerGunOperator.fromLocalPlayer(player).crawl(false);
-                    return;
-                }
-                boolean action = true;
-                if (!KeyConfig.HOLD_TO_CRAWL.get()) {
-                    action = !operator.isCrawl();
-                }
-                if (event.getAction() == GLFW.GLFW_PRESS) {
-                    IClientPlayerGunOperator.fromLocalPlayer(player).crawl(action);
-                }
-                if (KeyConfig.HOLD_TO_CRAWL.get() && event.getAction() == GLFW.GLFW_RELEASE) {
-                    IClientPlayerGunOperator.fromLocalPlayer(player).crawl(false);
-                }
-            }
-        }
+    public static boolean onCrawlPress() {
+        return onCrawlInput(true);
     }
 
     public static boolean onCrawlControllerPress(boolean isPress) {
+        controllerCrawlDown = isPress;
+        return onCrawlInput(isPress);
+    }
+
+    public static void setControllerCrawlDown(boolean isDown) {
+        controllerCrawlDown = isDown;
+    }
+
+    public static void onCrawlHoldingInput(Minecraft client) {
+//        if (event.phase != TickEvent.Phase.END) {
+//            return;
+//        }
         if (!isInGame()) {
-            return false;
+            controllerCrawlDown = false;
         }
-        if (!SyncConfig.ENABLE_CRAWL.get()) {
-            return false;
+        if (KeyConfig.HOLD_TO_CRAWL.get()) {
+            // 持续检查也能处理先松开修饰键，以及冷却期间松开主键的情况。
+            onCrawlInput(false);
         }
+    }
+
+    private static boolean onCrawlInput(boolean isPress) {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null || player.isSpectator() || player.isPassenger()) {
-            return false;
-        }
         if (!(player instanceof IClientPlayerGunOperator operator)) {
             return false;
         }
-        if (!IGun.mainHandHoldGun(player)) {
+        boolean holdToCrawl = KeyConfig.HOLD_TO_CRAWL.get();
+        IGun iGun = IGun.getIGunOrNull(player.getMainHandItem());
+        boolean inputEnabled = isInGame() && SyncConfig.ENABLE_CRAWL.get();
+        boolean playerAllowed = inputEnabled && !player.isSpectator() && !player.isPassenger();
+        boolean crawlAllowed = playerAllowed && (iGun == null
+                ? SyncConfig.ENABLE_CRAWL_WITHOUT_GUN.get() : iGun.isCanCrawl(player.getMainHandItem()));
+        if (!crawlAllowed) {
+            if (holdToCrawl && operator.isCrawl()) {
+                operator.crawl(false);
+            }
             return false;
         }
-        boolean action = true;
-        if (!KeyConfig.HOLD_TO_CRAWL.get()) {
-            action = !operator.isCrawl();
+        if (!isPress && !holdToCrawl) {
+            return false;
         }
-        if (isPress) {
-            IClientPlayerGunOperator.fromLocalPlayer(player).crawl(action);
-            return true;
+        boolean crawl = holdToCrawl ? CRAWL_KEY.isDown() || controllerCrawlDown : !operator.isCrawl();
+        if (operator.isCrawl() != crawl) {
+            operator.crawl(crawl);
         }
-        if (KeyConfig.HOLD_TO_CRAWL.get()) {
-            IClientPlayerGunOperator.fromLocalPlayer(player).crawl(false);
-            return true;
-        }
-        return false;
+        return true;
     }
 }

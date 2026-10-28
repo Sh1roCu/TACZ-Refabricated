@@ -9,6 +9,7 @@
     "minVersion": "0.5.0"
   },
   "mixins": [
+    "AbstractContainerScreenAccessor",
     "accessor.LootManagerAccessor",
     "common.AbstractMinecartMixin",
     "common.ArmorStandMixin",
@@ -49,6 +50,7 @@
     "client.LivingEntityRendererMixin",
     "client.MinecraftMixin",
     "client.MouseHandlerMixin",
+    "client.PlayerRendererMixin",
     "client.RenderTargetMixin",
     "client.SoundEngineMixin",
     "client.TextureAtlasMixin"

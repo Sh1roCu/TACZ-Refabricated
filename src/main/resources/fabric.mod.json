@@ -50,6 +50,7 @@
   "mixins": [
     "tacz.mixins.json",
     "tacz.fabric.mixins.json",
+    "tacz.iris.mixins.json",
     "tacz.compat.acceleratedrendering.mixins.json"
   ],
   "accessWidener": "tacz.accesswidener",

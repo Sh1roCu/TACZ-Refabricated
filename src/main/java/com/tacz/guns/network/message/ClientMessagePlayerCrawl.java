@@ -2,7 +2,6 @@ package com.tacz.guns.network.message;
 
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.entity.IGunOperator;
-import com.tacz.guns.config.sync.SyncConfig;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
@@ -33,10 +32,11 @@ public class ClientMessagePlayerCrawl implements FabricPacket {
         return TYPE;
     }
 
-    public void handle(ServerPlayer player, PacketSender responseSender) {
-        if (!SyncConfig.ENABLE_CRAWL.get()) {
+    public void handle(ServerPlayer entity, PacketSender responseSender) {
+        if (entity == null) {
             return;
         }
-        IGunOperator.fromLivingEntity(player).crawl(isCrawl);
+        // 进入条件由服务端趴下逻辑统一验证；禁用功能后仍允许退出。
+        IGunOperator.fromLivingEntity(entity).crawl(isCrawl);
     }
 }

@@ -8,6 +8,7 @@ import com.tacz.guns.client.gui.overlay.KillAmountOverlay;
 import com.tacz.guns.client.sound.SoundPlayManager;
 import com.tacz.guns.config.client.RenderConfig;
 import com.tacz.guns.entity.TargetMinecart;
+import com.tacz.guns.util.time.GunTime;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -19,7 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 @Environment(EnvType.CLIENT)
 public class ClientHitMark {
-    public static long lastHitTimestamp = 0;
+    public static long lastHitTimestamp = -1;
     public static float damageAmount = 0;
 
     public static void onEntityHurt(EntityHurtByGunEvent.Post event) {
@@ -41,8 +42,8 @@ public class ClientHitMark {
                 TimelessAPI.getGunDisplay(gunDisplayId, gunId).ifPresent(index -> SoundPlayManager.playFleshHitSound(player, index));
             }
 
-            if (hurtEntity instanceof TargetMinecart) {
-                if (System.currentTimeMillis() - lastHitTimestamp < RenderConfig.DAMAGE_COUNTER_RESET_TIME.get()) {
+            if(hurtEntity instanceof TargetMinecart){
+                if (GunTime.isWithin(lastHitTimestamp, RenderConfig.DAMAGE_COUNTER_RESET_TIME.get())) {
                     damageAmount += event.getAmount();
                 } else {
                     damageAmount = event.getAmount();
@@ -50,7 +51,7 @@ public class ClientHitMark {
                 float distance = player.distanceTo(event.getHurtEntity());
                 player.displayClientMessage(Component.translatable("message.tacz.target_minecart.hit", String.format("%.1f", damageAmount), String.format("%.2f", distance)), true);
 
-                lastHitTimestamp = System.currentTimeMillis();
+                lastHitTimestamp = GunTime.nowMillis();
             }
         }
     }
@@ -70,5 +71,10 @@ public class ClientHitMark {
                 RenderCrosshairEvent.markHeadShotTimestamp();
             }
         }
+    }
+
+    public static void resetTimestamp() {
+        lastHitTimestamp = -1;
+        damageAmount = 0;
     }
 }

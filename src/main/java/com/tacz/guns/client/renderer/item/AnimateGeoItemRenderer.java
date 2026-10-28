@@ -17,6 +17,7 @@ import com.tacz.guns.client.model.BedrockAnimatedModel;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.client.sound.SoundPlayManager;
 import com.tacz.guns.util.math.MathUtil;
+import com.tacz.guns.util.time.GunTime;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -88,7 +89,7 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
         if (stateMachine == null) {
             return false;
         }
-        return !stateMachine.isInitialized() && stateMachine.getExitingTime() < System.currentTimeMillis();
+        return !stateMachine.isInitialized() && stateMachine.getExitingTime() < GunTime.nowMillis();
     }
 
     public abstract CTX initContext(ItemStack stack, Player player, float partialTick);
@@ -135,7 +136,7 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
         });
         if (stateMachine.isInitialized()) {
             stateMachine.trigger(GunAnimationConstant.INPUT_PUT_AWAY);
-            
+
 //            KeepingItemRenderer.getRenderer().keep(stack, putAwayTime);
             stateMachine.exit();
             // 需要设置的比动画稍长些，避免意外的重初始化（可能是丢精度了）
@@ -254,7 +255,7 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
                 stateMachine.update();
             }
 
-            model.render(poseStack, ctx, getRenderType(stack), light, OverlayTexture.NO_OVERLAY);
+            model.render(poseStack, ctx, getRenderType(stack), light, OverlayTexture.NO_OVERLAY, bufferSource);
 
             // 渲染结束后清除动画变换
             model.cleanAnimationTransform();
@@ -276,7 +277,7 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
             poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
             model.render(poseStack, ctx, RenderType.entityCutout(
                     getTextureLocation(stack)
-            ), light, overlay);
+            ), light, overlay, bufferSource);
             poseStack.popPose();
         }
     }

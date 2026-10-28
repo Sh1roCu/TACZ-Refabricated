@@ -16,6 +16,7 @@ import com.tacz.guns.client.gui.GunRefitScreen;
 import com.tacz.guns.client.renderer.crosshair.CrosshairType;
 import com.tacz.guns.compat.shouldersurfing.ShoulderSurfingCompat;
 import com.tacz.guns.config.client.RenderConfig;
+import com.tacz.guns.util.time.GunTime;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -26,6 +27,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @Environment(EnvType.CLIENT)
@@ -40,15 +43,17 @@ public class RenderCrosshairEvent {
     /**
      * 当玩家手上拿着枪时，播放特定动画、或瞄准时需要隐藏准心
      */
-    public static void onRenderOverlay(GuiGraphics guiGraphics, Window window) {
+    public static void onRenderOverlay(GuiGraphics guiGraphics, Window window, float partialTick, AtomicBoolean cancelled) {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) {
+        if (player == null || player.isSpectator()) {
             return;
         }
         if (!IGun.mainHandHoldGun(player)) {
             return;
         }
-
+        // 全面替换成自己的
+        // event.setCanceled(true);
+        cancelled.set(true);
         // 击中显示
         renderHitMarker(guiGraphics, window);
         // 换弹进行时取消准心渲染
@@ -69,7 +74,7 @@ public class RenderCrosshairEvent {
         IClientPlayerGunOperator playerGunOperator = IClientPlayerGunOperator.fromLocalPlayer(player);
         TimelessAPI.getGunDisplay(stack).ifPresent(gunIndex -> {
             // 瞄准快要完成时，取消准心渲染
-            if (playerGunOperator.getClientAimingProgress(Minecraft.getInstance().getFrameTime()) > 0.9) {
+            if (playerGunOperator.getClientAimingProgress(partialTick) > 0.9) {
                 // 枪包可以强制显示准星
                 boolean forceShow = gunIndex.isShowCrosshair();
                 // 越肩视角可以强制显示准星
@@ -128,14 +133,13 @@ public class RenderCrosshairEvent {
     }
 
     private static void renderHitMarker(GuiGraphics graphics, Window window) {
-        long remainHitTime = System.currentTimeMillis() - hitTimestamp;
-        long remainKillTime = System.currentTimeMillis() - killTimestamp;
-        long remainHeadShotTime = System.currentTimeMillis() - headShotTimestamp;
+        long remainHitTime = GunTime.nowMillis() - hitTimestamp;
+        long remainKillTime = GunTime.nowMillis() - killTimestamp;
         float offset = RenderConfig.HIT_MARKET_START_POSITION.get().floatValue();
         float fadeTime;
 
-        if (remainKillTime > KEEP_TIME) {
-            if (remainHitTime > KEEP_TIME) {
+        if (!GunTime.isWithin(killTimestamp, KEEP_TIME)) {
+            if (!GunTime.isWithin(hitTimestamp, KEEP_TIME)) {
                 return;
             } else {
                 fadeTime = remainHitTime;
@@ -153,7 +157,7 @@ public class RenderCrosshairEvent {
 
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        if (remainHeadShotTime > KEEP_TIME) {
+        if (!GunTime.isWithin(headShotTimestamp, KEEP_TIME)) {
             RenderSystem.setShaderColor(1F, 1F, 1F, 1 - fadeTime / KEEP_TIME);
         } else {
             RenderSystem.setShaderColor(1F, 0, 0, 1 - fadeTime / KEEP_TIME);
@@ -166,14 +170,20 @@ public class RenderCrosshairEvent {
     }
 
     public static void markHitTimestamp() {
-        RenderCrosshairEvent.hitTimestamp = System.currentTimeMillis();
+        RenderCrosshairEvent.hitTimestamp = GunTime.nowMillis();
     }
 
     public static void markKillTimestamp() {
-        RenderCrosshairEvent.killTimestamp = System.currentTimeMillis();
+        RenderCrosshairEvent.killTimestamp = GunTime.nowMillis();
     }
 
     public static void markHeadShotTimestamp() {
-        RenderCrosshairEvent.headShotTimestamp = System.currentTimeMillis();
+        RenderCrosshairEvent.headShotTimestamp = GunTime.nowMillis();
+    }
+
+    public static void resetTimestamps() {
+        hitTimestamp = -1L;
+        killTimestamp = -1L;
+        headShotTimestamp = -1L;
     }
 }

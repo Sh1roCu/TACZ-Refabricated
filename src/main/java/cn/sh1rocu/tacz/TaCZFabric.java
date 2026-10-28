@@ -3,6 +3,7 @@ package cn.sh1rocu.tacz;
 import cn.sh1rocu.tacz.api.event.*;
 import cn.sh1rocu.tacz.util.forge.EnumArgument;
 import com.tacz.guns.GunMod;
+import com.tacz.guns.api.event.common.GunFireEvent;
 import com.tacz.guns.api.event.server.AmmoHitBlockEvent;
 import com.tacz.guns.config.ClientConfig;
 import com.tacz.guns.config.CommonConfig;
@@ -23,10 +24,12 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
@@ -115,5 +118,19 @@ public class TaCZFabric implements ModInitializer {
 
         ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(TravelToDimensionEvent::onTravelToDimension);
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(TravelToDimensionEvent::onTravelToDimension);
+
+        AttackBlockCallback.EVENT.register(GunPegboardInteractionEvent::onLeftClickBlock);
+
+        UseBlockCallback.EVENT.addPhaseOrdering(HIGHEST, HIGH);
+        UseBlockCallback.EVENT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+        UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
+        UseBlockCallback.EVENT.addPhaseOrdering(LOW, LOWEST);
+
+        UseBlockCallback.EVENT.register(LOW, AmmoStorageInteractionEvent::onRightClickBlock);
+
+        UseBlockCallback.EVENT.register(GunDisplayCaseInteractionEvent::onRightClickBlock);
+        AttackBlockCallback.EVENT.register(GunDisplayCaseInteractionEvent::onLeftClickBlock);
+
+        GunFireEvent.CALLBACK.register(LOWEST, GunSoundAngerEvent::onGunFire);
     }
 }
