@@ -1,4 +1,4 @@
-package cn.sh1rocu.tacz.mixin.accessor;
+package cn.sh1rocu.tacz.mixin.client.accessor;
 
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;

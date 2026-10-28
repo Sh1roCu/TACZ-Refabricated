@@ -1,4 +1,4 @@
-package cn.sh1rocu.tacz.mixin;
+package cn.sh1rocu.tacz.mixin.client.accessor;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.spongepowered.asm.mixin.Mixin;

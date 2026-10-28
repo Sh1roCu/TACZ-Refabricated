@@ -132,7 +132,7 @@ dependencies {
     modCompileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     annotationProcessor 'com.google.code.findbugs:jsr305:3.0.2'
 
-    modImplementation(include("libs:simplebedrockmodel-fabric:2.6.1+mc1.20.1"))
+    modImplementation(include("libs:simplebedrockmodel-fabric:2.6.1.2+mc1.20.1"))
     implementation("com.maydaymemory:mae:1.1.4") {
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
         exclude group: 'it.unimi.dsi', module: 'fastutil'

@@ -1,6 +1,6 @@
 package com.tacz.guns.client.gui;
 
-import cn.sh1rocu.tacz.mixin.accessor.ScreenAccessor;
+import cn.sh1rocu.tacz.mixin.client.accessor.ScreenAccessor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;

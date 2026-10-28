@@ -1,6 +1,6 @@
 package com.tacz.guns.client.gui;
 
-import cn.sh1rocu.tacz.mixin.accessor.ScreenAccessor;
+import cn.sh1rocu.tacz.mixin.client.accessor.ScreenAccessor;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;

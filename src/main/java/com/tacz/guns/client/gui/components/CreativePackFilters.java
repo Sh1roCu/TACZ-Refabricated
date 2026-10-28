@@ -1,6 +1,6 @@
 package com.tacz.guns.client.gui.components;
 
-import cn.sh1rocu.tacz.mixin.AbstractContainerScreenAccessor;
+import cn.sh1rocu.tacz.mixin.client.accessor.AbstractContainerScreenAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.DefaultAssets;

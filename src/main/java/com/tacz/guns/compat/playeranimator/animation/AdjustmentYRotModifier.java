@@ -1,6 +1,5 @@
 package com.tacz.guns.compat.playeranimator.animation;
 
-import cn.sh1rocu.tacz.mixin.accessor.MinecraftAccessor;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import dev.kosmx.playerAnim.api.layered.modifier.AdjustmentModifier;

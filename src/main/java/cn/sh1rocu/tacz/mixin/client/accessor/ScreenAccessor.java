@@ -1,4 +1,4 @@
-package cn.sh1rocu.tacz.mixin.accessor;
+package cn.sh1rocu.tacz.mixin.client.accessor;
 
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;

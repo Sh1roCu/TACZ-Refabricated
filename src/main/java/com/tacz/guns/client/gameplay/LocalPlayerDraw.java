@@ -1,7 +1,6 @@
 package com.tacz.guns.client.gameplay;
 
 import cn.sh1rocu.tacz.api.LogicalSide;
-import cn.sh1rocu.tacz.mixin.accessor.BlockableEventLoopAccessor;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.event.common.GunDrawEvent;
 import com.tacz.guns.api.item.IGun;

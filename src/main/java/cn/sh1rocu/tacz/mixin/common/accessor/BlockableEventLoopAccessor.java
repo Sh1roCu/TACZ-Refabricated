@@ -1,4 +1,4 @@
-package cn.sh1rocu.tacz.mixin.accessor;
+package cn.sh1rocu.tacz.mixin.common.accessor;
 
 import net.minecraft.util.thread.BlockableEventLoop;
 import org.spongepowered.asm.mixin.Mixin;

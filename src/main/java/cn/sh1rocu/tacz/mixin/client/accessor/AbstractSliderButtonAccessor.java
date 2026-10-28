@@ -1,4 +1,4 @@
-package cn.sh1rocu.tacz.mixin.accessor;
+package cn.sh1rocu.tacz.mixin.client.accessor;
 
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.resources.ResourceLocation;

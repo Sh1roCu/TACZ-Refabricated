@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.util.forge;
 
-import cn.sh1rocu.tacz.mixin.accessor.AbstractSliderButtonAccessor;
+import cn.sh1rocu.tacz.mixin.client.accessor.AbstractSliderButtonAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;

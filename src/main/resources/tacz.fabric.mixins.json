@@ -9,8 +9,8 @@
     "minVersion": "0.5.0"
   },
   "mixins": [
-    "AbstractContainerScreenAccessor",
-    "accessor.LootManagerAccessor",
+    "common.accessor.BlockableEventLoopAccessor",
+    "common.accessor.LootManagerAccessor",
     "common.AbstractMinecartMixin",
     "common.ArmorStandMixin",
     "common.BundlePacketMixin",
@@ -36,10 +36,10 @@
     "compat.tweakeroo.ItemMixin"
   ],
   "client": [
-    "accessor.AbstractSliderButtonAccessor",
-    "accessor.BlockableEventLoopAccessor",
-    "accessor.MinecraftAccessor",
-    "accessor.ScreenAccessor",
+    "client.accessor.AbstractContainerScreenAccessor",
+    "client.accessor.AbstractSliderButtonAccessor",
+    "client.accessor.MinecraftAccessor",
+    "client.accessor.ScreenAccessor",
     "client.AbstractPlayerMixin",
     "client.ChannelAccessHandleMixin",
     "client.ClientLevelMixin",

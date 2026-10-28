@@ -1,10 +1,9 @@
 package com.tacz.guns.loot;
 
-import cn.sh1rocu.tacz.mixin.accessor.LootManagerAccessor;
+import cn.sh1rocu.tacz.mixin.common.accessor.LootManagerAccessor;
 import com.tacz.guns.resource.CommonAssetsManager;
 import com.tacz.guns.resource.pojo.data.loot.LootTableInjection;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;

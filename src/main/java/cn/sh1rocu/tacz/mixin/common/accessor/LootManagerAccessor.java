@@ -1,4 +1,4 @@
-package cn.sh1rocu.tacz.mixin.accessor;
+package cn.sh1rocu.tacz.mixin.common.accessor;
 
 import net.minecraft.world.level.storage.loot.LootDataId;
 import net.minecraft.world.level.storage.loot.LootDataManager;
