@@ -1,5 +1,6 @@
 package com.tacz.guns.resource;
 
+import cn.sh1rocu.tacz.util.VersionConverter;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -19,6 +20,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,18 +96,18 @@ public final class VersionChecker {
     private static boolean modVersionAllMatch(Info info) throws VersionParsingException {
         HashMap<String, String> dependencies = info.getDependencies();
         for (String modId : dependencies.keySet()) {
-            if (!modVersionMatch(modId, dependencies.get(modId))) {
+            if (!modVersionMatch(modId, VersionConverter.toList(dependencies.get(modId)))) {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean modVersionMatch(String modId, String version) throws VersionParsingException {
-        VersionPredicate versionRange = VersionPredicate.parse(version);
+    private static boolean modVersionMatch(String modId, Collection<String> version) throws VersionParsingException {
+        Collection<VersionPredicate> versionRanges = VersionPredicate.parse(version);
         return FabricLoader.getInstance().getModContainer(modId).map(mod -> {
             Version modVersion = mod.getMetadata().getVersion();
-            return versionRange.test(modVersion);
+            return versionRanges.stream().anyMatch(p -> p.test(modVersion));
         }).orElse(false);
     }
 

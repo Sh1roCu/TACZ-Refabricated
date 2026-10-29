@@ -1,5 +1,6 @@
 package com.tacz.guns.resource;
 
+import cn.sh1rocu.tacz.util.VersionConverter;
 import cn.sh1rocu.tacz.util.forge.DelegatingPackResources;
 import cn.sh1rocu.tacz.util.forge.PathPackResources;
 import com.google.gson.JsonIOException;
@@ -36,10 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -242,19 +240,20 @@ public enum GunPackLoader implements RepositorySource {
     private static boolean modVersionAllMatch(PackMeta info) throws VersionParsingException {
         HashMap<String, String> dependencies = info.getDependencies();
         for (String modId : dependencies.keySet()) {
-            if (!modVersionMatch(modId, dependencies.get(modId))) {
+            if (!modVersionMatch(modId, VersionConverter.toList(dependencies.get(modId)))) {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean modVersionMatch(String modId, String version) throws VersionParsingException {
-        VersionPredicate versionRange = VersionPredicate.parse(version);
+    private static boolean modVersionMatch(String modId, Collection<String> version) throws VersionParsingException {
+        Collection<VersionPredicate> versionRanges = VersionPredicate.parse(version);
         return FabricLoader.getInstance().getModContainer(modId).map(mod -> {
             Version modVersion = mod.getMetadata().getVersion();
-            return versionRange.test(modVersion);
+            return versionRanges.stream().anyMatch(p -> p.test(modVersion));
         }).orElse(false);
+
     }
 
 
