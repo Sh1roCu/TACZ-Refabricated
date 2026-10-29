@@ -1,7 +1,7 @@
 package cn.sh1rocu.tacz.client;
 
-import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
 import cn.sh1rocu.simplebedrockmodel.api.event.RenderFrameEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
 import cn.sh1rocu.tacz.api.event.*;
 import cn.sh1rocu.tacz.api.extension.IItem;
 import com.tacz.guns.api.client.event.BeforeRenderHandEvent;
@@ -76,7 +76,7 @@ public class TaCZFabricClient implements ClientModInitializer {
 
         InputEvent.InteractionKeyMappingTriggered.EVENT.register(ClientPreventGunClick::onClickInput);
 
-        ClientPlayConnectionEvents.DISCONNECT.register(CommonNetworkCacheEvent::onClientPlayerLoggingIn);
+        ClientPlayConnectionEvents.JOIN.register(CommonNetworkCacheEvent::onClientPlayerLoggingIn);
 
         // RenderHandEvent.EVENT.register(FirstPersonRenderEvent::onRenderHand);
 
@@ -86,7 +86,7 @@ public class TaCZFabricClient implements ClientModInitializer {
         ClientTickEvents.START_CLIENT_TICK.register(client -> InventoryEvent.onPlayerChangeSelect(client, false));
         ClientTickEvents.END_CLIENT_TICK.register(client -> InventoryEvent.onPlayerChangeSelect(client, true));
         SwapItemWithOffHand.CALLBACK.register(InventoryEvent::onPlayerSwapMainHand);
-        ClientPlayerNetworkEvent.LOGGING_OUT.register(InventoryEvent::onPlayerLoggedOut);
+        ClientPlayConnectionEvents.DISCONNECT.register(InventoryEvent::onPlayerLoggedOut);
 
         PlayerEvent.LOGGED_IN.register(PlayerEnterWorld::onPlayerEnterWorld);
 
@@ -131,7 +131,12 @@ public class TaCZFabricClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(DisplayCaseLockHintOverlay::onClientTick);
 
-        ClientPlayerNetworkEvent.LOGGING_OUT.register(LOWEST, ClientGunTimeResetEvent::onLoggingOut);
+
+        ClientPlayConnectionEvents.DISCONNECT.addPhaseOrdering(HIGHEST, HIGH);
+        ClientPlayConnectionEvents.DISCONNECT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+        ClientPlayConnectionEvents.DISCONNECT.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
+        ClientPlayConnectionEvents.DISCONNECT.addPhaseOrdering(LOW, LOWEST);
+        ClientPlayConnectionEvents.DISCONNECT.register(LOWEST, ClientGunTimeResetEvent::onLoggingOut);
 
         WorldRenderEvents.AFTER_TRANSLUCENT.register(ScopeThermalRenderer::onWorldStage);
 

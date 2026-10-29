@@ -9,6 +9,7 @@ import com.tacz.guns.client.resource.ClientIndexManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -73,7 +74,7 @@ public class InventoryEvent {
         IClientPlayerGunOperator.fromLocalPlayer(player).draw(player.getMainHandItem());
     }
 
-    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
+    public static void onPlayerLoggedOut(ClientPacketListener handler, Minecraft client) {
         // 离开游戏时重置客户端 draw 状态
         oldHotbarSelected = -1;
         oldHotbarSelectItem = ItemStack.EMPTY;
