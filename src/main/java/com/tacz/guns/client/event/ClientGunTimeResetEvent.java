@@ -16,6 +16,7 @@ import com.tacz.guns.util.time.GunTime;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 
 /**
@@ -26,7 +27,7 @@ public final class ClientGunTimeResetEvent {
     private ClientGunTimeResetEvent() {
     }
 
-    public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+    public static void onLoggingOut(ClientPacketListener handler, Minecraft client) {
         ScopeLensRenderer.close();
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) {

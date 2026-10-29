@@ -3,7 +3,6 @@ package cn.sh1rocu.tacz.mixin.client;
 import cn.sh1rocu.tacz.api.event.AddPackFindersEvent;
 import cn.sh1rocu.tacz.api.event.InputEvent;
 import cn.sh1rocu.tacz.api.mixin.PackRepositoryExtension;
-import cn.sh1rocu.tacz.util.forge.ClientHooks;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -12,8 +11,6 @@ import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.Timer;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.particle.ParticleEngine;
@@ -54,25 +51,10 @@ public abstract class MinecraftMixin {
     @Nullable
     public LocalPlayer player;
 
-    @Shadow
-    private volatile boolean pause;
-
-    @Shadow
-    private float pausePartialTick;
-
-    @Shadow
-    @Final
-    private Timer timer;
-
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/repository/PackRepository;reload()V"))
     private void tacz$addPacks(GameConfig gameConfig, CallbackInfo ci) {
         AddPackFindersEvent event = new AddPackFindersEvent(PackType.CLIENT_RESOURCES, ((PackRepositoryExtension) this.getResourcePackRepository())::tacz$addPackFinder, false);
         AddPackFindersEvent.CALLBACK.invoker().onAddPackFinders(event);
-    }
-
-    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetData()V"))
-    private void tacz$disconnect(Screen screen, CallbackInfo ci) {
-        ClientHooks.firePlayerLogout(this.gameMode, this.player);
     }
 
     @Unique
