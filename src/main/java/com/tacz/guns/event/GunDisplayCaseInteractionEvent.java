@@ -66,9 +66,11 @@ public class GunDisplayCaseInteractionEvent {
         }
 
         InteractionResult result = InteractionResult.PASS;
-
         // event.setCanceled(true);
         result = InteractionResult.FAIL;
+        if (level.isClientSide()) {
+            result = InteractionResult.SUCCESS;
+        }
         boolean shouldDrop = !player.isCreative() || player.isShiftKeyDown();
         if (!level.isClientSide() && (shouldDrop ? displayCase.dropItem(slot) : displayCase.removeItem(slot))) {
             level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
