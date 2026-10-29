@@ -2,6 +2,8 @@ package com.tacz.guns.network.message;
 
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.client.event.SwapItemWithOffHand;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -21,6 +23,7 @@ public class ServerMessageSwapItem implements CustomPacketPayload {
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageSwapItem message, ClientPlayNetworking.Context context) {
         SwapItemWithOffHand.CALLBACK.invoker().post(new SwapItemWithOffHand());
     }

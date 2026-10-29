@@ -40,6 +40,7 @@ public class ServerMessageGunShoot implements CustomPacketPayload {
         this.gunItemStack = gunItemStack;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageGunShoot message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> doClientEvent(message));
     }

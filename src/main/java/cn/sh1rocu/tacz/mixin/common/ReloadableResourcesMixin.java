@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.mixin.common;
 
-import cn.sh1rocu.tacz.util.forge.EventHooks;
+import cn.sh1rocu.tacz.util.neoforge.EventHooks;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.LayeredRegistryAccess;

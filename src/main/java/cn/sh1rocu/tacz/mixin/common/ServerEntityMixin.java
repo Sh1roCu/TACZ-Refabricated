@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.mixin.common;
 
-import cn.sh1rocu.tacz.util.forge.network.IEntityExtension;
+import cn.sh1rocu.tacz.util.neoforge.network.IEntityExtension;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerEntity;

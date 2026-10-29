@@ -1,6 +1,26 @@
-package com.tacz.guns.compat.kubejs.events;
-
-public class GunKubeJSEvents {
+//package com.tacz.guns.compat.kubejs.events;
+//
+//import cn.sh1rocu.tacz.api.event.BaseEvent;
+//import cn.sh1rocu.tacz.api.event.ICancellableEvent;
+//import com.tacz.guns.api.client.event.BeforeRenderHandEvent;
+//import com.tacz.guns.api.client.event.RenderItemInHandBobEvent;
+//import com.tacz.guns.api.client.event.RenderLevelBobEvent;
+//import com.tacz.guns.api.client.event.SwapItemWithOffHand;
+//import com.tacz.guns.api.event.common.*;
+//import com.tacz.guns.api.event.server.AmmoHitBlockEvent;
+//import com.tacz.guns.api.item.IGun;
+//import dev.latvian.mods.kubejs.event.EventExit;
+//import dev.latvian.mods.kubejs.event.EventGroup;
+//import dev.latvian.mods.kubejs.event.EventJS;
+//import dev.latvian.mods.kubejs.script.ScriptTypeHolder;
+//import dev.latvian.mods.rhino.util.HideFromJS;
+//import net.minecraft.resources.ResourceLocation;
+//import net.minecraft.world.item.ItemStack;
+//
+//import javax.annotation.Nonnull;
+//import javax.annotation.Nullable;
+//
+//public class GunKubeJSEvents {
 //    public static final EventGroup GROUP = EventGroup.of("TimelessGunEvents");
 //
 //    public static abstract class GunEventJS<E extends BaseEvent> extends EventJS implements TimelessForgeEventWrappers.ForgeEventWrapper<E> {
@@ -137,14 +157,32 @@ public class GunKubeJSEvents {
 //        }
 //
 //        @HideFromJS
-//        @Nullable
+//        @Override
 //        public ScriptTypeHolder getTypeHolder() {
-//            return event.getLogicalSide().isClient() ? ScriptType.CLIENT : ScriptType.SERVER;
+//            return (ScriptTypeHolder) event.getEntity();
 //        }
 //    }
 //
 //    public static class GunFireEventJS extends GunEventJS<GunFireEvent> implements TimelessForgeEventWrappers.GunFireWrapper {
 //        public GunFireEventJS(GunFireEvent event) {
+//            super(event);
+//        }
+//
+//        @Override
+//        @Nonnull
+//        protected ItemStack getEventItemStack() {
+//            return event.getGunItemStack();
+//        }
+//
+//        @HideFromJS
+//        @Override
+//        public ScriptTypeHolder getTypeHolder() {
+//            return (ScriptTypeHolder) event.getShooter();
+//        }
+//    }
+//
+//    public static class GunFirePostEventJS extends GunEventJS<GunFirePostEvent> implements TimelessForgeEventWrappers.GunFirePostWrapper {
+//        public GunFirePostEventJS(GunFirePostEvent event) {
 //            super(event);
 //        }
 //
@@ -282,4 +320,4 @@ public class GunKubeJSEvents {
 //            super(event);
 //        }
 //    }
-}
+//}

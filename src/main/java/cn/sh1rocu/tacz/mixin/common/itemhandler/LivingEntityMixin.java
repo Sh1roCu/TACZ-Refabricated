@@ -1,7 +1,7 @@
 package cn.sh1rocu.tacz.mixin.common.itemhandler;
 
 import cn.sh1rocu.tacz.api.mixin.ItemHandlerCapability;
-import cn.sh1rocu.tacz.util.forge.LazyOptional;
+import cn.sh1rocu.tacz.util.neoforge.LazyOptional;
 import cn.sh1rocu.tacz.util.itemhandler.IItemHandler;
 import cn.sh1rocu.tacz.util.itemhandler.entity.EntityEquipmentInvWrapper;
 import net.minecraft.core.Direction;

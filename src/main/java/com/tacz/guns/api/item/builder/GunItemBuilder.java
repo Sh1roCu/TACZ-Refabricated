@@ -8,6 +8,7 @@ import com.tacz.guns.api.item.gun.AbstractGunItem;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.api.item.gun.GunItemManager;
 import com.tacz.guns.init.ModItems;
+import com.tacz.guns.util.VirtualOemAttachment;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -22,6 +23,7 @@ public final class GunItemBuilder {
     private FireMode fireMode = FireMode.UNKNOWN;
     private boolean bulletInBarrel = false;
     private EnumMap<AttachmentType, ResourceLocation> attachments = Maps.newEnumMap(AttachmentType.class);
+    private EnumMap<AttachmentType, ResourceLocation> virtualAttachments = Maps.newEnumMap(AttachmentType.class);
 
     private GunItemBuilder() {
     }
@@ -65,6 +67,11 @@ public final class GunItemBuilder {
         return this;
     }
 
+    public GunItemBuilder putAllVirtualAttachment(EnumMap<AttachmentType, ResourceLocation> attachments) {
+        this.virtualAttachments = attachments;
+        return this;
+    }
+
     public GunItemBuilder setHeatData(boolean heatData) {
         this.heatData = heatData;
         return this;
@@ -82,13 +89,12 @@ public final class GunItemBuilder {
             iGun.setCurrentAmmoCount(gun, this.ammoCount);
             iGun.setBulletInBarrel(gun, this.bulletInBarrel);
             if (heatData) iGun.setHeatAmount(gun, 0f);
-            this.attachments.forEach((type, id) -> {
-                ItemStack attachmentStack = AttachmentItemBuilder.create().setId(id).build();
-                iGun.installAttachment(provider, gun, attachmentStack);
-            });
+            installAttachments(gun, iGun, provider);
         }
         return gun;
     }
+
+    public ItemStack build() { return build(null); }
 
     public ItemStack build(HolderLookup.Provider provider) {
         String itemType = TimelessAPI.getCommonGunIndex(gunId).map(index -> index.getPojo().getItemType()).orElse(null);
@@ -107,11 +113,23 @@ public final class GunItemBuilder {
             iGun.setFireMode(gun, this.fireMode);
             iGun.setCurrentAmmoCount(gun, this.ammoCount);
             iGun.setBulletInBarrel(gun, this.bulletInBarrel);
-            this.attachments.forEach((type, id) -> {
-                ItemStack attachmentStack = AttachmentItemBuilder.create().setId(id).build();
-                iGun.installAttachment(provider, gun, attachmentStack);
-            });
+            installAttachments(gun, iGun, provider);
         }
         return gun;
+    }
+
+    private void installAttachments(ItemStack gun, IGun iGun, HolderLookup.Provider provider) {
+        this.virtualAttachments.forEach((type, id) -> {
+            if (this.attachments.containsKey(type)) {
+                return;
+            }
+            ItemStack attachmentStack = AttachmentItemBuilder.create().setId(id).build();
+            VirtualOemAttachment.mark(attachmentStack);
+            iGun.installAttachment(provider == null ? net.minecraft.core.RegistryAccess.fromRegistryOfRegistries(net.minecraft.core.registries.BuiltInRegistries.REGISTRY) : provider, gun, attachmentStack);
+        });
+        this.attachments.forEach((type, id) -> {
+            ItemStack attachmentStack = AttachmentItemBuilder.create().setId(id).build();
+            iGun.installAttachment(provider == null ? net.minecraft.core.RegistryAccess.fromRegistryOfRegistries(net.minecraft.core.registries.BuiltInRegistries.REGISTRY) : provider, gun, attachmentStack);
+        });
     }
 }

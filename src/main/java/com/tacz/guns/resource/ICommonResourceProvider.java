@@ -1,11 +1,10 @@
 package com.tacz.guns.resource;
 
 import com.tacz.guns.resource.filter.RecipeFilter;
-import com.tacz.guns.resource.index.CommonAmmoIndex;
-import com.tacz.guns.resource.index.CommonAttachmentIndex;
-import com.tacz.guns.resource.index.CommonBlockIndex;
-import com.tacz.guns.resource.index.CommonGunIndex;
+import com.tacz.guns.resource.index.*;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
+import com.tacz.guns.resource.pojo.data.attachment.SlotAdapterData;
+import com.tacz.guns.resource.pojo.data.attachment.VariantData;
 import com.tacz.guns.resource.pojo.data.block.BlockData;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +19,10 @@ public interface ICommonResourceProvider {
 
     @Nullable AttachmentData getAttachmentData(ResourceLocation attachmentId);
 
+    @Nullable VariantData getAttachmentVariantData(ResourceLocation variantDataId);
+
+    @Nullable SlotAdapterData getSlotAdapterData(ResourceLocation adapterDataId);
+
     @Nullable BlockData getBlockData(ResourceLocation id);
 
     @Nullable RecipeFilter getRecipeFilter(ResourceLocation id);
@@ -29,6 +32,10 @@ public interface ICommonResourceProvider {
     @Nullable CommonAmmoIndex getAmmoIndex(ResourceLocation ammoId);
 
     @Nullable CommonAttachmentIndex getAttachmentIndex(ResourceLocation attachmentId);
+
+    @Nullable CommonAttachmentVariantIndex getAttachmentVariantIndex(ResourceLocation variantId);
+
+    @Nullable CommonSlotAdapterIndex getSlotAdapterIndex(ResourceLocation adapterId);
 
     @Nullable CommonBlockIndex getBlockIndex(ResourceLocation blockId);
 
@@ -40,6 +47,10 @@ public interface ICommonResourceProvider {
     Set<Map.Entry<ResourceLocation, CommonAmmoIndex>> getAllAmmos();
 
     Set<Map.Entry<ResourceLocation, CommonAttachmentIndex>> getAllAttachments();
+
+    Set<Map.Entry<ResourceLocation, CommonAttachmentVariantIndex>> getAllAttachmentVariants();
+
+    Set<Map.Entry<ResourceLocation, CommonSlotAdapterIndex>> getAllSlotAdapters();
 
     Set<Map.Entry<ResourceLocation, CommonBlockIndex>> getAllBlocks();
 

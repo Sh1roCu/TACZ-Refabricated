@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.mixin.client;
 
-import cn.sh1rocu.tacz.util.forge.ClientHooks;
+import cn.sh1rocu.tacz.util.neoforge.ClientHooks;
 import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import org.spongepowered.asm.mixin.Mixin;

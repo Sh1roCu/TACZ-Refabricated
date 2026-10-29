@@ -58,6 +58,7 @@ public record ServerMessageGunHurt(int bulletId, int hurtEntityId, int attackerI
         return new ServerMessageGunHurt(bulletId, hurtEntityId, attackerId, gunId, gunDisplayId, amount, isHeadShot, headshotMultiplier);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageGunHurt message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> onHurt(message));
     }

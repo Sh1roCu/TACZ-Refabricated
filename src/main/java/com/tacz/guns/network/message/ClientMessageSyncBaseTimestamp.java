@@ -3,6 +3,7 @@ package com.tacz.guns.network.message;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
+import com.tacz.guns.util.time.GunTime;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -28,9 +29,12 @@ public class ClientMessageSyncBaseTimestamp implements CustomPacketPayload {
     private static final Marker MARKER = MarkerFactory.getMarker("SYNC_BASE_TIMESTAMP");
 
     public static void handle(ClientMessageSyncBaseTimestamp message, ServerPlayNetworking.Context context) {
-        long timestamp = System.currentTimeMillis();
         context.server().execute(() -> {
             ServerPlayer entity = context.player();
+            long timestamp = GunTime.nowMillis();
+            if (entity == null) {
+                return;
+            }
             ShooterDataHolder dataHolder = IGunOperator.fromLivingEntity(entity).getDataHolder();
             dataHolder.baseTimestamp = timestamp;
             GunMod.LOGGER.debug(MARKER, "Update server base timestamp: {}", dataHolder.baseTimestamp);

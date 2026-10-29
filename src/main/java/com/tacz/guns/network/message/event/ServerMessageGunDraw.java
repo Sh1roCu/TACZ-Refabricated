@@ -34,6 +34,7 @@ public record ServerMessageGunDraw(int entityId, ItemStack previousGunItem,
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageGunDraw message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> doClientEvent(message));
     }

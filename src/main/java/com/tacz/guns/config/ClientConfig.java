@@ -4,6 +4,8 @@ import com.tacz.guns.config.client.*;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ClientConfig {
+    public static ModConfigSpec CLIENT_CONFIG_SPEC;
+
     public static ModConfigSpec init() {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         KeyConfig.init(builder);
@@ -11,6 +13,7 @@ public class ClientConfig {
         ResourceConfig.init(builder);
         SoundConfig.init(builder);
         ZoomConfig.init(builder);
-        return builder.build();
+        CLIENT_CONFIG_SPEC = builder.build();
+        return CLIENT_CONFIG_SPEC;
     }
 }

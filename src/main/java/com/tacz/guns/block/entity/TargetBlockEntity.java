@@ -126,13 +126,6 @@ public class TargetBlockEntity extends BlockEntity implements Nameable {
         }
     }
 
-    // TODO
-//    @Override
-//    @Environment(EnvType.CLIENT)
-//    public AABB getRenderBoundingBox() {
-//        return AABB.encapsulatingFullBlocks(worldPosition.offset(-2, 0, -2), worldPosition.offset(2, 2, 2));
-//    }
-
     public void hit(Level level, BlockState state, BlockHitResult hit, boolean isUpperBlock) {
         if (this.level != null && state.getValue(STAND)) {
             BlockPos blockPos = hit.getBlockPos();

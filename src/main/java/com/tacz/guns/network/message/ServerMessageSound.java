@@ -2,6 +2,8 @@ package com.tacz.guns.network.message;
 
 import com.tacz.guns.GunMod;
 import com.tacz.guns.client.sound.SoundPlayManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -29,6 +31,7 @@ public record ServerMessageSound(int entityId, ResourceLocation gunId, ResourceL
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageSound message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> SoundPlayManager.playMessageSound(message));
     }

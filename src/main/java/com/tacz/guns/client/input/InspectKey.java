@@ -1,6 +1,5 @@
 package com.tacz.guns.client.input;
 
-import cn.sh1rocu.tacz.api.event.InputEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import net.fabricmc.api.EnvType;
@@ -19,18 +18,8 @@ public class InspectKey {
             GLFW.GLFW_KEY_H,
             "key.category.tacz");
 
-    public static void onInspectPress(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INSPECT_KEY.matches(event.getKey(), event.getScanCode())) {
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player == null || player.isSpectator()) {
-                return;
-            }
-            IClientPlayerGunOperator.fromLocalPlayer(player).inspect();
-        }
-    }
-
-    public static boolean onInspectControllerPress(boolean isPress) {
-        if (isInGame() && isPress) {
+    public static boolean onInspectPress() {
+        if (isInGame()) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null || player.isSpectator()) {
                 return false;
@@ -39,5 +28,9 @@ public class InspectKey {
             return true;
         }
         return false;
+    }
+
+    public static boolean onInspectControllerPress(boolean isPress) {
+        return isPress && onInspectPress();
     }
 }

@@ -7,6 +7,7 @@ import com.tacz.guns.api.GunProperty;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.event.common.GunFireEvent;
+import com.tacz.guns.api.event.common.GunFirePostEvent;
 import com.tacz.guns.api.item.IAmmo;
 import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.attachment.AttachmentType;
@@ -17,23 +18,32 @@ import com.tacz.guns.api.util.LuaNbtAccessor;
 import com.tacz.guns.client.animation.statemachine.GunAnimationStateContext;
 import com.tacz.guns.config.common.AmmoConfig;
 import com.tacz.guns.entity.EntityKineticBullet;
+import com.tacz.guns.entity.shooter.GunScriptGuard;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.network.message.event.ServerMessageGunFire;
+import com.tacz.guns.network.message.event.ServerMessageGunFirePost;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
+import com.tacz.guns.resource.modifier.custom.RecoilPushModifier;
 import com.tacz.guns.resource.modifier.custom.SilenceModifier;
 import com.tacz.guns.resource.pojo.data.gun.*;
 import com.tacz.guns.sound.SoundManager;
 import com.tacz.guns.util.AttachmentDataUtils;
 import com.tacz.guns.util.CycleTaskHelper;
+import com.tacz.guns.util.time.GunTime;
 import it.unimi.dsi.fastutil.Pair;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaTable;
@@ -79,9 +89,10 @@ public class ModernKineticGunScriptAPI {
      * 请勿获取拥有复杂数据结构的属性值，该行为是未定义的。
      *
      * @param id 属性 id，请参阅 {@link GunProperties}
-     * @return 属性的值
-     * @author ChloePrime
      * @see com.tacz.guns.api.CacheModifiableByScript
+     * @return 属性的值
+     *
+     * @author ChloePrime
      * @since 1.1.7
      */
     public LuaValue getCachedProperty(String id) {
@@ -98,7 +109,6 @@ public class ModernKineticGunScriptAPI {
 
     /**
      * 执行一次完整的射击逻辑，会考虑玩家的状态(是否在瞄准、是否在移动、是否在匍匐等)、配件数值影响、多弹丸散射、连发，播放开火音效、
-     *
      * @param consumeAmmo 本次射击是否消耗弹药
      */
     public void shootOnce(boolean consumeAmmo) {
@@ -147,7 +157,7 @@ public class ModernKineticGunScriptAPI {
         // 连发间隔
         long period = modifyProperty(GunProperties.RuntimeOnly.BURST_SHOOT_INTERVAL, Long.class, fireMode == FireMode.BURST ? gunData.getBurstShootInterval() : 1);
 
-        CycleTaskHelper.addCycleTask(() -> {
+        CycleTaskHelper.addCycleTask(() -> GunScriptGuard.run(dataHolder, shooter, gunId, "shoot", () -> {
             // 如果射击者死亡，取消射击
             if (shooter.isDeadOrDying()) {
                 return false;
@@ -180,6 +190,7 @@ public class ModernKineticGunScriptAPI {
                 // 获取射击方向（pitch 和 yaw）
                 float pitch = pitchSupplier != null ? pitchSupplier.get() : shooter.getXRot();
                 float yaw = yawSupplier != null ? yawSupplier.get() : shooter.getYRot();
+                applyRecoilPush(cacheProperty, bulletAmount, pitch, yaw);
                 // 生成子弹
                 Level world = shooter.level();
                 ResourceLocation ammoId = gunData.getAmmoId();
@@ -198,9 +209,34 @@ public class ModernKineticGunScriptAPI {
                     String soundId = useSilenceSound ? SoundManager.SILENCE_3P_SOUND : SoundManager.SHOOT_3P_SOUND;
                     SoundManager.sendSoundToNearby(shooter, soundDistance, gunId, gunDisplayId, soundId, 0.8f, 0.9f + shooter.getRandom().nextFloat() * 0.125f);
                 }
+                // 仅成功击发才发布后置事件并通知旁观客户端。
+                GunFirePostEvent.EVENT.invoker().post(new GunFirePostEvent(shooter, itemStack, LogicalSide.SERVER));
+                NetworkHandler.sendToTrackingEntity(new ServerMessageGunFirePost(shooter.getId(), itemStack), shooter);
             }
             return true;
-        }, period, cycles);
+        }, false), period, cycles);
+    }
+
+    private void applyRecoilPush(AttachmentCacheProperty cacheProperty, int bulletAmount, float pitch, float yaw) {
+        GunRecoilPushData recoilPush = cacheProperty.getCache(RecoilPushModifier.ID);
+        if (recoilPush == null) {
+            return;
+        }
+        if (!(shooter instanceof Player player) || player.isPassenger()) {
+            return;
+        }
+        boolean crawling = !player.isSwimming() && player.getPose() == Pose.SWIMMING;
+        boolean onGround = player.onGround() || crawling;
+        boolean sneaking = player.getPose() == Pose.CROUCHING;
+        double strength = recoilPush.getFinalStrength(onGround, sneaking, crawling, bulletAmount);
+        if (strength <= 0.0D) {
+            return;
+        }
+        Vec3 push = Vec3.directionFromRotation(pitch, yaw).scale(-strength);
+        player.setDeltaMovement(player.getDeltaMovement().add(push));
+        if (player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
+        }
     }
 
     private <T> T modifyProperty(GunProperty<?> property, Class<T> type, T value) {
@@ -229,7 +265,6 @@ public class ModernKineticGunScriptAPI {
     /**
      * 让枪械内的子弹减少一发。会遵从栓动、闭膛待击和开膛待机的规律，消耗枪管内子弹或者弹匣内子弹。
      * 如果没有可以消耗的子弹，这个方法会返回 false。例如栓动步枪，虽然弹匣内有子弹，但是在 bolt 之前枪管内没有子弹，那么就会返回 false，
-     *
      * @return 是否成功减少子弹。
      */
     public boolean reduceAmmoOnce() {
@@ -303,7 +338,7 @@ public class ModernKineticGunScriptAPI {
         if (dataHolder.reloadTimestamp == -1) {
             return 0;
         }
-        return System.currentTimeMillis() - dataHolder.reloadTimestamp;
+        return GunTime.nowMillis() - dataHolder.reloadTimestamp;
     }
 
     /**
@@ -315,7 +350,7 @@ public class ModernKineticGunScriptAPI {
         if (!dataHolder.isBolting) {
             return 0;
         }
-        return System.currentTimeMillis() - dataHolder.boltTimestamp;
+        return GunTime.nowMillis() - dataHolder.boltTimestamp;
     }
 
     /**
@@ -338,12 +373,12 @@ public class ModernKineticGunScriptAPI {
     }
 
     /**
-     * 返回上次射击的 timestamp(系统时间)，单位为毫秒。此值在切枪时会重置为 -1。
+     * 返回上次射击的枪械时间，单位为毫秒。此值在切枪时会重置为 -1。
      *
      * @return 上次射击的 timestamp，在切枪时会重置为 -1。
      */
     public long getLastShootTimestamp() {
-        return dataHolder.lastShootTimestamp + dataHolder.baseTimestamp;
+        return dataHolder.lastShootTimestamp < 0 ? -1 : dataHolder.lastShootTimestamp + dataHolder.baseTimestamp;
     }
 
     /**
@@ -493,7 +528,7 @@ public class ModernKineticGunScriptAPI {
      * @return 换弹是否需要消耗弹药
      */
     public boolean isReloadingNeedConsumeAmmo() {
-        return IGunOperator.fromLivingEntity(shooter).needCheckAmmo();
+        return IGunOperator.fromLivingEntity(shooter).needCheckAmmo() && !gunIndex.getGunData().getReloadData().isInfinite();
     }
 
     /**
@@ -557,7 +592,6 @@ public class ModernKineticGunScriptAPI {
     /**
      * 检查玩家身上（或者虚拟备弹）是否有弹药可以消耗，通常用于循环换弹的打断。
      * 创造模式的玩家会直接返回 true
-     *
      * @return 玩家身上（或者虚拟备弹）是否有弹药可以消耗
      */
     public boolean hasAmmoToConsume() {
@@ -634,6 +668,24 @@ public class ModernKineticGunScriptAPI {
     }
 
     /**
+     * 按数量卸弹，优先返还匹配弹种的普通弹药盒，再返还背包，剩余掉落。
+     * Lua 调用为 unloadAmmo(barrel, amount)，两个参数都必须是整数。
+     * 开膛待击不计算膛内一发，虚拟备弹返还虚拟备弹；创造模式、无限弹药和燃料不生成返还物品。
+     * 仅在服务端结算，脚本自行控制调用时刻以及是否只调用一次。
+     * 经由枪械物品执行结算，不会再次触发 unload_ammo 回调。
+     *
+     * @param barrel 0 保留膛内，1 卸出膛内
+     * @param amount 弹匣卸出数量，不含膛内；0 保留弹匣，-1 清空弹匣
+     * @return 实际卸出总数（含膛内）；无效取值、背包直读或客户端调用返回 0
+     */
+    public int unloadAmmo(int barrel, int amount) {
+        if ((barrel != 0 && barrel != 1) || amount < -1) {
+            return 0;
+        }
+        return abstractGunItem.unloadAmmo(itemStack, shooter, barrel == 1, amount);
+    }
+
+    /**
      * 获取枪膛内是否有子弹。
      *
      * @return 枪膛内是否有子弹.如果是开膛待击的枪械，则此方法返回 false。
@@ -688,15 +740,22 @@ public class ModernKineticGunScriptAPI {
      */
     public void safeAsyncTask(LuaValue value, long delayMs, long periodMs, int cycles) {
         LuaFunction func = value.checkfunction();
-        CycleTaskHelper.addCycleTask(() -> func.call().checkboolean(), delayMs, periodMs, cycles);
+        CycleTaskHelper.addCycleTask(() -> GunScriptGuard.run(dataHolder, shooter, gunId, "safe_async_task",
+                () -> func.call().checkboolean(), false), delayMs, periodMs, cycles);
     }
 
     /**
-     * 获取当前系统时间，单位毫秒。
+     * 获取当前枪械时间，单位毫秒。单人游戏暂停时此时间不前进。
+     * 此时间不是 Unix 时间戳；如需真实系统时间，使用 {@link #getRealSystemTimestamp()}。
      *
-     * @return 当前系统时间
+     * @return 当前枪械时间
      */
     public long getCurrentTimestamp() {
+        return GunTime.nowMillis();
+    }
+
+    /** 获取真实系统时间（Unix 毫秒时间戳），不受游戏暂停影响。 */
+    public long getRealSystemTimestamp() {
         return System.currentTimeMillis();
     }
 
@@ -717,7 +776,6 @@ public class ModernKineticGunScriptAPI {
     /**
      * 返回一个当前枪械物品的 NBT 访问器。除非要保存持久化数据，你不应该频繁调用这个方法。<br/>
      * 参见 {@link LuaNbtAccessor}
-     *
      * @return NBT 访问器
      */
     public LuaNbtAccessor getNbt() {
@@ -727,7 +785,6 @@ public class ModernKineticGunScriptAPI {
     /**
      * 返回一个关于当前开枪实体的工具。这个访问器提供了一些常用的方法，例如发送系统消息、发送ActionBar、创建文本组件等。<br/>
      * 参见 {@link LuaEntityAccessor}
-     *
      * @return 实体访问器
      */
     public LuaEntityAccessor getEntityUtil() {
@@ -833,7 +890,7 @@ public class ModernKineticGunScriptAPI {
     public float calcHeatReduction(long heatTimestamp) {
         GunHeatData heatData = gunIndex.getGunData().getHeatData();
         if (heatData != null) {
-            return ((float) (System.currentTimeMillis() - heatTimestamp) / 10000f)
+            return ((float) (GunTime.nowMillis() - heatTimestamp) / 10000f)
                     * heatData.getCoolingMultiplier();
         }
         return 0f;
@@ -876,6 +933,7 @@ public class ModernKineticGunScriptAPI {
     }
 
     private void initGunItem() {
+        nbtUtil = null;
         if (itemStack == null || !(itemStack.getItem() instanceof AbstractGunItem gunItem)) {
             gunIndex = null;
             abstractGunItem = null;
@@ -886,9 +944,7 @@ public class ModernKineticGunScriptAPI {
         Optional<CommonGunIndex> gunIndexOptional = TimelessAPI.getCommonGunIndex(gunId);
         gunIndex = gunIndexOptional.orElse(null);
         abstractGunItem = gunItem;
-        if (itemStack.has(DataComponents.CUSTOM_DATA)) {
-            nbtUtil = new LuaNbtAccessor(itemStack.get(DataComponents.CUSTOM_DATA).copyTag());
-        }
+        nbtUtil = LuaNbtAccessor.from(itemStack);
     }
 
 

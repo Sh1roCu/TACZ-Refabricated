@@ -18,14 +18,11 @@
     "group": "tacz:misc",
     "item": {
       "id": "minecraft:painting",
+      "count": 1,
       "components": {
-        "minecraft:item_name": "{\"translate\":\"item.tacz.painting.blood_strike_1\"}",
-        "minecraft:entity_data": {
-          "variant": "tacz:blood_strike_1",
-          "id": "minecraft:painting"
-        }
-      },
-      "count": 1
+        "minecraft:entity_data": "{id:\"minecraft:painting\",variant:\"tacz:blood_strike_1\"}",
+        "minecraft:custom_name": "{\"translate\":\"item.tacz.painting.blood_strike_1\"}"
+      }
     }
   },
   "type": "tacz:gun_smith_table_crafting"

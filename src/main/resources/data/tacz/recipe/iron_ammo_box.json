@@ -2,8 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "result": {
     "id": "tacz:ammo_box",
+    "count": 1,
     "components": {
-      "minecraft:custom_data": "{Level: 0}"
+      "minecraft:custom_data": "{Level:0}"
     }
   },
   "pattern": [

@@ -54,13 +54,6 @@ public class GunSmithTableBlockEntity extends BlockEntity implements ExtendedScr
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    // TODO
-//    @Override
-//    @Environment(EnvType.CLIENT)
-//    public AABB getRenderBoundingBox() {
-//        return AABB.encapsulatingFullBlocks(worldPosition.offset(-2, 0, -2), worldPosition.offset(2, 1, 2));
-//    }
-
     @Override
     public Component getDisplayName() {
         return Component.literal("Gun Smith Table");

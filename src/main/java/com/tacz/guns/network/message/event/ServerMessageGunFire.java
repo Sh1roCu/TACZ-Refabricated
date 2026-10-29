@@ -32,6 +32,7 @@ public record ServerMessageGunFire(int shooterId, ItemStack gunItemStack) implem
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageGunFire message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> doClientEvent(message));
     }

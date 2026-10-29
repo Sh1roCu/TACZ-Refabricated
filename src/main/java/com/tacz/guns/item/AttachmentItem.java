@@ -10,10 +10,10 @@ import com.tacz.guns.client.renderer.item.AttachmentItemRenderer;
 import com.tacz.guns.client.resource.index.ClientAttachmentIndex;
 import com.tacz.guns.inventory.tooltip.AttachmentItemTooltip;
 import com.tacz.guns.resource.index.CommonAttachmentIndex;
+import com.tacz.guns.util.ContentPackOrder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -50,7 +50,7 @@ public class AttachmentItem extends Item implements AttachmentItemDataAccessor, 
     }
 
     private static Comparator<Map.Entry<ResourceLocation, CommonAttachmentIndex>> idNameSort() {
-        return Comparator.comparingInt(m -> m.getValue().getSort());
+        return ContentPackOrder.<CommonAttachmentIndex>byNamespace().thenComparingInt(m -> m.getValue().getSort());
     }
 
     public static NonNullList<ItemStack> fillItemCategory(AttachmentType type) {

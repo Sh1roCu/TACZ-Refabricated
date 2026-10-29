@@ -1,6 +1,6 @@
 package com.tacz.guns.command.sub;
 
-import cn.sh1rocu.tacz.util.forge.EnumArgument;
+import cn.sh1rocu.tacz.util.neoforge.EnumArgument;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

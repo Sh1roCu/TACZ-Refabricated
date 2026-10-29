@@ -27,7 +27,9 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
     private final List<Checkbox> gunPackList = new ArrayList<>();
     private final Set<String> selectedNamespaces = new HashSet<>();
     private final Checkbox byHandCheckbox;
+    private final Checkbox allCheckbox;
     private final EditBox byName;
+    private boolean clearingFilters;
 
     /*@Override
     protected void renderListBackground(GuiGraphics pGuiGraphics) {
@@ -46,8 +48,10 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
         this.byName = new EditBox(pMinecraft.font, 3, 0, 94, 10, Component.empty());
         this.byName.setHint(Component.translatable("gui.tacz.gun_smith_table.filter.search"));
         this.byName.setResponder((pText) -> {
-            parent.init();
-            parent.setIndexPage(0);
+            if (!this.clearingFilters) {
+                parent.init();
+                parent.setIndexPage(0);
+            }
         });
         this.addEntry(new GunPackList.Entry(byName));
 
@@ -61,7 +65,7 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
         };
         this.addEntry(new GunPackList.Entry(byHandCheckbox));
 
-        Checkbox checkbox1 = new Checkbox(0, 0, 10, 10, Component.translatable("gui.tacz.gun_smith_table.filter.all"), true) {
+        this.allCheckbox = new Checkbox(0, 0, 10, 10, Component.translatable("gui.tacz.gun_smith_table.filter.all"), true) {
             @Override
             public void onPress() {
                 super.onPress();
@@ -69,7 +73,7 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
                 updateSelectedNamespaces();
             }
         };
-        this.addEntry(new GunPackList.Entry(checkbox1));
+        this.addEntry(new GunPackList.Entry(this.allCheckbox));
 
         for (String namespace : namespaces) {
             PackInfo packInfo = ClientAssetsManager.INSTANCE.getPackInfo(namespace);
@@ -79,7 +83,7 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
                 @Override
                 public void onPress() {
                     super.onPress();
-                    checkbox1.selected = gunPackList.stream().allMatch(Checkbox::selected);
+                    allCheckbox.selected = gunPackList.stream().allMatch(Checkbox::selected);
                     updateSelectedNamespaces();
                 }
             };
@@ -99,6 +103,25 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
 
     public void setByHandSelected(boolean selected) {
         byHandCheckbox.selected = selected;
+    }
+
+    /**
+     * Clears user filters without rebuilding the parent screen.
+     */
+    public void clearFilters() {
+        this.byHandCheckbox.selected = false;
+        this.allCheckbox.selected = true;
+        this.selectedNamespaces.clear();
+        for (Checkbox checkbox : this.gunPackList) {
+            checkbox.selected = true;
+            this.selectedNamespaces.add(checkbox.getId());
+        }
+        this.clearingFilters = true;
+        try {
+            this.byName.setValue("");
+        } finally {
+            this.clearingFilters = false;
+        }
     }
 
     public Set<String> namespaceList() {

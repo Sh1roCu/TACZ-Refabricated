@@ -59,36 +59,34 @@ public class GunProperties {
         return ALL_CACHE_MODIFIABLE_BY_SCRIPT.get();
     }
 
-    public static final GunProperty<Float> ADS_TIME = GunProperty.of("ads", Float.class);
-    /**
-     * @deprecated 此类是一个意外和设计失误，其功能和{@link InaccuracyModifier}完全重复<br/>
+    public static final GunProperty<Float>                                      ADS_TIME            = GunProperty.of("ads", Float.class);
+    /**@deprecated
+     * 此类是一个意外和设计失误，其功能和{@link InaccuracyModifier}完全重复<br/>
      * 已不再使用，内部的所有方法实际不会执行，请使用 {@link InaccuracyModifier} <br/>
-     * <p>
+     *
      * 同时，此Modifier的id也已经被重定向到 {@link InaccuracyModifier} <br/>
-     */
+     * */
     @Deprecated
-    public static final GunProperty<Map<InaccuracyType, Float>> AIM_INACCURACY = GunProperty.of("inaccuracy", new TypeToken<>() {
-    });
+    public static final GunProperty<Map<InaccuracyType, Float>>                 AIM_INACCURACY      = GunProperty.of("inaccuracy", new TypeToken<>() {});
 
     @CacheModifiableByScript
     @ValueModifiableAtRuntime(Float.class)
-    public static final GunProperty<Float> AMMO_SPEED = GunProperty.of("ammo_speed", Float.class);
+    public static final GunProperty<Float>                                      AMMO_SPEED          = GunProperty.of("ammo_speed", Float.class);
 
     @CacheModifiableByScript
     @ValueModifiableAtRuntime(Float.class)
-    public static final GunProperty<Float> ARMOR_IGNORE = GunProperty.of("armor_ignore", Float.class);
+    public static final GunProperty<Float>                                      ARMOR_IGNORE        = GunProperty.of("armor_ignore", Float.class);
 
     /**
      * 枪械伤害。
      * 生效的值在命中时被脚本修改。
      */
     @ValueModifiableAtRuntime(Float.class)
-    public static final GunProperty<LinkedList<ExtraDamage.DistanceDamagePair>> DAMAGE = GunProperty.of("damage", new TypeToken<>() {
-    });
+    public static final GunProperty<LinkedList<ExtraDamage.DistanceDamagePair>> DAMAGE              = GunProperty.of("damage", new TypeToken<>() {});
 
     @CacheModifiableByScript
     @ValueModifiableAtRuntime(Float.class)
-    public static final GunProperty<Float> EFFECTIVE_RANGE = GunProperty.of("effective_range", Float.class);
+    public static final GunProperty<Float>                                      EFFECTIVE_RANGE     = GunProperty.of("effective_range", Float.class);
 
     /**
      * @see RuntimeOnly#EXPLODE_ENABLED
@@ -98,45 +96,44 @@ public class GunProperties {
      * @see RuntimeOnly#EXPLOSION_DESTROYS_BLOCK
      * @see RuntimeOnly#EXPLOSION_DELAY
      */
-    public static final GunProperty<ExplosionData> EXPLOSION = GunProperty.of("explosion", ExplosionData.class);
+    public static final GunProperty<ExplosionData>                              EXPLOSION           = GunProperty.of("explosion", ExplosionData.class);
 
-    public static final GunProperty<MoveSpeed> MOVE_SPEED = GunProperty.of("movement_speed", MoveSpeed.class);
+    public static final GunProperty<MoveSpeed>                                  MOVE_SPEED          = GunProperty.of("movement_speed", MoveSpeed.class);
 
     @CacheModifiableByScript
     @ValueModifiableAtRuntime(Float.class)
-    public static final GunProperty<Float> HEADSHOT_MULTIPLIER = GunProperty.of("head_shot", Float.class);
+    public static final GunProperty<Float>                                      HEADSHOT_MULTIPLIER = GunProperty.of("head_shot", Float.class);
 
     /**
      * @see RuntimeOnly#IGNITE_ENTITY
      * @see RuntimeOnly#IGNITE_ENTITY_TIME
      * @see RuntimeOnly#IGNITE_BLOCK
      */
-    public static final GunProperty<Ignite> IGNITE = GunProperty.of("ignite", Ignite.class);
+    public static final GunProperty<Ignite>                                     IGNITE              = GunProperty.of("ignite", Ignite.class);
 
     @ValueModifiableAtRuntime(Float.class)
-    public static final GunProperty<Map<InaccuracyType, Float>> INACCURACY = GunProperty.of("inaccuracy", new TypeToken<>() {
-    });
+    public static final GunProperty<Map<InaccuracyType, Float>>                 INACCURACY          = GunProperty.of("inaccuracy", new TypeToken<>() {});
 
     @CacheModifiableByScript
     @ValueModifiableAtRuntime(Float.class)
-    public static final GunProperty<Float> KNOCKBACK = GunProperty.of("knockback", Float.class);
+    public static final GunProperty<Float>                                      KNOCKBACK           = GunProperty.of("knockback", Float.class);
 
     @CacheModifiableByScript
     @ValueModifiableAtRuntime(Integer.class)
-    public static final GunProperty<Integer> PIERCE = GunProperty.of("pierce", Integer.class);
+    public static final GunProperty<Integer>                                    PIERCE              = GunProperty.of("pierce", Integer.class);
 
-    public static final GunProperty<ParameterizedCachePair<Float, Float>> RECOIL = GunProperty.of("recoil", new TypeToken<>() {
-    });
-    public static final GunProperty<Integer> ROUNDS_PER_MINUTE = GunProperty.of("rpm", Integer.class);
+    public static final GunProperty<GunRecoilPushData>                          RECOIL_PUSH         = GunProperty.of("recoil_push", GunRecoilPushData.class);
+
+    public static final GunProperty<ParameterizedCachePair<Float, Float>>       RECOIL              = GunProperty.of("recoil", new TypeToken<>() {});
+    public static final GunProperty<Integer>                                    ROUNDS_PER_MINUTE   = GunProperty.of("rpm", Integer.class);
 
     /**
      * @see RuntimeOnly#SOUND_DISTANCE
      */
-    public static final GunProperty<Pair<Integer, Boolean>> SILENCE = GunProperty.of("silence", new TypeToken<>() {
-    });
+    public static final GunProperty<Pair<Integer, Boolean>>                     SILENCE             = GunProperty.of("silence", new TypeToken<>() {});
 
     @CacheModifiableByScript
-    public static final GunProperty<Float> WEIGHT = GunProperty.of("weight_modifier", Float.class);
+    public static final GunProperty<Float>                                      WEIGHT              = GunProperty.of("weight_modifier", Float.class);
 
     /**
      * 这个类是纯文档性质的，

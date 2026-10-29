@@ -1,6 +1,6 @@
 package com.tacz.guns.entity.sync.core;
 
-import cn.sh1rocu.tacz.util.forge.LazyOptional;
+import cn.sh1rocu.tacz.util.neoforge.LazyOptional;
 import com.tacz.guns.GunMod;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

@@ -58,17 +58,11 @@ public class FirstPersonRenderEvent {
                 renderer.tryInit(stack, player, event.getPartialTick());
             }
 
-            // 防止内存泄漏
-            IrisCompat.endBatch(Minecraft.getInstance().renderBuffers().bufferSource());
+			// 防止内存泄漏
+			IrisCompat.endBatch(Minecraft.getInstance().renderBuffers().bufferSource());
 
-            renderer.renderFirstPerson(
-                    player, stack, transformType,
-                    event.getPoseStack(),
-                    event.getMultiBufferSource(),
-                    event.getPackedLight(),
-                    event.getPartialTick()
-            );
-
+            renderer.renderFirstPerson(player, stack, transformType, event.getPoseStack(), event.getMultiBufferSource(),
+                    event.getPackedLight(), event.getPartialTick());
             event.setCanceled(true);
         }
     }

@@ -1,11 +1,9 @@
 package com.tacz.guns.client.input;
 
-import cn.sh1rocu.tacz.api.event.InputEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.config.client.KeyConfig;
-import com.tacz.guns.util.InputExtraCheck;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
@@ -21,67 +19,32 @@ public class AimKey {
             InputConstants.Type.MOUSE,
             GLFW.GLFW_MOUSE_BUTTON_RIGHT,
             "key.category.tacz");
+    private static boolean controllerAimDown;
 
-    public static void onAimPress(InputEvent.MouseButton.Post event) {
-        if (isInGame() && AIM_KEY.matchesMouse(event.getButton())) {
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player == null || player.isSpectator()) {
-                return;
-            }
-            if (!(player instanceof IClientPlayerGunOperator operator)) {
-                return;
-            }
-            if (IGun.mainHandHoldGun(player)) {
-                boolean action = true;
-                if (!KeyConfig.HOLD_TO_AIM.get()) {
-                    action = !operator.isAim();
-                }
-                if (event.getAction() == GLFW.GLFW_PRESS) {
-                    IClientPlayerGunOperator.fromLocalPlayer(player).aim(action);
-                }
-                if (KeyConfig.HOLD_TO_AIM.get() && event.getAction() == GLFW.GLFW_RELEASE) {
-                    IClientPlayerGunOperator.fromLocalPlayer(player).aim(false);
-                }
-            }
-        }
+    public static boolean onAimPress() {
+        return onAimInput(true);
     }
 
     /**
-     * 该监听器能正确处理 按住瞄准模式 下的
-     * 1.预输入（典型：按住瞄准切换武器后，能保持瞄准状态）
-     * 2.键盘按键输入
-     * <p>
-     * 建议将按下切换瞄准也支持 键盘按键输入
+     * 合并键鼠和手柄的按住状态，同时保留切换武器时的瞄准预输入。
      */
     public static void onAimHoldingPreInput(Minecraft client) {
-        if (!KeyConfig.HOLD_TO_AIM.get()) {
+        if (/*event.phase != TickEvent.Phase.END ||*/ !KeyConfig.HOLD_TO_AIM.get()) {
             return;
         }
-        Minecraft mc = Minecraft.getInstance();
-        boolean press = AimKey.AIM_KEY.isDown();
-        if (InputExtraCheck.isInGame()) {
-            LocalPlayer player = mc.player;
-            if (player == null || player.isSpectator()) {
-                return;
-            }
-            if (!(player instanceof IClientPlayerGunOperator operator)) {
-                return;
-            }
-            if (operator.isAim() && press) {
-                return;
-            }
-            if (!operator.isAim()) {
-                if (!press) {
-                    return;
-                }
-            }
-            if (IGun.mainHandHoldGun(player)) {
-                IClientPlayerGunOperator.fromLocalPlayer(player).aim(press);
-            }
-        }
+        onAimInput(false);
     }
 
     public static boolean onAimControllerPress(boolean isPress) {
+        controllerAimDown = isPress;
+        return onAimInput(isPress);
+    }
+
+    public static void setControllerAimDown(boolean isDown) {
+        controllerAimDown = isDown;
+    }
+
+    private static boolean onAimInput(boolean isPress) {
         if (!isInGame()) {
             return false;
         }
@@ -95,22 +58,25 @@ public class AimKey {
         if (!IGun.mainHandHoldGun(player)) {
             return false;
         }
-        boolean action = true;
-        if (!KeyConfig.HOLD_TO_AIM.get()) {
-            action = !operator.isAim();
+        boolean holdToAim = KeyConfig.HOLD_TO_AIM.get();
+        if (!isPress && !holdToAim) {
+            return false;
         }
-        if (isPress) {
-            IClientPlayerGunOperator.fromLocalPlayer(player).aim(action);
-            return true;
+        boolean aim = holdToAim ? AIM_KEY.isDown() || controllerAimDown : !operator.isAim();
+        if (operator.isAim() != aim) {
+            operator.aim(aim);
         }
-        if (KeyConfig.HOLD_TO_AIM.get()) {
-            IClientPlayerGunOperator.fromLocalPlayer(player).aim(false);
-            return true;
-        }
-        return false;
+        return true;
     }
 
-    public static void cancelAim(Minecraft mc) {
+    public static void cancelAim(Minecraft client) {
+//        if (event.phase != TickEvent.Phase.END) {
+//            return;
+//        }
+        Minecraft mc = Minecraft.getInstance();
+        if (!isInGame()) {
+            controllerAimDown = false;
+        }
         LocalPlayer player = mc.player;
         if (!(player instanceof IClientPlayerGunOperator operator)) {
             return;

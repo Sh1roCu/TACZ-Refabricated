@@ -1,6 +1,6 @@
 package com.tacz.guns.client.event;
 
-import cn.sh1rocu.simplebedrockmodel.api.event.RenderTickEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderFrameEvent;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
 import com.tacz.guns.client.renderer.item.AnimateGeoItemRenderer;
@@ -40,8 +40,8 @@ public class TickAnimationEvent {
         });
     }
 
-    public static void tickAnimation(RenderTickEvent event) {
-        if (event.phase == RenderTickEvent.Phase.END) {
+    public static void tickAnimation(RenderFrameEvent event) {
+        if (event.phase == RenderFrameEvent.Phase.END) {
             return;
         }
         if (Minecraft.getInstance().options.getCameraType().isFirstPerson()) {

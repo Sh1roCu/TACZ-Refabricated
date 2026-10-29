@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.mixin.common;
 
-import cn.sh1rocu.tacz.util.forge.network.IEntityWithComplexSpawn;
+import cn.sh1rocu.tacz.util.neoforge.network.IEntityWithComplexSpawn;
 import net.minecraft.network.protocol.BundlePacket;
 import net.minecraft.network.protocol.Packet;
 import org.spongepowered.asm.mixin.Mixin;

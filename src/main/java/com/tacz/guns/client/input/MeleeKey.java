@@ -1,6 +1,5 @@
 package com.tacz.guns.client.input;
 
-import cn.sh1rocu.tacz.api.event.InputEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import net.fabricmc.api.EnvType;
@@ -19,41 +18,23 @@ public class MeleeKey {
             GLFW.GLFW_KEY_V,
             "key.category.tacz");
 
-    public static void onMeleeKeyPress(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && MELEE_KEY.matches(event.getKey(), event.getScanCode())) {
-            doMeleeLogic();
-        }
-    }
-
-    public static void onMeleeMousePress(InputEvent.MouseButton.Post event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && MELEE_KEY.matchesMouse(event.getButton())) {
-            doMeleeLogic();
-        }
-    }
-
     public static boolean onMeleeControllerPress(boolean isPress) {
-        if (isInGame() && isPress) {
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player == null || player.isSpectator()) {
-                return false;
-            }
-            IClientPlayerGunOperator operator = IClientPlayerGunOperator.fromLocalPlayer(player);
-            if (!operator.isAim()) {
-                operator.melee();
-                return true;
-            }
-        }
-        return false;
+        return isPress && onMeleePress();
     }
 
-    private static void doMeleeLogic() {
+    public static boolean onMeleePress() {
+        if (!isInGame()) {
+            return false;
+        }
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null || player.isSpectator()) {
-            return;
+            return false;
         }
         IClientPlayerGunOperator operator = IClientPlayerGunOperator.fromLocalPlayer(player);
         if (!operator.isAim()) {
             operator.melee();
+            return true;
         }
+        return false;
     }
 }

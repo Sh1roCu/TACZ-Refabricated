@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.mixin.common;
 
-import cn.sh1rocu.tacz.util.forge.EventHooks;
+import cn.sh1rocu.tacz.util.neoforge.EventHooks;
 import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;

@@ -1,8 +1,9 @@
 package cn.sh1rocu.tacz;
 
 import cn.sh1rocu.tacz.api.event.*;
-import cn.sh1rocu.tacz.util.forge.EnumArgument;
+import cn.sh1rocu.tacz.util.neoforge.EnumArgument;
 import com.tacz.guns.GunMod;
+import com.tacz.guns.api.event.common.GunFireEvent;
 import com.tacz.guns.api.event.server.AmmoHitBlockEvent;
 import com.tacz.guns.config.ClientConfig;
 import com.tacz.guns.config.CommonConfig;
@@ -28,10 +29,12 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
@@ -53,7 +56,7 @@ public class TaCZFabric implements ModInitializer {
     public static final ResourceLocation LOW = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "event_low_priority");
     public static final ResourceLocation LOWEST = ResourceLocation.fromNamespaceAndPath(GunMod.MOD_ID, "event_lowest_priority");
 
-    public static final HolderLookup.Provider VANILLA_ACCESS = VanillaRegistries.createLookup();
+    public static HolderLookup.Provider VANILLA_ACCESS = VanillaRegistries.createLookup();
 
     @Nullable
     private static WeakReference<MinecraftServer> server;
@@ -98,6 +101,8 @@ public class TaCZFabric implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTING.register((server) -> TaCZFabric.server = new WeakReference<>(server));
 
+        ServerLifecycleEvents.SERVER_STARTED.register((server) -> VANILLA_ACCESS = server.registryAccess());
+
         subscribeEvents();
     }
 
@@ -141,5 +146,19 @@ public class TaCZFabric implements ModInitializer {
 
         ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(TravelToDimensionEvent::onTravelToDimension);
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(TravelToDimensionEvent::onTravelToDimension);
+
+        AttackBlockCallback.EVENT.register(GunPegboardInteractionEvent::onLeftClickBlock);
+
+        UseBlockCallback.EVENT.addPhaseOrdering(HIGHEST, HIGH);
+        UseBlockCallback.EVENT.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+        UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
+        UseBlockCallback.EVENT.addPhaseOrdering(LOW, LOWEST);
+
+        UseBlockCallback.EVENT.register(LOW, AmmoStorageInteractionEvent::onRightClickBlock);
+
+        UseBlockCallback.EVENT.register(GunDisplayCaseInteractionEvent::onRightClickBlock);
+        AttackBlockCallback.EVENT.register(GunDisplayCaseInteractionEvent::onLeftClickBlock);
+
+        GunFireEvent.CALLBACK.register(LOWEST, GunSoundAngerEvent::onGunFire);
     }
 }

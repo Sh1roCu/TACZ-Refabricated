@@ -2,8 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "result": {
     "id": "tacz:workbench_c",
+    "count": 1,
     "components": {
-      "minecraft:custom_data": "{BlockId: \"tacz:attachment_workbench\"}"
+      "minecraft:custom_data": "{BlockId:\"tacz:attachment_workbench\"}"
     }
   },
   "pattern": [

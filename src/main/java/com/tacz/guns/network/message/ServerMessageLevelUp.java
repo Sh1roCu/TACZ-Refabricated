@@ -29,6 +29,7 @@ public record ServerMessageLevelUp(ItemStack gun, int level) implements CustomPa
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageLevelUp message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> onLevelUp(message));
     }

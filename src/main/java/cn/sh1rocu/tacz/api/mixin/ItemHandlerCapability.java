@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.api.mixin;
 
-import cn.sh1rocu.tacz.util.forge.LazyOptional;
+import cn.sh1rocu.tacz.util.neoforge.LazyOptional;
 import cn.sh1rocu.tacz.util.itemhandler.IItemHandler;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;

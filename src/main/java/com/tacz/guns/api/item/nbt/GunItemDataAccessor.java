@@ -9,6 +9,7 @@ import com.tacz.guns.api.item.builder.AttachmentItemBuilder;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import com.tacz.guns.client.resource.index.ClientAttachmentIndex;
+import com.tacz.guns.client.resource.index.ClientAttachmentVariantIndex;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
@@ -69,10 +70,9 @@ public interface GunItemDataAccessor extends IGun {
         if (hasMaxDummyAmmo(gun)) {
             maxDummyAmmo = getMaxDummyAmmoAmount(gun);
         }
-        final int dummyAmmo = Math.min(getDummyAmmoAmount(gun) + amount, maxDummyAmmo);
-        gun.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag -> {
-            tag.putInt(GUN_DUMMY_AMMO, Math.max(dummyAmmo, 0));
-        }));
+        long updatedAmount = Math.min((long) getDummyAmmoAmount(gun) + amount, maxDummyAmmo);
+        gun.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag ->
+                tag.putInt(GUN_DUMMY_AMMO, (int) Math.max(updatedAmount, 0))));
     }
 
     @Override
@@ -194,7 +194,7 @@ public interface GunItemDataAccessor extends IGun {
     default FireMode getFireMode(ItemStack gun) {
         CompoundTag nbt = gun.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
         if (nbt.contains(GUN_FIRE_MODE_TAG, Tag.TAG_STRING)) {
-            return FireMode.valueOf(nbt.getString(GUN_FIRE_MODE_TAG));
+            return FireMode.fromName(nbt.getString(GUN_FIRE_MODE_TAG));
         }
         return FireMode.UNKNOWN;
     }
@@ -277,7 +277,10 @@ public interface GunItemDataAccessor extends IGun {
         if (index != null) {
             var builtin = index.getGunData().getBuiltInAttachments();
             if (builtin.containsKey(type)) {
-                return AttachmentItemBuilder.create().setId(builtin.get(type)).build();
+                ResourceLocation attachmentId = builtin.get(type).getDisplayAttachment();
+                if (attachmentId != null) {
+                    return AttachmentItemBuilder.create().setId(attachmentId).build();
+                }
             }
         }
         return ItemStack.EMPTY;
@@ -308,7 +311,10 @@ public interface GunItemDataAccessor extends IGun {
         if (index != null) {
             var builtin = index.getGunData().getBuiltInAttachments();
             if (builtin.containsKey(type)) {
-                return builtin.get(type);
+                ResourceLocation attachmentId = builtin.get(type).getDisplayAttachment();
+                if (attachmentId != null) {
+                    return attachmentId;
+                }
             }
         }
         return DefaultAssets.EMPTY_ATTACHMENT_ID;
@@ -335,8 +341,7 @@ public interface GunItemDataAccessor extends IGun {
         }
         gun.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, data -> data.update(tag -> {
             String key = GUN_ATTACHMENT_BASE + iAttachment.getType(attachment).name();
-            Tag attachmentTag = attachment.saveOptional(provider);
-            tag.put(key, attachmentTag);
+            tag.put(key, attachment.saveOptional(provider));
         }));
     }
 
@@ -363,7 +368,13 @@ public interface GunItemDataAccessor extends IGun {
         if (!DefaultAssets.isEmptyAttachmentId(scopeId)) {
             CompoundTag attachmentTag = this.getAttachmentTag(gunItem, AttachmentType.SCOPE);
             int zoomNumber = builtin ? 0 : AttachmentItemDataAccessor.getZoomNumberFromTag(attachmentTag);
-            float[] zooms = TimelessAPI.getClientAttachmentIndex(scopeId).map(ClientAttachmentIndex::getZoom).orElse(null);
+            ResourceLocation resolvedScopeId = scopeId;
+            ResourceLocation variantId = attachmentTag == null ? null : ResourceLocation.tryParse(attachmentTag.getString("Variant"));
+            float[] zooms = java.util.Optional.ofNullable(variantId)
+                    .filter(id -> TimelessAPI.getCommonAttachmentVariantIndex(id).map(index -> index.appliesTo(resolvedScopeId)).orElse(false))
+                    .flatMap(TimelessAPI::getClientAttachmentVariantIndex)
+                    .map(ClientAttachmentVariantIndex::getZoom)
+                    .orElseGet(() -> TimelessAPI.getClientAttachmentIndex(resolvedScopeId).map(ClientAttachmentIndex::getZoom).orElse(null));
             if (zooms != null) {
                 zoom = zooms[zoomNumber % zooms.length];
             }

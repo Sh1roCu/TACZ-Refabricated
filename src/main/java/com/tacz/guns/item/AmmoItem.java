@@ -9,11 +9,11 @@ import com.tacz.guns.client.resource.ClientAssetsManager;
 import com.tacz.guns.client.resource.index.ClientAmmoIndex;
 import com.tacz.guns.client.resource.pojo.PackInfo;
 import com.tacz.guns.resource.index.CommonAmmoIndex;
+import com.tacz.guns.util.ContentPackOrder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -32,7 +32,7 @@ import java.util.Optional;
 
 public class AmmoItem extends Item implements AmmoItemDataAccessor, IItem {
     public AmmoItem() {
-        super(new Properties().stacksTo(1));
+        super(new Properties());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class AmmoItem extends Item implements AmmoItemDataAccessor, IItem {
     }
 
     private static Comparator<Map.Entry<ResourceLocation, CommonAmmoIndex>> idNameSort() {
-        return Comparator.comparingInt(m -> m.getValue().getSort());
+        return ContentPackOrder.<CommonAmmoIndex>byNamespace().thenComparingInt(m -> m.getValue().getSort());
     }
 
     public static NonNullList<ItemStack> fillItemCategory() {

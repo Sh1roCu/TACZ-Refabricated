@@ -63,7 +63,7 @@ public final class GetJarResources {
     }
 
     /**
-     * 复制本模组的文件夹到指定文件夹。将强行覆盖原文件夹。
+     * 按 TACZ 版本和内置资源指纹按需导出文件夹；覆盖前备份，未变化时跳过。
      *
      * @param srcPath jar 中的源文件地址
      * @param root    想要复制到的根目录
@@ -81,7 +81,7 @@ public final class GetJarResources {
     }
 
     /**
-     * 复制本模组的文件夹到指定文件夹。将强行覆盖原文件夹。
+     * 按 TACZ 版本和内置资源指纹按需导出文件夹；覆盖前备份，未变化时跳过。
      *
      * @param srcPath jar 中的源文件地址
      * @param root    想要复制到的根目录
@@ -156,6 +156,7 @@ public final class GetJarResources {
         List<String> lines = "jar".equals(sourceUrl.getProtocol())
                 ? collectJarFingerprintLines(sourceUrl)
                 : collectPathFingerprintLines(resolveSourcePath(sourceUrl));
+        lines.add("mod-version|" + FabricLoader.getInstance().getModContainer(GunMod.MOD_ID).orElseThrow().getMetadata().getVersion().getFriendlyString());
         Collections.sort(lines);
         return Md5Utils.md5Hex(String.join("\n", lines).getBytes(StandardCharsets.UTF_8));
     }

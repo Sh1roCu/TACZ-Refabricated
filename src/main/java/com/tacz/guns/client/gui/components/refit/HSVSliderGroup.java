@@ -1,6 +1,6 @@
 package com.tacz.guns.client.gui.components.refit;
 
-import cn.sh1rocu.tacz.util.forge.ExtendedSlider;
+import cn.sh1rocu.tacz.util.neoforge.ExtendedSlider;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.nbt.AttachmentItemDataAccessor;

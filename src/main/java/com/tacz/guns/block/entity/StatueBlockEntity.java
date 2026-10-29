@@ -91,12 +91,6 @@ public class StatueBlockEntity extends BlockEntity {
         return tag;
     }
 
-    // TODO
-//    @Override
-//    public AABB getRenderBoundingBox() {
-//        return AABB.encapsulatingFullBlocks(worldPosition.offset(-2, 0, -2), worldPosition.offset(2, 2, 2));
-//    }
-
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);

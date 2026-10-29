@@ -2,6 +2,7 @@ package com.tacz.guns.block;
 
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.serialization.MapCodec;
+import com.tacz.guns.advancement.TargetHitTrigger;
 import com.tacz.guns.block.entity.TargetBlockEntity;
 import com.tacz.guns.entity.EntityKineticBullet;
 import com.tacz.guns.init.ModBlocks;
@@ -10,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -139,6 +141,9 @@ public class TargetBlock extends BaseEntityBlock {
                     String formattedDamage = String.format("%.1f", bullet.getDamage(hit.getLocation()));
                     String formattedDistance = String.format("%.2f", hit.getLocation().distanceTo(player.position()));
                     player.displayClientMessage(Component.translatable("message.tacz.target_minecart.hit", formattedDamage, formattedDistance), true);
+                    if (player instanceof ServerPlayer sp) {
+                        TargetHitTrigger.INSTANCE.trigger(sp, hit.getLocation().distanceTo(player.position()));
+                    }
                 }
 
             }

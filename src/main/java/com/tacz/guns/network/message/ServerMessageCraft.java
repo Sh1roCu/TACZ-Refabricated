@@ -28,6 +28,7 @@ public record ServerMessageCraft(int menuId) implements CustomPacketPayload {
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageCraft message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> updateScreen(message.menuId));
     }

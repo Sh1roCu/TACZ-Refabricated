@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.config.client.RenderConfig;
+import com.tacz.guns.util.time.GunTime;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -31,13 +32,13 @@ public class KillAmountOverlay implements LayeredDraw.Layer {
         int timeout = (int) (RenderConfig.KILL_AMOUNT_DURATION_SECOND.get() * 1000);
         float colorCount = 30;
 
-        long remainTime = System.currentTimeMillis() - killTimestamp;
-        if (remainTime > timeout) {
+        long remainTime = GunTime.nowMillis() - killTimestamp;
+        if (!GunTime.isWithin(killTimestamp, timeout)) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (!(player instanceof IClientPlayerGunOperator)) {
+        if (!(player instanceof IClientPlayerGunOperator) || player.isSpectator()) {
             return;
         }
         ItemStack stack = player.getMainHandItem();
@@ -76,10 +77,15 @@ public class KillAmountOverlay implements LayeredDraw.Layer {
 
     public static void markTimestamp() {
         int timeout = (int) (RenderConfig.KILL_AMOUNT_DURATION_SECOND.get() * 1000);
-        if (System.currentTimeMillis() - killTimestamp > timeout) {
+        if (!GunTime.isWithin(killTimestamp, timeout)) {
             killAmount = 0;
         }
-        killTimestamp = System.currentTimeMillis();
+        killTimestamp = GunTime.nowMillis();
         killAmount += 1;
+    }
+
+    public static void resetTimestamp() {
+        killTimestamp = -1L;
+        killAmount = 0;
     }
 }

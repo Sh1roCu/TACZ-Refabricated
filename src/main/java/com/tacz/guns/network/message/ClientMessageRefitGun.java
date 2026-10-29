@@ -1,11 +1,13 @@
 package com.tacz.guns.network.message;
 
 import com.tacz.guns.GunMod;
+import com.tacz.guns.advancement.GunRefitTrigger;
 import com.tacz.guns.api.item.IAttachment;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.resource.modifier.AttachmentPropertyManager;
+import com.tacz.guns.util.VirtualOemAttachment;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -37,6 +39,9 @@ public record ClientMessageRefitGun(int attachmentSlotIndex, int gunSlotIndex,
     public static void handle(ClientMessageRefitGun message, ServerPlayNetworking.Context context) {
         context.server().execute(() -> {
             ServerPlayer player = context.player();
+            if (player == null) {
+                return;
+            }
             Inventory inventory = player.getInventory();
             ItemStack attachmentItem = inventory.getItem(message.attachmentSlotIndex);
             ItemStack gunItem = inventory.getItem(message.gunSlotIndex);
@@ -54,10 +59,12 @@ public record ClientMessageRefitGun(int attachmentSlotIndex, int gunSlotIndex,
                     }
                     AttachmentType realType = iAttachment.getType(attachmentItem);
                     ItemStack oldAttachmentItem = iGun.getAttachment(player.registryAccess(), gunItem, realType);
+                    ItemStack beforeRefit = gunItem.copy();
                     iGun.installAttachment(player.registryAccess(), gunItem, attachmentItem);
+                    GunRefitTrigger.INSTANCE.trigger(player, beforeRefit, gunItem);
                     // 刷新配件数据
                     AttachmentPropertyManager.postChangeEvent(player, gunItem);
-                    inventory.setItem(message.attachmentSlotIndex, oldAttachmentItem);
+                    inventory.setItem(message.attachmentSlotIndex, VirtualOemAttachment.isMarked(oldAttachmentItem) ? ItemStack.EMPTY : oldAttachmentItem);
                     // 如果卸载的是扩容弹匣，吐出所有子弹
                     if (realType == AttachmentType.EXTENDED_MAG) {
                         iGun.dropAllAmmo(player, gunItem);

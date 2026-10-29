@@ -1,10 +1,12 @@
 package com.tacz.guns.network.message;
 
 import com.tacz.guns.GunMod;
+import com.tacz.guns.advancement.GunRefitTrigger;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.resource.modifier.AttachmentPropertyManager;
+import com.tacz.guns.util.VirtualOemAttachment;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -35,6 +37,9 @@ public record ClientMessageUnloadAttachment(int gunSlotIndex,
     public static void handle(ClientMessageUnloadAttachment message, ServerPlayNetworking.Context context) {
         context.server().execute(() -> {
             ServerPlayer player = context.player();
+            if (player == null) {
+                return;
+            }
             Inventory inventory = player.getInventory();
             ItemStack gunItem = inventory.getItem(message.gunSlotIndex);
             IGun iGun = IGun.getIGunOrNull(gunItem);
@@ -44,8 +49,10 @@ public record ClientMessageUnloadAttachment(int gunSlotIndex,
                     return;
                 }
                 ItemStack attachmentItem = iGun.getAttachment(player.registryAccess(), gunItem, message.attachmentType);
-                if (!attachmentItem.isEmpty() && inventory.add(attachmentItem)) {
+                if (!attachmentItem.isEmpty() && (VirtualOemAttachment.isMarked(attachmentItem) || inventory.add(attachmentItem))) {
+                    ItemStack beforeRefit = gunItem.copy();
                     iGun.unloadAttachment(player.registryAccess(), gunItem, message.attachmentType);
+                    GunRefitTrigger.INSTANCE.trigger(player, beforeRefit, gunItem);
                     // 刷新配件数据
                     AttachmentPropertyManager.postChangeEvent(player, gunItem);
                     // 如果卸载的是扩容弹匣，吐出所有子弹

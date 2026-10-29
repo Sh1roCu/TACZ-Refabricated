@@ -17,8 +17,7 @@ import com.tacz.guns.inventory.tooltip.GunTooltip;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.pojo.data.gun.FeedType;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
-import com.tacz.guns.util.AllowAttachmentTagMatcher;
-import com.tacz.guns.util.AttachmentDataUtils;
+import com.tacz.guns.util.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -43,7 +42,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
     }
 
     private static Comparator<Map.Entry<ResourceLocation, CommonGunIndex>> idNameSort() {
-        return Comparator.comparingInt(m -> m.getValue().getSort());
+        return ContentPackOrder.<CommonGunIndex>byNamespace().thenComparingInt(m -> m.getValue().getSort());
     }
 
     /**
@@ -83,6 +82,27 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
     public abstract void interruptReload(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter);
 
     /**
+     * 主动卸弹的行为入口，由操作者完成空闲检查后调用。
+     * 默认清空弹匣和膛内弹；枪械实现可覆写此方法或分发到逻辑脚本。
+     */
+    public void unloadAmmo(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter) {
+        unloadAmmo(gunItem, shooter, true, -1);
+    }
+
+    /**
+     * 按数量结算卸弹，不触发主动卸弹回调，供默认行为和脚本 API 复用。
+     *
+     * @param unloadBarrel 是否同时卸出闭膛枪的膛内一发
+     * @param amount       弹匣卸出数量；0 保留弹匣，-1 清空弹匣
+     * @return 实际卸出总数（含膛内）；无效取值、缺少枪械定义、背包直读或客户端调用返回 0
+     */
+    public int unloadAmmo(ItemStack gunItem, LivingEntity shooter, boolean unloadBarrel, int amount) {
+        return TimelessAPI.getCommonGunIndex(getGunId(gunItem))
+                .map(index -> GunAmmoUnloadHelper.unloadAmmo(shooter, gunItem, this, index, unloadBarrel, amount))
+                .orElse(0);
+    }
+
+    /**
      * 切换开火模式时调用
      */
     public abstract void fireSelect(ShooterDataHolder dataHolder, ItemStack gunItem);
@@ -98,6 +118,8 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      */
     public void tickHeat(ShooterDataHolder dataHolder, ItemStack gunItem, LivingEntity shooter) {
     }
+
+    ;
 
     /**
      * 初始化子弹角度和速度
@@ -294,9 +316,9 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
         IAttachment iAttachment = IAttachment.getIAttachmentOrNull(attachmentItem);
         IGun iGun = IGun.getIGunOrNull(gun);
         if (iGun != null && iAttachment != null) {
-            ResourceLocation gunId = iGun.getGunId(gun);
+            AttachmentType attachmentType = iAttachment.getType(attachmentItem);
             ResourceLocation attachmentId = iAttachment.getAttachmentId(attachmentItem);
-            return AllowAttachmentTagMatcher.match(gunId, attachmentId);
+            return SlotAdapterHelper.allowsAttachment(gun, attachmentType, attachmentId);
         }
         return false;
     }
@@ -352,6 +374,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
                         .setAmmoCount(gunData.getAmmoAmount())
                         .setHeatData(gunData.hasHeatData())
                         .setAmmoInBarrel(true)
+                        .putAllVirtualAttachment(DefaultGunAttachments.defaults(entry.getKey()))
                         .build(provider);
                 stacks.add(itemStack);
             }
@@ -392,7 +415,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 获取是否使用弹药直读
-     *
      * @param gun 枪械
      * @return 是否使用弹药直读
      */
@@ -412,7 +434,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 获取是否有供给弹药直读的弹药
-     *
      * @param gun 枪械
      * @return 是否有供给弹药直读的弹药
      */
@@ -448,7 +469,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 获取 RPM
-     *
      * @param gun 枪械
      * @return RPM 数值
      */
@@ -470,7 +490,6 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     /**
      * 获取是否可以趴下射击
-     *
      * @param gun 枪械
      * @return 是否可以趴下射击
      */

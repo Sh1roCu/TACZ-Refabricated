@@ -26,6 +26,7 @@ public class ServerMessageRefreshRefitScreen implements CustomPacketPayload {
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageRefreshRefitScreen message, ClientPlayNetworking.Context context) {
         context.client().execute(ServerMessageRefreshRefitScreen::updateScreen);
     }

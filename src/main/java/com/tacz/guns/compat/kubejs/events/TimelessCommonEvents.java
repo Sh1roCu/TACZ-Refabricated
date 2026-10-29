@@ -1,6 +1,15 @@
-package com.tacz.guns.compat.kubejs.events;
-
-public class TimelessCommonEvents implements TimelessKubeJSEventRegister {
+//package com.tacz.guns.compat.kubejs.events;
+//
+//import cn.sh1rocu.tacz.api.event.BaseEvent;
+//import com.tacz.guns.api.event.common.*;
+//import dev.latvian.mods.kubejs.event.EventHandler;
+//import dev.latvian.mods.kubejs.script.ScriptTypePredicate;
+//
+//import java.util.HashMap;
+//import java.util.Map;
+//import java.util.function.Consumer;
+//
+//public class TimelessCommonEvents implements TimelessKubeJSEventRegister {
 //    public static final TimelessCommonEvents INSTANCE = new TimelessCommonEvents();
 //    public static final Map<Class<? extends BaseEvent>, Consumer<BaseEvent>> EVENT_HANDLERS = new HashMap<>();
 //    public static final EventHandler ENTITY_HURT_BY_GUN_PRE = INSTANCE.registerTimelessCommonEvent(
@@ -32,8 +41,7 @@ public class TimelessCommonEvents implements TimelessKubeJSEventRegister {
 //            "gunFinishReload",
 //            GunKubeJSEvents.GunFinishReloadEventJS.class,
 //            GunFinishReloadEvent.class,
-//            GunKubeJSEvents.GunFinishReloadEventJS::new,
-//            true
+//            GunKubeJSEvents.GunFinishReloadEventJS::new
 //    );
 //    public static final EventHandler GUN_FIRE = INSTANCE.registerTimelessCommonEvent(
 //            "gunFire",
@@ -41,6 +49,12 @@ public class TimelessCommonEvents implements TimelessKubeJSEventRegister {
 //            GunFireEvent.class,
 //            GunKubeJSEvents.GunFireEventJS::new,
 //            true
+//    );
+//    public static final EventHandler GUN_FIRE_POST = INSTANCE.registerTimelessCommonEvent(
+//            "gunFirePost",
+//            GunKubeJSEvents.GunFirePostEventJS.class,
+//            GunFirePostEvent.class,
+//            GunKubeJSEvents.GunFirePostEventJS::new
 //    );
 //    public static final EventHandler GUN_FIRE_SELECT = INSTANCE.registerTimelessCommonEvent(
 //            "gunFireSelect",
@@ -88,4 +102,4 @@ public class TimelessCommonEvents implements TimelessKubeJSEventRegister {
 //    public ScriptTypePredicate getScriptType() {
 //        return ScriptTypePredicate.COMMON;
 //    }
-}
+//}

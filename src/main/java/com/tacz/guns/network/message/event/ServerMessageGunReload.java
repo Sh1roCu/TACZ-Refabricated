@@ -32,6 +32,7 @@ public record ServerMessageGunReload(int shooterId, ItemStack gunItemStack) impl
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageGunReload message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> doClientEvent(message));
     }

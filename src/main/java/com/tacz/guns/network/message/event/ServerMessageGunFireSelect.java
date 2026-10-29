@@ -32,6 +32,7 @@ public record ServerMessageGunFireSelect(int shooterId, ItemStack gunItemStack) 
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageGunFireSelect message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> doClientEvent(message));
     }

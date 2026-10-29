@@ -39,7 +39,7 @@ public class AmmoClothConfig {
                     AmmoConfig.EXPLOSIVE_AMMO_VISIBLE_DISTANCE.save();
                 }).build());
 
-        ammo.addEntry(entryBuilder.startStrList(Component.translatable("config.tacz.common.ammo.pass_through_blocks"), AmmoConfig.PASS_THROUGH_BLOCKS.get())
+        ammo.addEntry(entryBuilder.startStrList(Component.translatable("config.tacz.common.ammo.pass_through_blocks"), Lists.newArrayList(AmmoConfig.PASS_THROUGH_BLOCKS.get()))
                 .setDefaultValue(Lists.newArrayList()).setTooltip(Component.translatable("config.tacz.common.ammo.pass_through_blocks.desc"))
                 .setSaveConsumer(value -> {
                     AmmoConfig.PASS_THROUGH_BLOCKS.set(value);
@@ -52,6 +52,14 @@ public class AmmoClothConfig {
                     AmmoConfig.DESTROY_GLASS.set(value);
                     AmmoConfig.DESTROY_GLASS.save();
                 }).build());
+
+        ammo.addEntry(entryBuilder.startStrList(Component.translatable("config.tacz.common.ammo.destroy_blocks"), Lists.newArrayList(AmmoConfig.DESTROY_BLOCKS.get()))
+                .setDefaultValue(Lists.newArrayList(AmmoConfig.DEFAULT_DESTROY_BLOCKS)).setTooltip(Component.translatable("config.tacz.common.ammo.destroy_blocks.desc"))
+                .setSaveConsumer(AmmoConfig.DESTROY_BLOCKS::set).build());
+
+        ammo.addEntry(entryBuilder.startDoubleField(Component.translatable("config.tacz.common.ammo.destroy_block_hardness_threshold"), AmmoConfig.DESTROY_BLOCK_HARDNESS_THRESHOLD.get())
+                .setMin(0).setMax(Double.MAX_VALUE).setDefaultValue(4).setTooltip(Component.translatable("config.tacz.common.ammo.destroy_block_hardness_threshold.desc"))
+                .setSaveConsumer(AmmoConfig.DESTROY_BLOCK_HARDNESS_THRESHOLD::set).build());
 
         ammo.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.tacz.common.ammo.ignite_block"), AmmoConfig.IGNITE_BLOCK.get())
                 .setDefaultValue(true).setTooltip(Component.translatable("config.tacz.common.ammo.ignite_block.desc"))
@@ -66,6 +74,18 @@ public class AmmoClothConfig {
                     AmmoConfig.IGNITE_ENTITY.set(value);
                     AmmoConfig.IGNITE_ENTITY.save();
                 }).build());
+
+        ammo.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.tacz.common.ammo.ignore_team_friendly_fire"), AmmoConfig.IGNORE_TEAM_FRIENDLY_FIRE.get())
+                .setDefaultValue(false).setTooltip(Component.translatable("config.tacz.common.ammo.ignore_team_friendly_fire.desc"))
+                .setSaveConsumer(AmmoConfig.IGNORE_TEAM_FRIENDLY_FIRE::set).build());
+
+        ammo.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.tacz.common.ammo.enable_bullet_damage_ignore_list"), AmmoConfig.ENABLE_BULLET_DAMAGE_IGNORE_LIST.get())
+                .setDefaultValue(false).setTooltip(Component.translatable("config.tacz.common.ammo.enable_bullet_damage_ignore_list.desc"))
+                .setSaveConsumer(AmmoConfig.ENABLE_BULLET_DAMAGE_IGNORE_LIST::set).build());
+
+        ammo.addEntry(entryBuilder.startStrList(Component.translatable("config.tacz.common.ammo.bullet_damage_ignore_list"), Lists.newArrayList(AmmoConfig.BULLET_DAMAGE_IGNORE_LIST.get()))
+                .setDefaultValue(Lists.newArrayList(AmmoConfig.DEFAULT_BULLET_DAMAGE_IGNORE_LIST)).setTooltip(Component.translatable("config.tacz.common.ammo.bullet_damage_ignore_list.desc"))
+                .setSaveConsumer(AmmoConfig.BULLET_DAMAGE_IGNORE_LIST::set).build());
 
         ammo.addEntry(entryBuilder.startDoubleField(Component.translatable("config.tacz.common.ammo.global_speed_modifier"), AmmoConfig.GLOBAL_BULLET_SPEED_MODIFIER.get())
                 .setDefaultValue(2.0).setTooltip(Component.translatable("config.tacz.common.ammo.global_speed_modifier.desc"))

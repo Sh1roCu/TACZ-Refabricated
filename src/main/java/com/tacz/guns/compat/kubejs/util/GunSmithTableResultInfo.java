@@ -1,6 +1,19 @@
-package com.tacz.guns.compat.kubejs.util;
-
-public class GunSmithTableResultInfo {
+//package com.tacz.guns.compat.kubejs.util;
+//
+//import cn.sh1rocu.tacz.util.forge.CraftingHelper;
+//import com.google.gson.JsonObject;
+//import com.tacz.guns.crafting.result.GunSmithTableResult;
+//import dev.latvian.mods.kubejs.item.ItemStackJS;
+//import dev.latvian.mods.kubejs.item.OutputItem;
+//import dev.latvian.mods.kubejs.registry.RegistryInfo;
+//import dev.latvian.mods.kubejs.util.JsonIO;
+//import dev.latvian.mods.kubejs.util.UtilsJS;
+//import net.minecraft.nbt.CompoundTag;
+//import net.minecraft.resources.ResourceLocation;
+//import net.minecraft.util.GsonHelper;
+//import net.minecraft.world.item.ItemStack;
+//
+//public class GunSmithTableResultInfo {
 //    private static final String TYPE_KEY = "type";
 //    private static final String ID_KEY = "id";
 //    private static final String COUNT_KEY = "count";
@@ -139,6 +152,7 @@ public class GunSmithTableResultInfo {
 //        MUZZLE("muzzle"),
 //        PISTOL("pistol"),
 //        RIFLE("rifle"),
+//        DMR("dmr"),
 //        RPG("rpg"),
 //        SCOPE("scope"),
 //        SHOTGUN("shotgun"),
@@ -156,4 +170,4 @@ public class GunSmithTableResultInfo {
 //            return name;
 //        }
 //    }
-}
+//}

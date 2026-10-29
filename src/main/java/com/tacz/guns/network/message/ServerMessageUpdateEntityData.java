@@ -35,6 +35,7 @@ public record ServerMessageUpdateEntityData(int entityId,
         return TYPE;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageUpdateEntityData message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> onHandle(message));
     }

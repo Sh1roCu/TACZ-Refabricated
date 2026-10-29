@@ -33,11 +33,11 @@ public class PlayerAnimatorAssetManager extends SimplePreparableReloadListener<M
     }
 
     void putAnimation(ResourceLocation id, InputStream stream) throws IOException {
-        Collection<IPlayable> keyframeAnimations = AnimationCodecs.deserialize("json", () -> stream);
+        Collection<IPlayable> keyframeAnimations = AnimationCodecs.deserialize("json", stream);
         for (var playable : keyframeAnimations) {
             if (playable instanceof KeyframeAnimation animation && animation.extraData.get("name") instanceof String text) {
                 String name = PlayerAnimationRegistry.serializeTextToString(text).toLowerCase(Locale.ENGLISH);
-                animations.computeIfAbsent(id, k -> Maps.newHashMap()).put(name, animation);
+                animations.computeIfAbsent(id, k -> Maps.newHashMap()).put(name, PlayerAnimatorEasing.restoreLegacyEasing(animation));
             }
         }
     }
@@ -66,11 +66,11 @@ public class PlayerAnimatorAssetManager extends SimplePreparableReloadListener<M
             ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
 
             try (InputStream stream = entry.getValue().open()) {
-                Collection<IPlayable> keyframeAnimations = AnimationCodecs.deserialize("json", () -> stream);
+                Collection<IPlayable> keyframeAnimations = AnimationCodecs.deserialize("json", stream);
                 for (var playable : keyframeAnimations) {
                     if (playable instanceof KeyframeAnimation animation && animation.extraData.get("name") instanceof String text) {
                         String name = PlayerAnimationRegistry.serializeTextToString(text).toLowerCase(Locale.ENGLISH);
-                        output.computeIfAbsent(resourcelocation1, k -> Maps.newHashMap()).put(name, animation);
+                        output.computeIfAbsent(resourcelocation1, k -> Maps.newHashMap()).put(name, PlayerAnimatorEasing.restoreLegacyEasing(animation));
                     }
                 }
             } catch (IllegalArgumentException | IOException | JsonParseException jsonparseexception) {

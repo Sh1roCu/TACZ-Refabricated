@@ -1,7 +1,7 @@
 package cn.sh1rocu.tacz.client;
 
-import cn.sh1rocu.simplebedrockmodel.api.event.RenderTickEvent;
 import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderFrameEvent;
 import cn.sh1rocu.tacz.api.event.*;
 import cn.sh1rocu.tacz.api.extension.IItem;
 import com.tacz.guns.api.client.event.BeforeRenderHandEvent;
@@ -12,11 +12,14 @@ import com.tacz.guns.api.event.common.EntityKillByGunEvent;
 import com.tacz.guns.api.event.common.GunFireEvent;
 import com.tacz.guns.client.animation.screen.RefitTransform;
 import com.tacz.guns.client.event.*;
-import com.tacz.guns.client.init.ClientSetupEvent;
-import com.tacz.guns.client.init.ModContainerScreen;
-import com.tacz.guns.client.init.ModEntitiesRender;
-import com.tacz.guns.client.init.ParticleFactories;
-import com.tacz.guns.client.input.*;
+import com.tacz.guns.client.gui.overlay.DisplayCaseLockHintOverlay;
+import com.tacz.guns.client.init.*;
+import com.tacz.guns.client.input.AimKey;
+import com.tacz.guns.client.input.GunInputHandler;
+import com.tacz.guns.client.input.ReloadKey;
+import com.tacz.guns.client.input.ShootKey;
+import com.tacz.guns.client.renderer.item.ScreenItemVboContext;
+import com.tacz.guns.client.renderer.scope.ScopeThermalRenderer;
 import com.tacz.guns.client.sound.SoundPlayManager;
 import com.tacz.guns.init.CommonRegistry;
 import com.tacz.guns.network.NetworkHandler;
@@ -28,7 +31,13 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.phys.BlockHitResult;
+
+import static cn.sh1rocu.tacz.TaCZFabric.*;
 
 public class TaCZFabricClient implements ClientModInitializer {
     @Override
@@ -42,13 +51,17 @@ public class TaCZFabricClient implements ClientModInitializer {
         ParticleFactories.registerParticles();
         BuiltInRegistries.ITEM.stream().filter(item -> item instanceof IItem).forEach(clientEx ->
                 BuiltinItemRendererRegistry.INSTANCE.register(clientEx, ((IItem) clientEx).getCustomRenderer()));
+        GunPegboardColors.setup();
+        GunPegboardColors.itemColors();
+        GunPegboardColors.blockColors();
+
         subscribeEvents();
     }
 
     private void subscribeEvents() {
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> CommonRegistry.onLoadComplete());
 
-        RenderTickEvent.EVENT.register(RefitTransform::tickInterpolation);
+        RenderFrameEvent.EVENT.register(RefitTransform::tickInterpolation);
 
         ViewportEvent.CAMERA.register(CameraSetupEvent::applyLevelCameraAnimation);
         BeforeRenderHandEvent.CALLBACK.register(CameraSetupEvent::applyItemInHandCameraAnimation);
@@ -84,47 +97,69 @@ public class TaCZFabricClient implements ClientModInitializer {
 
         TextureStitchEvent.POST.register(ReloadResourceEvent::onTextureStitchEventPost);
 
-        RenderTickEvent.EVENT.register(RenderCrosshairEvent::onRenderTick);
+        RenderFrameEvent.EVENT.register(RenderCrosshairEvent::onRenderTick);
 
         RenderLivingEvent.POST.register(RenderHeadShotAABB::onRenderEntity);
 
         ClientTickEvents.START_CLIENT_TICK.register(TickAnimationEvent::tickAnimation);
         ClientTickEvents.END_CLIENT_TICK.register(TickAnimationEvent::tickAnimation);
-        RenderTickEvent.EVENT.register(TickAnimationEvent::tickAnimation);
+        RenderFrameEvent.EVENT.register(TickAnimationEvent::tickAnimation);
 
         ItemTooltipCallback.EVENT.register(TooltipEvent::onTooltip);
 
-        InputEvent.MouseButton.Post.EVENT.register(AimKey::onAimPress);
         ClientTickEvents.END_CLIENT_TICK.register(AimKey::cancelAim);
         ClientTickEvents.START_CLIENT_TICK.register(AimKey::onAimHoldingPreInput);
         ClientTickEvents.END_CLIENT_TICK.register(AimKey::onAimHoldingPreInput);
 
-
-        InputEvent.Key.EVENT.register(ConfigKey::onOpenConfig);
-        InputEvent.Key.EVENT.register(CrawlKey::onCrawlPress);
-
-        InputEvent.Key.EVENT.register(FireSelectKey::onFireSelectKeyPress);
-        InputEvent.MouseButton.Post.EVENT.register(FireSelectKey::onFireSelectMousePress);
-
-        InputEvent.Key.EVENT.register(InspectKey::onInspectPress);
-
-        InputEvent.Key.EVENT.register(InteractKey::onInteractKeyPress);
-        InputEvent.MouseButton.Post.EVENT.register(InteractKey::onInteractMousePress);
-
-        InputEvent.Key.EVENT.register(MeleeKey::onMeleeKeyPress);
-        InputEvent.MouseButton.Post.EVENT.register(MeleeKey::onMeleeMousePress);
-
-        InputEvent.Key.EVENT.register(RefitKey::onRefitPress);
-
-        InputEvent.Key.EVENT.register(ReloadKey::onReloadPress);
         PlayerTickEvent.START.register(ReloadKey::autoReload);
 
         ClientTickEvents.START_CLIENT_TICK.register(mc -> ShootKey.autoShoot(mc, false));
         ClientTickEvents.END_CLIENT_TICK.register(mc -> ShootKey.autoShoot(mc, true));
 
-        InputEvent.Key.EVENT.register(ZoomKey::onZoomKeyPress);
-        InputEvent.MouseButton.Post.EVENT.register(ZoomKey::onZoomMousePress);
+        InputEvent.Key.EVENT.register(GunInputHandler::onKeyPress);
+        InputEvent.MouseButton.Post.EVENT.register(GunInputHandler::onMousePress);
+        InputEvent.MouseButton.Pre.EVENT.register(GunInputHandler::onMousePressPre);
 
         ClientTickEvents.END_CLIENT_TICK.register(SoundPlayManager::onClientTick);
+
+        WorldRenderEvents.BEFORE_BLOCK_OUTLINE.register((ctx, hitResult) -> {
+            if (hitResult instanceof BlockHitResult blockHitResult) {
+                return GunPegboardHighlightEvent.onRenderBlockHighlight(ctx, blockHitResult);
+            }
+            return true;
+        });
+
+        ClientTickEvents.END_CLIENT_TICK.register(DisplayCaseLockHintOverlay::onClientTick);
+
+        ClientPlayerNetworkEvent.LOGGING_OUT.register(LOWEST, ClientGunTimeResetEvent::onLoggingOut);
+
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(ScopeThermalRenderer::onWorldStage);
+
+        InputEvent.Key.EVENT.register(GunDisplayCaseClientInteractionEvent::onUseKey);
+        InputEvent.MouseButton.Post.EVENT.register(GunDisplayCaseClientInteractionEvent::onUseMouse);
+
+        WorldRenderEvents.BEFORE_BLOCK_OUTLINE.register((ctx, hitResult) -> {
+            if (hitResult instanceof BlockHitResult blockHitResult) {
+                return GunDisplayCaseHighlightEvent.onRenderBlockHighlight(ctx, blockHitResult);
+            }
+            return true;
+        });
+
+        ScreenEvents.BEFORE_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            var event = ScreenEvents.beforeRender(screen);
+            event.addPhaseOrdering(HIGHEST, HIGH);
+            event.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+            event.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
+            event.addPhaseOrdering(LOW, LOWEST);
+            event.register(HIGHEST, ScreenItemVboContext::beforeScreen);
+        });
+        ScreenEvents.BEFORE_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            var event = ScreenEvents.afterRender(screen);
+            event.addPhaseOrdering(HIGHEST, HIGH);
+            event.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+            event.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
+            event.addPhaseOrdering(LOW, LOWEST);
+            event.register(LOWEST, ScreenItemVboContext::afterScreen);
+        });
     }
 }

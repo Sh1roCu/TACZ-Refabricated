@@ -1,6 +1,6 @@
 package com.tacz.guns.client.event;
 
-import cn.sh1rocu.simplebedrockmodel.api.event.RenderTickEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderFrameEvent;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -16,6 +16,7 @@ import com.tacz.guns.client.gui.GunRefitScreen;
 import com.tacz.guns.client.renderer.crosshair.CrosshairType;
 import com.tacz.guns.compat.shouldersurfing.ShoulderSurfingCompat;
 import com.tacz.guns.config.client.RenderConfig;
+import com.tacz.guns.util.time.GunTime;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.DeltaTracker;
@@ -28,6 +29,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @Environment(EnvType.CLIENT)
@@ -44,7 +47,7 @@ public class RenderCrosshairEvent {
      */
     public static void onRenderOverlay(GuiGraphics guiGraphics, Window window, DeltaTracker deltaTracker, CallbackInfo ci) {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) {
+        if (player == null || player.isSpectator()) {
             return;
         }
         if (!IGun.mainHandHoldGun(player)) {
@@ -99,7 +102,7 @@ public class RenderCrosshairEvent {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public static void onRenderTick(RenderTickEvent event) {
+    public static void onRenderTick(RenderFrameEvent event) {
         // 奇迹的是，RenderGameOverlayEvent.PreLayer 事件中，screen 还未被赋值...
         isRefitScreen = Minecraft.getInstance().screen instanceof GunRefitScreen;
     }
@@ -135,14 +138,13 @@ public class RenderCrosshairEvent {
     }
 
     private static void renderHitMarker(GuiGraphics graphics, Window window) {
-        long remainHitTime = System.currentTimeMillis() - hitTimestamp;
-        long remainKillTime = System.currentTimeMillis() - killTimestamp;
-        long remainHeadShotTime = System.currentTimeMillis() - headShotTimestamp;
+        long remainHitTime = GunTime.nowMillis() - hitTimestamp;
+        long remainKillTime = GunTime.nowMillis() - killTimestamp;
         float offset = RenderConfig.HIT_MARKET_START_POSITION.get().floatValue();
         float fadeTime;
 
-        if (remainKillTime > KEEP_TIME) {
-            if (remainHitTime > KEEP_TIME) {
+        if (!GunTime.isWithin(killTimestamp, KEEP_TIME)) {
+            if (!GunTime.isWithin(hitTimestamp, KEEP_TIME)) {
                 return;
             } else {
                 fadeTime = remainHitTime;
@@ -160,7 +162,7 @@ public class RenderCrosshairEvent {
 
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        if (remainHeadShotTime > KEEP_TIME) {
+        if (!GunTime.isWithin(headShotTimestamp, KEEP_TIME)) {
             RenderSystem.setShaderColor(1F, 1F, 1F, 1 - fadeTime / KEEP_TIME);
         } else {
             RenderSystem.setShaderColor(1F, 0, 0, 1 - fadeTime / KEEP_TIME);
@@ -173,14 +175,20 @@ public class RenderCrosshairEvent {
     }
 
     public static void markHitTimestamp() {
-        RenderCrosshairEvent.hitTimestamp = System.currentTimeMillis();
+        RenderCrosshairEvent.hitTimestamp = GunTime.nowMillis();
     }
 
     public static void markKillTimestamp() {
-        RenderCrosshairEvent.killTimestamp = System.currentTimeMillis();
+        RenderCrosshairEvent.killTimestamp = GunTime.nowMillis();
     }
 
     public static void markHeadShotTimestamp() {
-        RenderCrosshairEvent.headShotTimestamp = System.currentTimeMillis();
+        RenderCrosshairEvent.headShotTimestamp = GunTime.nowMillis();
+    }
+
+    public static void resetTimestamps() {
+        hitTimestamp = -1L;
+        killTimestamp = -1L;
+        headShotTimestamp = -1L;
     }
 }

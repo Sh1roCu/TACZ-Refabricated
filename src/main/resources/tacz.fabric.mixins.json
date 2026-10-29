@@ -9,7 +9,6 @@
     "minVersion": "0.5.0"
   },
   "mixins": [
-    "accessor.ExplosionAccessor",
     "common.AbstractMinecartMixin",
     "common.ArmorStandMixin",
     "common.BlockBehaviourMixin",
@@ -26,6 +25,8 @@
     "common.ServerEntityMixin",
     "common.ServerLevelMixin",
     "common.ServerPacksSourceMixin",
+    "common.accessor.BlockableEventLoopAccessor",
+    "common.accessor.ExplosionAccessor",
     "common.itemhandler.AbstractHorseMixin",
     "common.itemhandler.LivingEntityMixin",
     "common.itemhandler.PlayerMixin",
@@ -34,10 +35,6 @@
     "compat.tweakeroo.ItemMixin"
   ],
   "client": [
-    "accessor.AbstractSliderButtonAccessor",
-    "accessor.BlockableEventLoopAccessor",
-    "accessor.GameRendererAccessor",
-    "accessor.ScreenAccessor",
     "client.AbstractPlayerMixin",
     "client.ChannelAccessHandleMixin",
     "client.ClientLevelMixin",
@@ -48,9 +45,14 @@
     "client.LivingEntityRendererMixin",
     "client.MinecraftMixin",
     "client.MouseHandlerMixin",
+    "client.PlayerRendererMixin",
     "client.RenderTargetMixin",
     "client.SoundEngineMixin",
-    "client.TextureAtlasMixin"
+    "client.TextureAtlasMixin",
+    "client.accessor.AbstractContainerScreenAccessor",
+    "client.accessor.AbstractSliderButtonAccessor",
+    "client.accessor.GameRendererAccessor",
+    "client.accessor.ScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

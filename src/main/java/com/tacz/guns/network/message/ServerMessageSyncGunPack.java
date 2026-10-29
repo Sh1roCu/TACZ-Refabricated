@@ -40,6 +40,7 @@ public class ServerMessageSyncGunPack implements CustomPacketPayload {
         this.cache = cache;
     }
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageSyncGunPack message, ClientPlayNetworking.Context context) {
         context.client().execute(() -> {
                     var connection = context.client().getConnection();

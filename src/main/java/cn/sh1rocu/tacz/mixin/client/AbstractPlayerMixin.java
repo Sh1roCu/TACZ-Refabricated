@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.mixin.client;
 
-import cn.sh1rocu.tacz.util.forge.ClientHooks;
+import cn.sh1rocu.tacz.util.neoforge.ClientHooks;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;

@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.mixin.common.itemhandler;
 
-import cn.sh1rocu.tacz.util.forge.LazyOptional;
+import cn.sh1rocu.tacz.util.neoforge.LazyOptional;
 import cn.sh1rocu.tacz.util.itemhandler.CombinedInvWrapper;
 import cn.sh1rocu.tacz.util.itemhandler.IItemHandler;
 import cn.sh1rocu.tacz.util.itemhandler.entity.player.PlayerArmorInvWrapper;

@@ -1,6 +1,6 @@
 package com.tacz.guns.resource;
 
-import cn.sh1rocu.tacz.util.forge.DelegatingPackResources;
+import cn.sh1rocu.tacz.util.VersionConverter;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.tacz.guns.GunMod;
@@ -14,7 +14,10 @@ import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.version.VersionPredicate;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.*;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
@@ -32,10 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -67,10 +67,9 @@ public enum GunPackLoader implements RepositorySource {
             }
         }
 
-//        // 确保配置文件加载，这个阶段将比标准的forge配置文件加载早
-//        PreLoadConfig.load(resourcePacksPath);
+        // NeoForge loads STARTUP configuration before pack discovery.
 
-        // 仅在第一次加载时复制默认资源包
+        // 仅在启动后的第一次加载时检查默认资源包是否需要导出；后续重载不重新导出
         if (firstLoad) {
             if (!PreLoadConfig.override.get()) {
                 for (ResourceManager.ExtraEntry entry : ResourceManager.EXTRA_ENTRIES) {
@@ -86,21 +85,17 @@ public enum GunPackLoader implements RepositorySource {
         List<PackResources> extensionPacks = new ArrayList<>();
 
         for (GunPack gunPack : gunPacks) {
-            PackResources packResources;
-            PackLocationInfo gunPackInfo = new PackLocationInfo(gunPack.name, Component.literal(gunPack.name), PackSource.BUILT_IN, Optional.empty());
-            if (Files.isDirectory(gunPack.path)) {
-                packResources = new PathPackResources.PathResourcesSupplier(gunPack.path).openPrimary(gunPackInfo);
-            } else {
-                packResources = new FilePackResources.FileResourcesSupplier(gunPack.path).openPrimary(gunPackInfo);
+            try {
+                PackLocationInfo location = new PackLocationInfo(gunPack.name, Component.literal(gunPack.name), PackSource.BUILT_IN, Optional.empty());
+                extensionPacks.add(GunPackOverlayResolver.open(gunPack.path, location, gunPack.overlays));
+            } catch (IOException e) {
+                GunMod.LOGGER.error(MARKER, "Failed to open gun pack {}: {}", gunPack.path, e.getMessage());
             }
-
-            extensionPacks.add(packResources);
         }
 
-        PackLocationInfo packLocationInfo = new PackLocationInfo("tacz_resources", Component.literal("TACZ Resources"), PackSource.BUILT_IN, Optional.empty());
-        return Pack.readMetaAndCreate(packLocationInfo, new DelegatingPackResources(packLocationInfo,
-                new PackMetadataSection(Component.translatable("tacz.resources.modresources"),
-                        SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty()), extensionPacks) {
+        PackLocationInfo info = new PackLocationInfo("tacz_resources", Component.literal("TACZ Resources"), PackSource.BUILT_IN, Optional.empty());
+        PackMetadataSection meta = new PackMetadataSection(Component.translatable("tacz.resources.modresources"), SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
+        DelegatingPackResources pack = new DelegatingPackResources(info, meta, extensionPacks) {
             public IoSupplier<InputStream> getRootResource(String... paths) {
                 if (paths.length == 1 && paths[0].equals("pack.png")) {
                     Path logoPath = getModIcon("tacz");
@@ -110,7 +105,9 @@ public enum GunPackLoader implements RepositorySource {
                 }
                 return null;
             }
-        }, packType, new PackSelectionConfig(true, Pack.Position.BOTTOM, false));
+        };
+        PackSelectionConfig config = new PackSelectionConfig(true, Pack.Position.BOTTOM, false);
+        return Pack.readMetaAndCreate(info, pack, packType, config);
     }
 
     public static @Nullable Path getModIcon(String modId) {
@@ -164,8 +161,9 @@ public enum GunPackLoader implements RepositorySource {
                 return null;
             }
 
-            return new GunPack(path, info.getName());
-        } catch (IOException | JsonSyntaxException | JsonIOException | VersionParsingException exception) {
+            return createGunPack(path, info);
+        } catch (IOException | JsonSyntaxException | JsonIOException | VersionParsingException |
+                 IllegalArgumentException exception) {
             GunMod.LOGGER.warn(MARKER, "Failed to read info json: {}", packInfoFilePath.getFileName());
             GunMod.LOGGER.warn(exception.getMessage());
         }
@@ -193,8 +191,9 @@ public enum GunPackLoader implements RepositorySource {
                     return null;
                 }
 
-                return new GunPack(path, info.getName());
-            } catch (IOException | JsonSyntaxException | JsonIOException | VersionParsingException e) {
+                return createGunPack(path, info);
+            } catch (IOException | JsonSyntaxException | JsonIOException | VersionParsingException |
+                     IllegalArgumentException e) {
                 GunMod.LOGGER.error(MARKER, "Failed to load extension from ZIP {}. Error: {}", path.getFileName(), e);
                 return null;
             }
@@ -230,22 +229,29 @@ public enum GunPackLoader implements RepositorySource {
     private static boolean modVersionAllMatch(PackMeta info) throws VersionParsingException {
         HashMap<String, String> dependencies = info.getDependencies();
         for (String modId : dependencies.keySet()) {
-            if (!modVersionMatch(modId, dependencies.get(modId))) {
+            if (!modVersionMatch(modId, VersionConverter.toList(dependencies.get(modId)))) {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean modVersionMatch(String modId, String version) throws VersionParsingException {
-        VersionPredicate versionRange = VersionPredicate.parse(version);
+    private static boolean modVersionMatch(String modId, Collection<String> version) throws VersionParsingException {
+        Collection<VersionPredicate> versionRanges = VersionPredicate.parse(version);
         return FabricLoader.getInstance().getModContainer(modId).map(mod -> {
             Version modVersion = mod.getMetadata().getVersion();
-            return versionRange.test(modVersion);
+            return versionRanges.stream().anyMatch(p -> p.test(modVersion));
         }).orElse(false);
     }
 
 
-    public record GunPack(Path path, String name) {
+    private static GunPack createGunPack(Path path, PackMeta info) throws IOException {
+        if (info.getName() == null || info.getName().isBlank()) throw new IOException("Missing gun pack namespace");
+        List<String> overlays = GunPackOverlayResolver.resolve(info, SharedConstants.getCurrentVersion().getName());
+        GunPackOverlayResolver.validate(path, overlays);
+        return new GunPack(path, info.getName(), overlays);
+    }
+
+    public record GunPack(Path path, String name, List<String> overlays) {
     }
 }

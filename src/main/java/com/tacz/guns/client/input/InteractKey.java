@@ -1,11 +1,15 @@
 package com.tacz.guns.client.input;
 
-import cn.sh1rocu.tacz.api.event.InputEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.block.AmmoStorageBlock;
+import com.tacz.guns.block.GunDisplayCaseBlock;
+import com.tacz.guns.client.event.GunDisplayCaseClientInteractionEvent;
 import com.tacz.guns.config.util.InteractKeyConfigRead;
+import com.tacz.guns.network.message.ClientMessageAmmoStorageInteract;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -26,69 +30,47 @@ public class InteractKey {
             GLFW.GLFW_KEY_O,
             "key.category.tacz");
 
-    public static void onInteractKeyPress(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INTERACT_KEY.matches(event.getKey(), event.getScanCode())) {
-            doInteractLogic();
-        }
-    }
-
-    public static void onInteractMousePress(InputEvent.MouseButton.Post event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && INTERACT_KEY.matchesMouse(event.getButton())) {
-            doInteractLogic();
-        }
-    }
-
     public static boolean onInteractControllerPress(boolean isPress) {
-        if (isInGame() && isPress) {
-            Minecraft mc = Minecraft.getInstance();
-            LocalPlayer player = mc.player;
-            if (player == null || player.isSpectator()) {
-                return false;
-            }
-            if (!IGun.mainHandHoldGun(player)) {
-                return false;
-            }
-            HitResult hitResult = mc.hitResult;
-            if (hitResult == null) {
-                return false;
-            }
-            if (hitResult instanceof BlockHitResult blockHitResult) {
-                interactBlock(blockHitResult, player, mc);
-                return true;
-            }
-            if (hitResult instanceof EntityHitResult entityHitResult) {
-                interactEntity(entityHitResult, mc);
-                return true;
-            }
-        }
-        return false;
+        return isPress && onInteractPress();
     }
 
-    private static void doInteractLogic() {
+    public static boolean onInteractPress() {
+        if (!isInGame()) {
+            return false;
+        }
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || player.isSpectator()) {
-            return;
+            return false;
         }
         if (!IGun.mainHandHoldGun(player)) {
-            return;
+            return false;
         }
         HitResult hitResult = mc.hitResult;
         if (hitResult == null) {
-            return;
+            return false;
         }
         if (hitResult instanceof BlockHitResult blockHitResult) {
             interactBlock(blockHitResult, player, mc);
-            return;
+            return true;
         }
         if (hitResult instanceof EntityHitResult entityHitResult) {
             interactEntity(entityHitResult, mc);
+            return true;
         }
+        return false;
     }
 
     private static void interactBlock(BlockHitResult blockHitResult, LocalPlayer player, Minecraft mc) {
         BlockPos blockPos = blockHitResult.getBlockPos();
         BlockState block = player.level().getBlockState(blockPos);
+        if (block.getBlock() instanceof GunDisplayCaseBlock) {
+            GunDisplayCaseClientInteractionEvent.showHintForTarget(mc, true);
+        }
+        if (block.getBlock() instanceof AmmoStorageBlock) {
+            ClientPlayNetworking.send(new ClientMessageAmmoStorageInteract(blockPos));
+            return;
+        }
         if (InteractKeyConfigRead.canInteractBlock(block)) {
             mc.startUseItem();
         }

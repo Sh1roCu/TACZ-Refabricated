@@ -13,6 +13,7 @@ public class OtherClothConfig {
 
         other.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.tacz.common.other.default_pack_debug"), PreLoadConfig.override.get())
                 .setDefaultValue(false).setTooltip(Component.translatable("config.tacz.common.other.default_pack_debug.desc"))
+//                .requireRestart()
                 .setSaveConsumer(value -> {
                     PreLoadConfig.override.set(value);
                     PreLoadConfig.override.save();

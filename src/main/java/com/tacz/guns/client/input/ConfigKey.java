@@ -1,6 +1,5 @@
 package com.tacz.guns.client.input;
 
-import cn.sh1rocu.tacz.api.event.InputEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.tacz.guns.client.gui.compat.ClothConfigScreen;
 import com.tacz.guns.compat.cloth.MenuIntegration;
@@ -27,10 +26,8 @@ public class ConfigKey {
             GLFW.GLFW_KEY_T,
             "key.category.tacz");
 
-    public static void onOpenConfig(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS
-                && OPEN_CONFIG_KEY.matches(event.getKey(), event.getScanCode())
-            /*&& ((IKeyBinding) OPEN_CONFIG_KEY).getKeyModifier().isActive(((IKeyBinding) OPEN_CONFIG_KEY).getKeyConflictContext())*/) {
+    public static void onOpenConfig() {
+        if (isInGame()) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null || player.isSpectator()) {
                 return;

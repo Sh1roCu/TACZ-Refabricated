@@ -1,6 +1,6 @@
 package cn.sh1rocu.tacz.mixin.client;
 
-import cn.sh1rocu.tacz.util.forge.ClientHooks;
+import cn.sh1rocu.tacz.util.neoforge.ClientHooks;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;

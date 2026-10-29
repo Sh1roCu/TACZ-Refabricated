@@ -19,7 +19,8 @@ public class BulletHoleOption implements ParticleOptions {
                     Codec.LONG.fieldOf("pos").forGetter(option -> option.pos.asLong()),
                     Codec.STRING.fieldOf("ammo_id").forGetter(option -> option.ammoId),
                     Codec.STRING.fieldOf("gun_id").forGetter(option -> option.gunId),
-                    Codec.STRING.optionalFieldOf("gun_display_id", DefaultAssets.DEFAULT_GUN_DISPLAY_ID.toString()).forGetter(option -> option.gunDisplayId)
+                    Codec.STRING.optionalFieldOf("gun_display_id", DefaultAssets.DEFAULT_GUN_DISPLAY_ID.toString()).forGetter(option -> option.gunDisplayId),
+                    Codec.BOOL.optionalFieldOf("incendiary", false).forGetter(option -> option.incendiary)
             ).apply(builder, BulletHoleOption::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, BulletHoleOption> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT, (option) -> option.direction.ordinal(),
@@ -27,6 +28,7 @@ public class BulletHoleOption implements ParticleOptions {
             ByteBufCodecs.STRING_UTF8, BulletHoleOption::getAmmoId,
             ByteBufCodecs.STRING_UTF8, BulletHoleOption::getGunId,
             ByteBufCodecs.STRING_UTF8, BulletHoleOption::getGunDisplayId,
+            ByteBufCodecs.BOOL, BulletHoleOption::isIncendiary,
             BulletHoleOption::new
     );
 
@@ -35,21 +37,32 @@ public class BulletHoleOption implements ParticleOptions {
     private final String ammoId;
     private final String gunId;
     private final String gunDisplayId;
+    private final boolean incendiary;
 
     public BulletHoleOption(int dir, long pos, String ammoId, String gunId, String gunDisplayId) {
+        this(dir, pos, ammoId, gunId, gunDisplayId, false);
+    }
+
+    public BulletHoleOption(int dir, long pos, String ammoId, String gunId, String gunDisplayId, boolean incendiary) {
         this.direction = Direction.values()[dir];
         this.pos = BlockPos.of(pos);
         this.ammoId = ammoId;
         this.gunId = gunId;
         this.gunDisplayId = gunDisplayId;
+        this.incendiary = incendiary;
     }
 
     public BulletHoleOption(Direction dir, BlockPos pos, String ammoId, String gunId, String gunDisplayId) {
+        this(dir, pos, ammoId, gunId, gunDisplayId, false);
+    }
+
+    public BulletHoleOption(Direction dir, BlockPos pos, String ammoId, String gunId, String gunDisplayId, boolean incendiary) {
         this.direction = dir;
         this.pos = pos;
         this.ammoId = ammoId;
         this.gunId = gunId;
         this.gunDisplayId = gunDisplayId;
+        this.incendiary = incendiary;
     }
 
     public Direction getDirection() {
@@ -70,6 +83,10 @@ public class BulletHoleOption implements ParticleOptions {
 
     public String getGunDisplayId() {
         return gunDisplayId;
+    }
+
+    public boolean isIncendiary() {
+        return incendiary;
     }
 
     @Override

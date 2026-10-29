@@ -3,6 +3,7 @@ package com.tacz.guns.network.message;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import com.tacz.guns.client.gameplay.LocalPlayerDataHolder;
+import com.tacz.guns.util.time.GunTime;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -32,8 +33,9 @@ public class ServerMessageSyncBaseTimestamp implements CustomPacketPayload {
 
     private static final Marker MARKER = MarkerFactory.getMarker("SYNC_BASE_TIMESTAMP");
 
+    @Environment(EnvType.CLIENT)
     public static void handle(ServerMessageSyncBaseTimestamp message, ClientPlayNetworking.Context context) {
-        long timestamp = System.currentTimeMillis();
+        long timestamp = GunTime.nowMillis();
         context.client().execute(() -> updateBaseTimestamp(timestamp));
         context.responseSender().sendPacket(ClientMessageSyncBaseTimestamp.INSTANCE);
     }

@@ -14,3 +14,6 @@ extendable method net/minecraft/world/entity/vehicle/VehicleEntity getDropItem (
 
 accessible method net/minecraft/client/renderer/block/model/ItemTransforms$Deserializer <init> ()V
 accessible method net/minecraft/client/renderer/block/model/ItemTransform$Deserializer <init> ()V
+
+accessible method net/minecraft/server/packs/FilePackResources <init> (Lnet/minecraft/server/packs/PackLocationInfo;Lnet/minecraft/server/packs/FilePackResources$SharedZipFileAccess;Ljava/lang/String;)V
+accessible method net/minecraft/server/packs/FilePackResources$SharedZipFileAccess <init> (Ljava/io/File;)V
