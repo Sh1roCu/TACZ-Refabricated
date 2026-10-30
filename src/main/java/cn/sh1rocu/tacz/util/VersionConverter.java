@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * NeoForge(Maven)版本范围 -> Fabric(SemVer) 版本范围，用于转换枪包meta文件的依赖版本
@@ -43,6 +42,7 @@ public final class VersionConverter {
         }
         return out;
     }
+
     public static String toString(String range) {
         return String.join(" ", toList(range));
     }
