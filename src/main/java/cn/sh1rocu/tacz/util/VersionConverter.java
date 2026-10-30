@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * NeoForge(Maven)版本范围 -> Fabric(SemVer) 版本范围，用于转换枪包meta文件的依赖版本
@@ -29,7 +28,11 @@ public final class VersionConverter {
             }
             String lo = m.group(2), hi = m.group(4);
             if (m.group(3) == null) {
-                out.add(lo);
+                if (m.group(1).equals("[") && m.group(5).equals("]")) {
+                    out.add(">=" + lo + " <=" + lo);
+                } else {
+                    out.add(lo);
+                }
                 continue;
             }
             List<String> conds = new ArrayList<>();
@@ -41,10 +44,7 @@ public final class VersionConverter {
     }
 
     public static String toString(String range) {
-        List<String> r = toList(range);
-        if (r.size() == 1) return "\"" + r.get(0) + "\"";
-        return r.stream().map(s -> "\"" + s + "\"")
-                .collect(Collectors.joining(", ", "[", "]"));
+        return String.join(" ", toList(range));
     }
 
 }
