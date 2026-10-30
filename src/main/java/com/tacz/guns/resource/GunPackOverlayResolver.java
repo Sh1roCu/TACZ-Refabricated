@@ -47,7 +47,7 @@ public final class GunPackOverlayResolver {
             throw new IllegalArgumentException("Missing Minecraft version range");
         }
         try {
-            VersionPredicate range = VersionPredicate.parse(specification);
+            VersionPredicate range = VersionPredicate.parse(VersionConverter.toString(specification));
 //            // Maven's bare version is a recommendation, not a constraint.
 //            if (!range.hasRestrictions()) {
 //                throw new IllegalArgumentException("Use an explicit Minecraft range, e.g. [1.21.1]: " + specification);
@@ -55,7 +55,7 @@ public final class GunPackOverlayResolver {
 //            if (!version.matches("\\d+\\.\\d+(?:\\.\\d+)?")) {
 //                return specification.equals("[" + version + "]");
 //            }
-            return range.test(Version.parse(VersionConverter.toString(version)));
+            return range.test(Version.parse(version));
         } catch (VersionParsingException e) {
             throw new IllegalArgumentException("Invalid Minecraft version range: " + specification, e);
         }

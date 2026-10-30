@@ -29,7 +29,11 @@ public final class VersionConverter {
             }
             String lo = m.group(2), hi = m.group(4);
             if (m.group(3) == null) {
-                out.add(lo);
+                if (m.group(1).equals("[") && m.group(5).equals("]")) {
+                    out.add(">=" + lo + " <=" + lo);
+                } else {
+                    out.add(lo);
+                }
                 continue;
             }
             List<String> conds = new ArrayList<>();
@@ -39,12 +43,8 @@ public final class VersionConverter {
         }
         return out;
     }
-
     public static String toString(String range) {
-        List<String> r = toList(range);
-        if (r.size() == 1) return "\"" + r.getFirst() + "\"";
-        return r.stream().map(s -> "\"" + s + "\"")
-                .collect(Collectors.joining(", ", "[", "]"));
+        return String.join(" ", toList(range));
     }
 
 }
