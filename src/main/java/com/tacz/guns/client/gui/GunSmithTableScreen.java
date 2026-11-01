@@ -170,7 +170,7 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
 
         if (!this.recipeKeys.containsKey(selectedType)) {
             selectedType = null;
-            selectedRecipeList = null;
+            selectedRecipeList = new ArrayList<>();
             indexPage = 0;
         }
 
@@ -181,7 +181,8 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
         }
 
         if (selectedType != null) {
-            selectedRecipeList = this.recipes.get(selectedType);
+            List<ResourceLocation> list = this.recipes.get(selectedType);
+            selectedRecipeList = list != null ? list : new ArrayList<>();
         }
     }
 
@@ -483,6 +484,9 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
     @Override
     public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
         if (pMouseX > leftPos + 143 && pMouseX < leftPos + 143 + 94 && pMouseY > topPos + 66 && pMouseY < topPos + 66 + 85) {
+            if (selectedRecipeList == null || selectedRecipeList.isEmpty()) {
+                return true;
+            }
             if (pDelta > 0) {
                 this.indexPage = Math.max(0, this.indexPage - 1);
             } else {
