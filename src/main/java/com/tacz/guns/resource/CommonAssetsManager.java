@@ -68,6 +68,7 @@ public class CommonAssetsManager implements ICommonResourceProvider {
             .create();
 
     private final List<INetworkCacheReloadListener> listeners = new ArrayList<>();
+    private List<ServerMessageSyncGunPack> networkSyncMessages = List.of();
     private CommonDataManager<GunData> gunData;
     private CommonDataManager<AttachmentData> attachmentData;
     private CommonDataManager<VariantData> attachmentVariantData;
@@ -120,7 +121,10 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         register.accept((barrier, resourceManager, preparationProfiler, reloadProfiler, backgroundExecutor, gameExecutor) -> {
             return barrier
                     .wait(Void.TYPE)
-                    .thenRunAsync(AllowAttachmentTagMatcher::resetCache, gameExecutor);
+                    .thenRunAsync(() -> {
+                        AllowAttachmentTagMatcher.resetCache();
+                        networkSyncMessages = ServerMessageSyncGunPack.createMessages(getNetworkCache());
+                    }, gameExecutor);
         });
     }
 
@@ -317,16 +321,17 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     }
 
     public static void OnDatapackSync(ServerPlayer player, boolean joined) {
-        if (getInstance() == null) {
+        CommonAssetsManager manager = getInstance();
+        if (manager == null) {
             return;
         }
-        ServerMessageSyncGunPack message = new ServerMessageSyncGunPack(getInstance().getNetworkCache());
-        NetworkHandler.sendToClientPlayer(message, player);
-
+        if (player != null) {
+            manager.networkSyncMessages.forEach(message -> NetworkHandler.sendToClientPlayer(message, player));
+        }
     }
 
     public static void reloadAllPack() {
-        var server = TaCZFabric.getServer();
+        MinecraftServer server = TaCZFabric.getServer();
         if (server == null) {
             return;
         }
