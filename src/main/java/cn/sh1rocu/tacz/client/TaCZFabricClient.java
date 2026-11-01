@@ -77,6 +77,7 @@ public class TaCZFabricClient implements ClientModInitializer {
         InputEvent.InteractionKeyMappingTriggered.EVENT.register(ClientPreventGunClick::onClickInput);
 
         ClientPlayConnectionEvents.JOIN.register(CommonNetworkCacheEvent::onClientPlayerLoggingIn);
+        ClientPlayConnectionEvents.DISCONNECT.register(CommonNetworkCacheEvent::onClientPlayerLoggingOut);
 
         // RenderHandEvent.EVENT.register(FirstPersonRenderEvent::onRenderHand);
 
