@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-@SuppressWarnings("deprecation")
 public final class SlotAdapterHelper {
     private static final String SLOT_ADAPTERS_TAG = "SlotAdapters";
     private static final String TAG_PREFIX = "#";
@@ -30,19 +29,21 @@ public final class SlotAdapterHelper {
         }
         holder.update(DataComponents.CUSTOM_DATA,
                 CustomData.EMPTY, data -> data.update(root -> {
-                    CompoundTag adapters = root.getCompound(SLOT_ADAPTERS_TAG);
-                    adapters.putString(slotKey(type), adapterId.toString());
-                    root.put(SLOT_ADAPTERS_TAG, adapters);
-                }));
+            CompoundTag adapters = root.getCompound(SLOT_ADAPTERS_TAG);
+            adapters.putString(slotKey(type), adapterId.toString());
+            root.put(SLOT_ADAPTERS_TAG, adapters);
+        }));
     }
 
     @Nullable
+    @SuppressWarnings("deprecation")
     public static ResourceLocation getSlotAdapter(ItemStack holder, AttachmentType type) {
         if (holder.isEmpty() || type == null) {
             return null;
         }
+        // This getter only reads NBT; compatibility checks do not need a defensive copy.
         CompoundTag root = holder.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
-        if (root == null || !root.contains(SLOT_ADAPTERS_TAG, Tag.TAG_COMPOUND)) {
+        if (!root.contains(SLOT_ADAPTERS_TAG, Tag.TAG_COMPOUND)) {
             return null;
         }
         CompoundTag adapters = root.getCompound(SLOT_ADAPTERS_TAG);
@@ -57,17 +58,17 @@ public final class SlotAdapterHelper {
         if (holder.isEmpty() || type == null) {
             return;
         }
-        CompoundTag root = holder.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
+        CompoundTag root = holder.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (root == null || !root.contains(SLOT_ADAPTERS_TAG, Tag.TAG_COMPOUND)) {
             return;
         }
         holder.update(DataComponents.CUSTOM_DATA,
                 CustomData.EMPTY, data -> data.update(current -> {
-                    CompoundTag adapters = current.getCompound(SLOT_ADAPTERS_TAG);
-                    adapters.remove(slotKey(type));
-                    if (adapters.isEmpty()) current.remove(SLOT_ADAPTERS_TAG);
-                    else current.put(SLOT_ADAPTERS_TAG, adapters);
-                }));
+            CompoundTag adapters = current.getCompound(SLOT_ADAPTERS_TAG);
+            adapters.remove(slotKey(type));
+            if (adapters.isEmpty()) current.remove(SLOT_ADAPTERS_TAG);
+            else current.put(SLOT_ADAPTERS_TAG, adapters);
+        }));
     }
 
     public static boolean allowsDirectAttachment(ItemStack gun, ResourceLocation attachmentId) {

@@ -247,7 +247,7 @@ public interface GunItemDataAccessor extends IGun {
         if (!stack.contains("components", Tag.TAG_COMPOUND)) return null;
         CompoundTag components = stack.getCompound("components");
         if (!components.contains(DataComponents.CUSTOM_DATA.toString())) return null;
-        return components.getCompound(DataComponents.CUSTOM_DATA.toString());
+        return components.getCompound(DataComponents.CUSTOM_DATA.toString()).copy();
     }
 
     @Override

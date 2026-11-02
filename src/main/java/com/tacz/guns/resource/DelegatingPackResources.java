@@ -50,11 +50,10 @@ public class DelegatingPackResources extends AbstractPackResources implements Pa
 
     @Override
     public void listResources(PackType type, String resourceNamespace, String paths, ResourceOutput resourceOutput) {
-        Set<ResourceLocation> seen = new HashSet<>();
-        for (PackResources delegate : this.delegates)
-            delegate.listResources(type, resourceNamespace, paths, (id, supplier) -> {
-                if (seen.add(id)) resourceOutput.accept(id, supplier);
-            });
+        List<PackResources> candidates = getCandidatePacks(type, resourceNamespace);
+        for (int i = candidates.size() - 1; i >= 0; i--) {
+            candidates.get(i).listResources(type, resourceNamespace, paths, resourceOutput);
+        }
     }
 
     @Override
@@ -78,7 +77,7 @@ public class DelegatingPackResources extends AbstractPackResources implements Pa
     @Nullable
     @Override
     public IoSupplier<InputStream> getResource(PackType type, ResourceLocation location) {
-        for (PackResources pack : getCandidatePacks(type, location)) {
+        for (PackResources pack : getCandidatePacks(type, location.getNamespace())) {
             IoSupplier<InputStream> ioSupplier = pack.getResource(type, location);
             if (ioSupplier != null)
                 return ioSupplier;
@@ -92,9 +91,9 @@ public class DelegatingPackResources extends AbstractPackResources implements Pa
         return delegates;
     }
 
-    private List<PackResources> getCandidatePacks(PackType type, ResourceLocation location) {
+    private List<PackResources> getCandidatePacks(PackType type, String namespace) {
         Map<String, List<PackResources>> map = type == PackType.CLIENT_RESOURCES ? namespacesAssets : namespacesData;
-        List<PackResources> packsWithNamespace = map.get(location.getNamespace());
+        List<PackResources> packsWithNamespace = map.get(namespace);
         return packsWithNamespace == null ? Collections.emptyList() : packsWithNamespace;
     }
 
