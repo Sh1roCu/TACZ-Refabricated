@@ -1,7 +1,6 @@
 package com.tacz.guns.resource;
 
 import cn.sh1rocu.tacz.util.VersionConverter;
-import cn.sh1rocu.tacz.util.forge.DelegatingPackResources;
 import cn.sh1rocu.tacz.util.forge.PathPackResources;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -108,19 +107,20 @@ public enum GunPackLoader implements RepositorySource {
         }
 
 
-        return Pack.readMetaAndCreate("tacz_resources", Component.literal("TACZ Resources"), true, (id) ->
-                new DelegatingPackResources(id, false, new PackMetadataSection(Component.translatable("tacz.resources.modresources"),
-                        SharedConstants.getCurrentVersion().getPackVersion(packType)), extensionPacks) {
-                    public IoSupplier<InputStream> getRootResource(String... paths) {
-                        if (paths.length == 1 && paths[0].equals("pack.png")) {
-                            Path logoPath = getModIcon("tacz");
-                            if (logoPath != null) {
-                                return IoSupplier.create(logoPath);
-                            }
+        return Pack.readMetaAndCreate("tacz_resources", Component.literal("TACZ Resources"), true, (id) -> {
+            return new NamespaceFilteredPackResources(id, false, new PackMetadataSection(Component.translatable("tacz.resources.modresources"),
+                    SharedConstants.getCurrentVersion().getPackVersion(packType)), extensionPacks) {
+                public IoSupplier<InputStream> getRootResource(String... paths) {
+                    if (paths.length == 1 && paths[0].equals("pack.png")) {
+                        Path logoPath = getModIcon("tacz");
+                        if (logoPath != null) {
+                            return IoSupplier.create(logoPath);
                         }
-                        return null;
                     }
-                }, packType, Pack.Position.BOTTOM, PackSource.BUILT_IN);
+                    return null;
+                }
+            };
+        }, packType, Pack.Position.BOTTOM, PackSource.BUILT_IN);
     }
 
     public static @Nullable Path getModIcon(String modId) {
@@ -253,7 +253,6 @@ public enum GunPackLoader implements RepositorySource {
             Version modVersion = mod.getMetadata().getVersion();
             return versionRanges.stream().anyMatch(p -> p.test(modVersion));
         }).orElse(false);
-
     }
 
 
