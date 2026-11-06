@@ -43,6 +43,12 @@ repositories {
         url = "https://maven.blamejared.com/"
     }
     maven {
+        url "https://repo.sleeping.town"
+        content {
+            includeGroup("dev.emi")
+        }
+    }
+    maven {
         // location of a maven mirror for JEI files, as a fallback
         name = "Mod Maven"
         url = "https://modmaven.k-4u.nl"
@@ -132,7 +138,7 @@ dependencies {
     modCompileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     annotationProcessor 'com.google.code.findbugs:jsr305:3.0.2'
 
-    modImplementation(include("libs:simplebedrockmodel-fabric:2.6.1.2+mc1.21.1"))
+    modImplementation(include("libs:simplebedrockmodel-fabric:2.6.2+mc1.21.1"))
     implementation("com.maydaymemory:mae:1.1.4") {
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
         exclude group: 'it.unimi.dsi', module: 'fastutil'
@@ -157,23 +163,26 @@ dependencies {
     modCompileOnly("mezz.jei:jei-1.21.1-common-api:${jei_version}")
     modCompileOnly("mezz.jei:jei-1.21.1-fabric-api:${jei_version}")
     // at runtime, use the full JEI jar for Fabric
-    modRuntimeOnly("mezz.jei:jei-1.21.1-fabric:${jei_version}")
+    // modLocalRuntime("mezz.jei:jei-1.21.1-fabric:${jei_version}")
+
+    // EMI
+    modCompileOnly("dev.emi:emi-fabric:1.1.24+1.21.1:api")
+    modLocalRuntime("dev.emi:emi-fabric:1.1.24+1.21.1")
 
     // 假人，测试近战伤害
-    modRuntimeOnly "curse.maven:selene-499980:6914081"
-    modRuntimeOnly "curse.maven:mmmmmmmmmmmm-225738:6826532"
+    modLocalRuntime "curse.maven:selene-499980:6914081"
+    modLocalRuntime "curse.maven:mmmmmmmmmmmm-225738:6826532"
     // 手柄按键支持
     modCompileOnly "curse.maven:framework-549225:6531437"
     modCompileOnly("curse.maven:controllable-317269:6850103")
 
     // 越肩视角，用来兼容第三人称准星
-    modImplementation "curse.maven:shoulder-surfing-reloaded-243190:6784174"
+    modCompileOnly "curse.maven:shoulder-surfing-reloaded-243190:6784174"
+    modLocalRuntime "curse.maven:shoulder-surfing-reloaded-243190:6784174"
 
-    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
+    modCompileOnly "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
+    modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
 
-    // emb暂无fabric1.21
-    // modCompileOnly "curse.maven:embeddium-908741:${embeddedt_id}"
-    // 使用sodium
     modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.5-fabric"
 
     // Iris
@@ -181,7 +190,8 @@ dependencies {
 
     modCompileOnly "curse.maven:carry-on-274259:${carry_on_id}"
 
-    modImplementation "dev.kosmx.player-anim:player-animation-lib-fabric:${player_animation_lib}"
+    modCompileOnly "dev.kosmx.player-anim:player-animation-lib-fabric:${player_animation_lib}"
+    modLocalRuntime "dev.kosmx.player-anim:player-animation-lib-fabric:${player_animation_lib}"
 
     // kjs暂无Fabric1.21
     // kubejs开发环境引入
@@ -195,42 +205,40 @@ dependencies {
     modImplementation(include("org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.2"))
     modImplementation(include("org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.2"))
 
-    // MKB
-    // 1.21存在不能单独设置alt, ctrl, shift的bug，暂时弃用
-    // modImplementation(include("curse.maven:modern-keybinding-fabric-695433:6016136"))
-    // dev环境使用全键无冲
-    modImplementation "curse.maven:nonconflictkeys-fabric-865546:4572953"
+    modLocalRuntime "curse.maven:nonconflictkeys-fabric-865546:4572953"
 
 
     // Forge Config API Port
     modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.1.4"
 
     // ModMenu
-    modImplementation("com.terraformersmc:modmenu:11.0.3")
+    modCompileOnly("com.terraformersmc:modmenu:11.0.3")
+    modLocalRuntime("com.terraformersmc:modmenu:11.0.3")
 
     // Zoomify
     modCompileOnly "maven.modrinth:zoomify:2.14.4+1.21.1"
 
     modCompileOnly "maven.modrinth:immediatelyfast:1.6.6+1.21.1-fabric"
 
-    modRuntimeOnly "maven.modrinth:tweakeroo:0.21.59"
-    modRuntimeOnly "maven.modrinth:malilib:0.21.9"
+    modLocalRuntime "maven.modrinth:tweakeroo:0.21.59"
+    modLocalRuntime "maven.modrinth:malilib:0.21.9"
 
     // REI
-    // modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:$rei_version"
 
-    modRuntimeOnly "maven.modrinth:flashback:pOGQFvgK"
-    runtimeOnly("com.moulberry:mixinconstraints:1.0.8")
-    modRuntimeOnly("com.moulberry:lattice:1.2.18") {
+    modLocalRuntime "maven.modrinth:flashback:pOGQFvgK"
+    localRuntime("com.moulberry:mixinconstraints:1.0.8")
+    modLocalRuntime("com.moulberry:lattice:1.2.18") {
         attributes {
             attribute(Attribute.of("earth.terrarium.cloche.modLoader", String), "fabric")
         }
     }
 
     // 加速渲染
-    modImplementation "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
+    modCompileOnly "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
+    modLocalRuntime "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
 }
 
 processResources {

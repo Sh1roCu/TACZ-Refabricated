@@ -1,6 +1,5 @@
 package com.tacz.guns.client.resource;
 
-import cn.sh1rocu.tacz.TaCZFabric;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -29,6 +28,7 @@ import com.tacz.guns.client.resource.pojo.display.ammo.HitSurfaceParticle;
 import com.tacz.guns.client.resource.pojo.display.gun.*;
 import com.tacz.guns.client.resource.pojo.model.BedrockModelPOJO;
 import com.tacz.guns.client.resource.pojo.model.BedrockVersion;
+import com.tacz.guns.client.util.ClientRegistryAccess;
 import com.tacz.guns.config.client.ResourceConfig;
 import com.tacz.guns.sound.SoundManager;
 import com.tacz.guns.util.ColorHex;
@@ -37,7 +37,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.commands.arguments.ParticleArgument;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -658,7 +657,7 @@ public class GunDisplayInstance {
             try {
                 String name = particle.getName();
                 if (StringUtils.isNoneBlank()) {
-                    particle.setParticleOptions(ParticleArgument.readParticle(new StringReader(name), TaCZFabric.VANILLA_ACCESS));
+                    particle.setParticleOptions(ParticleArgument.readParticle(new StringReader(name), ClientRegistryAccess.registries()));
                     Preconditions.checkArgument(particle.getCount() > 0, "particle count must be greater than 0");
                     Preconditions.checkArgument(particle.getLifeTime() > 0, "particle life time must be greater than 0");
                     this.particle = particle;
@@ -703,7 +702,9 @@ public class GunDisplayInstance {
         return gunModel;
     }
 
-    /** 外部视角模型在后台烘焙；未就绪或不支持时返回 null，渲染线程不等待。 */
+    /**
+     * 外部视角模型在后台烘焙；未就绪或不支持时返回 null，渲染线程不等待。
+     */
     public @Nullable ExternalGunModel getExternalGunModel() {
         return externalGunModel.getIfReady();
     }
@@ -731,7 +732,9 @@ public class GunDisplayInstance {
         return ExternalGunModel.bake(pojo, getExternalHiddenTextBones(), DisplayGunModelInstance.Kind.GUN);
     }
 
-    /** 第一人称文本功能节点在 FIXED 上不输出模型几何。 */
+    /**
+     * 第一人称文本功能节点在 FIXED 上不输出模型几何。
+     */
     public Set<String> getExternalHiddenTextBones() {
         return display.getTextShows() == null ? Set.of() : Set.copyOf(display.getTextShows().keySet());
     }
@@ -742,7 +745,9 @@ public class GunDisplayInstance {
         return lodModel;
     }
 
-    /** 与旧 LOD 选择对应的独立 SBM 模型，仍由调用方按距离选择。 */
+    /**
+     * 与旧 LOD 选择对应的独立 SBM 模型，仍由调用方按距离选择。
+     */
     public @Nullable Pair<ExternalGunModel, ResourceLocation> getExternalLodModel() {
         return externalLodModel.getIfReady();
     }

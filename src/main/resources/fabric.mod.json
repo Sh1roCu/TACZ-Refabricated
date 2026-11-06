@@ -25,13 +25,16 @@
       "cn.sh1rocu.tacz.compat.modmenu.ModMenuApiImpl"
     ],
     "jei_mod_plugin": [
-      "com.tacz.guns.compat.jei.GunModPlugin"
+      "com.tacz.guns.compat.jrei.jei.GunModPlugin"
     ],
     "rei_client": [
-      "cn.sh1rocu.tacz.compat.rei.REIClientPlugin"
+      "com.tacz.guns.compat.jrei.rei.GunModREIClientPlugin"
     ],
     "rei_common": [
-      "cn.sh1rocu.tacz.compat.rei.REIPlugin"
+      "com.tacz.guns.compat.jrei.rei.GunModREIPlugin"
+    ],
+    "emi": [
+      "com.tacz.guns.compat.emi.GunModEmiPlugin"
     ]
   },
   "custom": {
