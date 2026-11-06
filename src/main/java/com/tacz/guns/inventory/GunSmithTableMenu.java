@@ -63,7 +63,7 @@ public class GunSmithTableMenu extends AbstractContainerMenu {
         return true;
     }
 
-    /** Queues a client-side selection for when JEI restores the workbench screen. */
+    /** Queues a client-side selection for when JEI/REI restores the workbench screen. */
     public void requestRecipeSelection(ResourceLocation recipeId) {
         this.requestedRecipeId = recipeId;
     }
