@@ -157,20 +157,22 @@ dependencies {
     modCompileOnly("mezz.jei:jei-1.20.1-common-api:${jei_version}")
     modCompileOnly("mezz.jei:jei-1.20.1-fabric-api:${jei_version}")
     // at runtime, use the full JEI jar for Fabric
-    modRuntimeOnly("mezz.jei:jei-1.20.1-fabric:15.20.0.104")
+    modLocalRuntime("mezz.jei:jei-1.20.1-fabric:15.20.0.104")
     // 性能分析工具模组
-    modRuntimeOnly "curse.maven:spark-361579:4738953"
+    modLocalRuntime "curse.maven:spark-361579:4738953"
     // 假人，测试近战伤害
-    modRuntimeOnly "curse.maven:selene-499980:6902843"
-    modRuntimeOnly "curse.maven:mmmmmmmmmmmm-225738:6826546"
+    modLocalRuntime "curse.maven:selene-499980:6902843"
+    modLocalRuntime "curse.maven:mmmmmmmmmmmm-225738:6826546"
     // 手柄按键支持
     modCompileOnly "curse.maven:framework-549225:6531429"
     modCompileOnly("curse.maven:controllable-317269:6171420")
 
     // 越肩视角，用来兼容第三人称准星
-    modImplementation "curse.maven:shoulder-surfing-reloaded-243190:6784146"
+    modCompileOnly "curse.maven:shoulder-surfing-reloaded-243190:6784146"
+    modLocalRuntime "curse.maven:shoulder-surfing-reloaded-243190:6784146"
 
-    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
+    modCompileOnly "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
+    modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_fabric}"
 
     modCompileOnly "curse.maven:embeddium-908741:${embeddedt_id}"
     // 同时兼容两个版本
@@ -179,7 +181,8 @@ dependencies {
 
     modCompileOnly "curse.maven:carry-on-274259:${carry_on_id}"
 
-    modImplementation "dev.kosmx.player-anim:player-animation-lib-fabric:${player_animation_lib}"
+    modCompileOnly "dev.kosmx.player-anim:player-animation-lib-fabric:${player_animation_lib}"
+    modLocalRuntime "dev.kosmx.player-anim:player-animation-lib-fabric:${player_animation_lib}"
 
     // kubejs开发环境引入
     modCompileOnly "dev.latvian.mods:kubejs-fabric:${kubejs_version}"
@@ -190,29 +193,31 @@ dependencies {
     modImplementation(include("dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.3"))
     modImplementation(include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.3"))
 
-    modRuntimeOnly "curse.maven:nonconflictkeys-fabric-865546:4572953"
+    modLocalRuntime "curse.maven:nonconflictkeys-fabric-865546:4572953"
 
     // Forge Config API Port
     modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.2"
 
     // ModMenu
-    modImplementation("com.terraformersmc:modmenu:7.2.2")
+    modCompileOnly("com.terraformersmc:modmenu:7.2.2")
+    modLocalRuntime("com.terraformersmc:modmenu:7.2.2")
 
     // Zoomify
     modCompileOnly "maven.modrinth:zoomify:2.14.5+1.20.1"
 
     modCompileOnly "maven.modrinth:immediatelyfast:1.5.1+1.20.4-fabric"
 
-    modRuntimeOnly "maven.modrinth:tweakeroo:0.17.1"
-    modRuntimeOnly "maven.modrinth:malilib:0.16.3"
+    modLocalRuntime "maven.modrinth:tweakeroo:0.17.1"
+    modLocalRuntime "maven.modrinth:malilib:0.16.3"
 
     // REI
-    // modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"
+    // modLocalRuntime "me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:$rei_version"
 
     // 加速渲染
-    modImplementation "maven.modrinth:accrelatedrendering-refabricated:1.0.8-1.20.1-alpha-fabric.1"
+    modCompileOnly "maven.modrinth:accrelatedrendering-refabricated:1.0.8-1.20.1-alpha-fabric.1"
+    modLocalRuntime "maven.modrinth:accrelatedrendering-refabricated:1.0.8-1.20.1-alpha-fabric.1"
 }
 
 processResources {
