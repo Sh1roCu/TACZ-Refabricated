@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "tacz.refmap.json",
   "mixins": [
-    "common.BindingContextMixin",
+    "common.ClipContextMixin",
     "common.LivingEntityMixin",
     "common.ServerGamePacketListenerImplMixin",
     "common.ServerPlayerMixin",
@@ -13,6 +13,7 @@
   ],
   "client": [
     "client.AbstractButtonMixin",
+    "client.BindingContextMixin",
     "client.CreativeModeInventoryScreenMixin",
     "client.EntityRenderDispatcherMixin",
     "client.GameRendererMixin",

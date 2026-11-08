@@ -1,4 +1,4 @@
-package com.tacz.guns.mixin.common;
+package com.tacz.guns.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mrcrayfish.controllable.client.binding.context.BindingContext;

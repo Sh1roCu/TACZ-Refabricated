@@ -1,6 +1,5 @@
 package com.tacz.guns.client.init;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.client.other.ThirdPersonManager;
 import com.tacz.guns.client.gui.overlay.*;
@@ -19,6 +18,7 @@ import com.tacz.guns.init.ModBlocks;
 import com.tacz.guns.init.ModItems;
 import com.tacz.guns.inventory.tooltip.*;
 import com.tacz.guns.item.AmmoBoxItem;
+import com.tacz.guns.util.RenderHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -90,6 +90,8 @@ public class ClientSetupEvent {
     }
 
     public static void onClientSetup() {
+        RenderHelper.initializeItemEntityStencil();
+
         // 注册自己的的硬编码第三人称动画
         ThirdPersonManager.registerDefault();
 

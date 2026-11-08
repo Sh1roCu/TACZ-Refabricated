@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.11-SNAPSHOT'
+    id 'fabric-loom' version '1.16.3'
     id 'maven-publish'
 }
 
@@ -115,6 +115,20 @@ repositories {
     maven {
         name = "devOSSnapshots"
         url = uri("https://mvn.devos.one/snapshots")
+    }
+    repositories {
+        exclusiveContent { // Sable
+            forRepository {
+                maven {
+                    url = "https://maven.ryanhcode.dev/releases"
+                    name = "RyanHCode Maven"
+                }
+            }
+            filter {
+                includeGroup("dev.ryanhcode.sable")
+                includeGroup("dev.ryanhcode.sable-companion")
+            }
+        }
     }
     mavenCentral()
     mavenLocal()
@@ -239,6 +253,8 @@ dependencies {
     // 加速渲染
     modCompileOnly "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
     modLocalRuntime "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
+
+    modApi("dev.ryanhcode.sable:sable-fabric-${project.minecraft_version}:${project.sable_version}")
 }
 
 processResources {

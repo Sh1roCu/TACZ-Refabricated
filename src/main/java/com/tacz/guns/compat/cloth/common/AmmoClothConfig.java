@@ -11,6 +11,13 @@ public class AmmoClothConfig {
     public static void init(ConfigBuilder root, ConfigEntryBuilder entryBuilder) {
         ConfigCategory ammo = root.getOrCreateCategory(Component.translatable("config.tacz.common.ammo"));
 
+        ammo.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.tacz.common.ammo.sable_compat"), AmmoConfig.SABLE_COMPAT.get())
+                .setDefaultValue(true).setTooltip(Component.translatable("config.tacz.common.ammo.sable_compat.desc"))
+                .setSaveConsumer(value -> {
+                    AmmoConfig.SABLE_COMPAT.set(value);
+                    AmmoConfig.SABLE_COMPAT.save();
+                }).build());
+
         ammo.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.tacz.common.ammo.explosive_ammo_destroys_blocks"), AmmoConfig.EXPLOSIVE_AMMO_DESTROYS_BLOCK.get())
                 .setDefaultValue(false).setTooltip(Component.translatable("config.tacz.common.ammo.explosive_ammo_destroys_blocks.desc"))
                 .setSaveConsumer(value -> {

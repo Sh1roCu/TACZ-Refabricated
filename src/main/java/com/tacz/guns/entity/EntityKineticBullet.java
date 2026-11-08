@@ -17,6 +17,7 @@ import com.tacz.guns.api.event.common.EntityKillByGunEvent;
 import com.tacz.guns.api.event.server.AmmoHitBlockEvent;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
 import com.tacz.guns.client.particle.AmmoParticleSpawner;
+import com.tacz.guns.compat.sable.SableCompat;
 import com.tacz.guns.config.common.AmmoConfig;
 import com.tacz.guns.config.sync.SyncConfig;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
@@ -25,7 +26,6 @@ import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.network.message.ServerMessageBulletHitBlock;
 import com.tacz.guns.network.message.event.ServerMessageGunHurt;
 import com.tacz.guns.network.message.event.ServerMessageGunKill;
-import com.tacz.guns.particles.BulletHoleOption;
 import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
 import com.tacz.guns.resource.modifier.custom.DamageModifier;
 import com.tacz.guns.resource.modifier.custom.ExplosionModifier;
@@ -39,6 +39,8 @@ import com.tacz.guns.util.EntityUtil;
 import com.tacz.guns.util.ExplodeUtil;
 import com.tacz.guns.util.TacHitResult;
 import com.tacz.guns.util.block.BlockRayTrace;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -68,7 +70,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector2d;
@@ -242,7 +243,8 @@ public class EntityKineticBullet extends Projectile implements IEntityWithComple
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+
     }
 
     @Override
@@ -251,7 +253,7 @@ public class EntityKineticBullet extends Projectile implements IEntityWithComple
         // 调用 TaC 子弹服务器事件
         this.onBulletTick();
         // 粒子效果
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide() && FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             AmmoParticleSpawner.addParticle(this);
         }
         // 子弹模型的旋转与抛物线
@@ -510,8 +512,10 @@ public class EntityKineticBullet extends Projectile implements IEntityWithComple
         }
         // 弹孔与点燃特效
         if (this.level() instanceof ServerLevel serverLevel) {
-            BulletHoleOption bulletHoleOption = new BulletHoleOption(result.getDirection(), result.getBlockPos(), this.ammoId.toString(), this.gunId.toString(), this.gunDisplayId.toString());
-            serverLevel.sendParticles(bulletHoleOption, hitVec.x, hitVec.y, hitVec.z, 1, 0, 0, 0, 0);
+            // Preserve the attachment point while the ship moves between the server hit and packet arrival.
+            Vec3 effectHitPos = SableCompat.toLocalPosition(this.level(), pos, hitVec);
+            ServerMessageBulletHitBlock message = new ServerMessageBulletHitBlock(effectHitPos, result.getDirection(), result.getBlockPos(), this.ammoId.toString(), this.gunId.toString(), this.gunDisplayId.toString(), this.igniteEntity);
+            sendBulletHitBlockEffect(serverLevel, message, hitVec, this.getOwner());
             if (this.igniteBlock) {
                 serverLevel.sendParticles(ParticleTypes.LAVA, hitVec.x, hitVec.y, hitVec.z, 1, 0, 0, 0, 0);
             }
