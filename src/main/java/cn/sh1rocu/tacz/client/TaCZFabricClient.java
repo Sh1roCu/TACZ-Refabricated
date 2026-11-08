@@ -25,6 +25,7 @@ import com.tacz.guns.init.CommonRegistry;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.network.message.handshake.SyncedEntityDataMappingS2CPacket;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -89,6 +90,8 @@ public class TaCZFabricClient implements ClientModInitializer {
         SwapItemWithOffHand.CALLBACK.register(InventoryEvent::onPlayerSwapMainHand);
         ClientPlayConnectionEvents.DISCONNECT.register(InventoryEvent::onPlayerLoggedOut);
 
+        ClientCommandRegistrationCallback.EVENT.register(PlayerEnterWorld::registerClientCommands);
+        ClientPlayConnectionEvents.JOIN.register(PlayerEnterWorld::onClientPlayerEnterWorld);
         PlayerEvent.LOGGED_IN.register(PlayerEnterWorld::onPlayerEnterWorld);
 
         EntityHurtByGunEvent.POST.register(PlayerHurtByGunEvent::onPlayerHurtByGun);

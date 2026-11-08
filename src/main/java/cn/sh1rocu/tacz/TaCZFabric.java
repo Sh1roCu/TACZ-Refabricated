@@ -160,5 +160,7 @@ public class TaCZFabric implements ModInitializer {
         AttackBlockCallback.EVENT.register(GunDisplayCaseInteractionEvent::onLeftClickBlock);
 
         GunFireEvent.CALLBACK.register(LOWEST, GunSoundAngerEvent::onGunFire);
+
+        PlayerEvent.LOGGED_IN.register(GunPackCompatibilityWarning::onPlayerLoggedIn);
     }
 }
