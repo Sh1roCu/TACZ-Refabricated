@@ -3,9 +3,11 @@ package com.tacz.guns.init;
 import cn.sh1rocu.tacz.api.event.AddPackFindersEvent;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.advancement.GunRefitTrigger;
+import com.tacz.guns.compat.simulated.SimulatedCompat;
 import com.tacz.guns.advancement.TargetHitTrigger;
 import com.tacz.guns.entity.sync.ModSyncedEntityData;
 import com.tacz.guns.resource.GunPackLoader;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.cauldron.CauldronInteraction;
@@ -21,6 +23,9 @@ public final class CommonRegistry {
         registerCriteria();
         CauldronInteraction.WATER.map().put(ModItems.GUN_PEGBOARD, CauldronInteraction.DYED_ITEM);
         CauldronInteraction.WATER.map().put(ModItems.GLOW_GUN_PEGBOARD, CauldronInteraction.DYED_ITEM);
+        if (FabricLoader.getInstance().isModLoaded("simulated")) {
+            SimulatedCompat.registerAssemblyChecks();
+        }
     }
 
     public static void registerCriteria() {

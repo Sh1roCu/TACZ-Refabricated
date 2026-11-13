@@ -199,8 +199,7 @@ public class TargetBlock extends BaseEntityBlock {
             if (stack.has(DataComponents.CUSTOM_NAME)) {
                 BlockEntity blockentity = world.getBlockEntity(pos);
                 if (blockentity instanceof TargetBlockEntity e) {
-                    ResolvableProfile profile = new ResolvableProfile(Optional.of(stack.getHoverName().getString()), Optional.empty(), new PropertyMap());
-                    e.setOwner(profile);
+                    e.setOwner(new ResolvableProfile(Optional.of(stack.getHoverName().getString()), Optional.empty(), new PropertyMap()));
                     e.setCustomName(stack.getHoverName());
                     e.refresh();
                 }
@@ -213,7 +212,7 @@ public class TargetBlock extends BaseEntityBlock {
         BlockPos blockPos = state.getValue(HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
         BlockEntity blockentity = level.getBlockEntity(blockPos);
         if (blockentity instanceof TargetBlockEntity e) {
-            ItemStack stack = new ItemStack(this);
+            var stack = new ItemStack(this);
             stack.set(DataComponents.CUSTOM_NAME, e.getCustomName());
             return stack;
         }
@@ -252,5 +251,10 @@ public class TargetBlock extends BaseEntityBlock {
     @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    protected BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 }

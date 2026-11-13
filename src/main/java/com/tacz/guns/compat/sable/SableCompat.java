@@ -8,22 +8,36 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 
 import javax.annotation.Nullable;
 import java.util.Set;
 
-/**
- * Vanilla-only entry points keep Sable optional, including on dedicated servers.
- */
+/** Vanilla-only entry points keep Sable optional, including on dedicated servers. */
 public final class SableCompat {
     private SableCompat() {
     }
 
     public static boolean isEnabled() {
-        return FabricLoader.getInstance().isModLoaded("sable") && AmmoConfig.SABLE_COMPAT.get();
+        return isLoaded() && AmmoConfig.SABLE_COMPAT.get();
+    }
+
+    private static boolean isLoaded() {
+        return FabricLoader.getInstance().isModLoaded("sable");
+    }
+
+    @Nullable
+    public static BlockRenderPose blockRenderPose(BlockEntity blockEntity, float partialTick) {
+        Level level = blockEntity.getLevel();
+        return level != null && level.isClientSide() && isLoaded()
+                ? SableClientCompat.blockRenderPose(blockEntity, partialTick) : null;
+    }
+
+    public record BlockRenderPose(Vec3 origin, Vec3 center, Matrix4fc rotationAndScale) {
     }
 
     public static BlockHitResult clip(Level level, ClipContext context) {
@@ -50,7 +64,7 @@ public final class SableCompat {
 
     @Nullable
     public static ExplosionTrace explosionTrace(Level level, Vec3 position, ExplosionDamageCalculator calculator,
-                                                boolean knockback) {
+                                                 boolean knockback) {
         return isEnabled() ? SableCompatImpl.explosionTrace(level, position, calculator, knockback) : null;
     }
 

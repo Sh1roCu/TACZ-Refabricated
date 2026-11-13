@@ -127,6 +127,7 @@ repositories {
             filter {
                 includeGroup("dev.ryanhcode.sable")
                 includeGroup("dev.ryanhcode.sable-companion")
+                includeGroup("dev.simulated_team.simulated")
             }
         }
     }
@@ -254,7 +255,15 @@ dependencies {
     modCompileOnly "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
     modLocalRuntime "maven.modrinth:accrelatedrendering-refabricated:pgm8CkON"
 
+    // Sable
     modApi("dev.ryanhcode.sable:sable-fabric-${project.minecraft_version}:${project.sable_version}")
+//    modCompileOnly("dev.simulated_team.simulated:simulated-fabric-1.21.1:1.3.2") {
+//        transitive = false
+//    }
+    // TODO: wait Fabric
+    modCompileOnly("dev.simulated_team.simulated:simulated-common-1.21.1:1.3.2") {
+        transitive = false
+    }
 }
 
 processResources {

@@ -24,6 +24,12 @@ import org.jetbrains.annotations.Nullable;
  */
 public class GunSmithTableBlockB extends AbstractGunSmithTableBlock {
     public static final MapCodec<GunSmithTableBlockB> CODEC = simpleCodec((properties) -> new GunSmithTableBlockB());
+
+    @Override
+    protected MapCodec<GunSmithTableBlockB> codec() {
+        return CODEC;
+    }
+
     public static final EnumProperty<BedPart> PART = BlockStateProperties.BED_PART;
 
     public GunSmithTableBlockB() {
@@ -31,12 +37,7 @@ public class GunSmithTableBlockB extends AbstractGunSmithTableBlock {
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, BedPart.FOOT));
     }
 
-    @Override
-    protected MapCodec<GunSmithTableBlockB> codec() {
-        return CODEC;
-    }
-
-    private static Direction getNeighbourDirection(BedPart bedPart, Direction direction) {
+    public static Direction getNeighbourDirection(BedPart bedPart, Direction direction) {
         return bedPart == BedPart.FOOT ? direction : direction.getOpposite();
     }
 
