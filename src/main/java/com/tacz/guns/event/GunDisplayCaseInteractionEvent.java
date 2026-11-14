@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,7 +23,7 @@ public class GunDisplayCaseInteractionEvent {
         if (hand != InteractionHand.MAIN_HAND) {
             return InteractionResult.PASS;
         }
-        if (!player.isShiftKeyDown() || player.getMainHandItem().getItem() instanceof IGun) {
+        if (player.getMainHandItem().is(Items.DEBUG_STICK) || !player.isShiftKeyDown() || player.getMainHandItem().getItem() instanceof IGun) {
             return InteractionResult.PASS;
         }
         if (!(player.getOffhandItem().getItem() instanceof IGun)) {
@@ -45,9 +46,10 @@ public class GunDisplayCaseInteractionEvent {
     }
 
     public static InteractionResult onLeftClickBlock(Player player, Level level, InteractionHand hand, BlockPos pos, Direction direction) {
-//        if (event.getAction() != PlayerInteractEvent.LeftClickBlock.Action.START) {
-//            return;
-//        }
+        if (player.getMainHandItem().is(Items.DEBUG_STICK)
+            /*|| event.getAction() != PlayerInteractEvent.LeftClickBlock.Action.START*/) {
+            return InteractionResult.PASS;
+        }
         BlockState state = level.getBlockState(pos);
         if (!(state.getBlock() instanceof GunDisplayCaseBlock) || state.getValue(GunDisplayCaseBlock.LOCKED)) {
             return InteractionResult.PASS;
@@ -61,7 +63,7 @@ public class GunDisplayCaseInteractionEvent {
             return InteractionResult.PASS;
         }
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (!(blockEntity instanceof GunDisplayCaseBlockEntity displayCase) || displayCase.getItem(slot).isEmpty()) {
+        if (!(blockEntity instanceof GunDisplayCaseBlockEntity displayCase) || displayCase.isDecorationLocked() || displayCase.getItem(slot).isEmpty()) {
             return InteractionResult.PASS;
         }
 

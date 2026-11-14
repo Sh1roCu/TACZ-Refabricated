@@ -1,5 +1,6 @@
 package com.tacz.guns.block.entity;
 
+import com.tacz.guns.block.DecorationLock;
 import com.tacz.guns.block.GunDisplayCaseBlock;
 import com.tacz.guns.init.ModBlocks;
 import net.minecraft.core.BlockPos;
@@ -28,6 +29,10 @@ public class GunDisplayCaseBlockEntity extends BlockEntity implements GunDisplay
     private final ItemStack[] items = new ItemStack[SLOT_COUNT];
     private final byte[] rotations = new byte[SLOT_COUNT];
     private final DisplayGunSlot[] displaySlots = new DisplayGunSlot[SLOT_COUNT];
+
+    public boolean isDecorationLocked() {
+        return getBlockState().getValue(DecorationLock.LOCKED);
+    }
 
     public GunDisplayCaseBlockEntity(BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
@@ -79,7 +84,7 @@ public class GunDisplayCaseBlockEntity extends BlockEntity implements GunDisplay
     }
 
     public boolean setItem(int slot, ItemStack stack) {
-        if (!isValidSlot(slot) || !items[slot].isEmpty()) {
+        if (isDecorationLocked() || !isValidSlot(slot) || !items[slot].isEmpty()) {
             return false;
         }
         ItemStack stored = stack.copy();
@@ -92,7 +97,7 @@ public class GunDisplayCaseBlockEntity extends BlockEntity implements GunDisplay
     }
 
     public boolean rotateItem(int slot) {
-        if (!isValidSlot(slot) || items[slot].isEmpty()) {
+        if (isDecorationLocked() || !isValidSlot(slot) || items[slot].isEmpty()) {
             return false;
         }
         rotations[slot] = (byte) ((rotations[slot] + 1) & 7);
@@ -102,7 +107,7 @@ public class GunDisplayCaseBlockEntity extends BlockEntity implements GunDisplay
     }
 
     public boolean dropItem(int slot) {
-        if (!isValidSlot(slot) || items[slot].isEmpty() || level == null) {
+        if (isDecorationLocked() || !isValidSlot(slot) || items[slot].isEmpty() || level == null) {
             return false;
         }
         Direction facing = getBlockState().getValue(GunDisplayCaseBlock.FACING);
@@ -115,7 +120,7 @@ public class GunDisplayCaseBlockEntity extends BlockEntity implements GunDisplay
     }
 
     public boolean removeItem(int slot) {
-        if (!isValidSlot(slot) || items[slot].isEmpty()) {
+        if (isDecorationLocked() || !isValidSlot(slot) || items[slot].isEmpty()) {
             return false;
         }
         items[slot] = ItemStack.EMPTY;
@@ -126,7 +131,7 @@ public class GunDisplayCaseBlockEntity extends BlockEntity implements GunDisplay
     }
 
     public void dropAllItems() {
-        if (level == null) {
+        if (isDecorationLocked() || level == null) {
             return;
         }
         Direction facing = getBlockState().getValue(GunDisplayCaseBlock.FACING);

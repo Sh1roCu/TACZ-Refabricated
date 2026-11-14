@@ -54,7 +54,7 @@ public class GunDisplayCaseRenderer implements BlockEntityRenderer<GunDisplayCas
     }
 
     private static void renderPlacementPreview(GunDisplayCaseBlockEntity blockEntity, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        if (blockEntity.getBlockState().getValue(GunDisplayCaseBlock.LOCKED)) {
+        if (blockEntity.isDecorationLocked() || blockEntity.getBlockState().getValue(GunDisplayCaseBlock.LOCKED)) {
             return;
         }
         Minecraft minecraft = Minecraft.getInstance();

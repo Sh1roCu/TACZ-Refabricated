@@ -36,7 +36,7 @@ public class GunPegboardInteractionEvent {
             return InteractionResult.PASS;
         }
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (!(blockEntity instanceof GunPegboardBlockEntity pegboard) || pegboard.getItem(slot).isEmpty()) {
+        if (!(blockEntity instanceof GunPegboardBlockEntity pegboard) || pegboard.isDecorationLocked() || pegboard.getItem(slot).isEmpty()) {
             return InteractionResult.PASS;
         }
 

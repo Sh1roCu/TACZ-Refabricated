@@ -5,8 +5,10 @@ import com.tacz.guns.api.item.IAttachment;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.block.AbstractGunSmithTableBlock;
 import com.tacz.guns.block.AmmoStorageBlock;
+import com.tacz.guns.block.DecorationLock;
 import com.tacz.guns.block.GunDisplayCaseBlock;
 import com.tacz.guns.block.GunDisplayCaseSlotHelper;
+import com.tacz.guns.block.StatueBlock;
 import com.tacz.guns.block.entity.GunDisplayCaseBlockEntity;
 import com.tacz.guns.client.input.InteractKey;
 import com.tacz.guns.config.client.RenderConfig;
@@ -23,6 +25,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -57,6 +60,13 @@ public class InteractKeyTextOverlay {
     private static void renderBlockText(GuiGraphics graphics, int width, int height, BlockHitResult blockHitResult, LocalPlayer player, Minecraft mc) {
         BlockPos blockPos = blockHitResult.getBlockPos();
         BlockState block = player.level().getBlockState(blockPos);
+        BlockState decoration = block;
+        if (block.getBlock() instanceof StatueBlock && block.getValue(StatueBlock.HALF) == DoubleBlockHalf.UPPER) {
+            decoration = player.level().getBlockState(blockPos.below());
+        }
+        if (decoration.hasProperty(DecorationLock.LOCKED) && decoration.getValue(DecorationLock.LOCKED)) {
+            return;
+        }
         if (block.getBlock() instanceof GunDisplayCaseBlock) {
             renderDisplayCaseText(graphics, width, height, blockHitResult, player, mc, block);
             return;

@@ -1,5 +1,6 @@
 package com.tacz.guns.block.entity;
 
+import com.tacz.guns.block.DecorationLock;
 import com.tacz.guns.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,6 +23,10 @@ public class StatueBlockEntity extends BlockEntity {
     public static final BlockEntityType<StatueBlockEntity> TYPE = BlockEntityType.Builder.of(StatueBlockEntity::new, ModBlocks.STATUE).build(null);
     private static final String ITEM_TAG = "Item";
     private ItemStack gunItem = ItemStack.EMPTY;
+
+    public boolean isDecorationLocked() {
+        return getBlockState().getValue(DecorationLock.LOCKED);
+    }
 
     public StatueBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(TYPE, pPos, pBlockState);
@@ -47,6 +52,9 @@ public class StatueBlockEntity extends BlockEntity {
     }
 
     public void setGun(ItemStack stack) {
+        if (isDecorationLocked()) {
+            return;
+        }
         this.dropItem();
         this.gunItem = stack.copy();
         if (level != null) {
@@ -57,7 +65,7 @@ public class StatueBlockEntity extends BlockEntity {
     }
 
     public void dropItem() {
-        if (!gunItem.isEmpty() && level != null) {
+        if (!isDecorationLocked() && !gunItem.isEmpty() && level != null) {
             Direction direction = getBlockState().getValue(FACING);
             Block.popResource(level, worldPosition.relative(direction).above(), gunItem);
             this.gunItem = ItemStack.EMPTY;
@@ -85,9 +93,7 @@ public class StatueBlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        tag.put(ITEM_TAG, gunItem.save(new CompoundTag()));
-        return tag;
+        return saveWithoutMetadata();
     }
 
     // TODO

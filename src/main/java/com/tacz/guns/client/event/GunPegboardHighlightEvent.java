@@ -3,6 +3,7 @@ package com.tacz.guns.client.event;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.tacz.guns.block.DecorationLock;
 import com.tacz.guns.block.GunPegboardBlock;
 import com.tacz.guns.block.GunPegboardSlotHelper;
 import com.tacz.guns.block.entity.GunPegboardBlockEntity;
@@ -28,7 +29,7 @@ public class GunPegboardHighlightEvent {
         Entity cameraEntity = worldRenderContext.camera().getEntity();
         Level level = cameraEntity.level();
         BlockState state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof GunPegboardBlock)) {
+        if (!(state.getBlock() instanceof GunPegboardBlock) || state.getValue(DecorationLock.LOCKED)) {
             return true;
         }
         BlockEntity blockEntity = level.getBlockEntity(pos);

@@ -1,5 +1,6 @@
 package com.tacz.guns.block.entity;
 
+import com.tacz.guns.block.DecorationLock;
 import com.tacz.guns.block.GunPegboardBlock;
 import com.tacz.guns.block.GunPegboardSlotHelper;
 import com.tacz.guns.block.PegboardShape;
@@ -39,6 +40,10 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
     private int color = -1;
     private boolean inheritedColor;
     private final DisplayGunSlot[] displaySlots = new DisplayGunSlot[SLOT_COUNT];
+
+    public boolean isDecorationLocked() {
+        return getBlockState().getValue(DecorationLock.LOCKED);
+    }
 
     public GunPegboardBlockEntity(BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
@@ -110,7 +115,7 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
     }
 
     public boolean setItem(int slot, ItemStack stack) {
-        if (!GunPegboardSlotHelper.isSlotActive(getBlockState(), slot) || !items[slot].isEmpty()) {
+        if (isDecorationLocked() || !GunPegboardSlotHelper.isSlotActive(getBlockState(), slot) || !items[slot].isEmpty()) {
             return false;
         }
         ItemStack stored = stack.copy();
@@ -124,7 +129,7 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
 
     /** Fill empty slots in one update when creating a display wall. */
     public boolean setItems(Map<Integer, ItemStack> stacks) {
-        if (stacks.isEmpty() || stacks.size() > SLOT_COUNT) {
+        if (isDecorationLocked() || stacks.isEmpty() || stacks.size() > SLOT_COUNT) {
             return false;
         }
         for (Map.Entry<Integer, ItemStack> entry : stacks.entrySet()) {
@@ -146,7 +151,7 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
     }
 
     public boolean rotateItem(int slot) {
-        if (!GunPegboardSlotHelper.isSlotActive(getBlockState(), slot) || items[slot].isEmpty()) {
+        if (isDecorationLocked() || !GunPegboardSlotHelper.isSlotActive(getBlockState(), slot) || items[slot].isEmpty()) {
             return false;
         }
         rotations[slot] = (byte) ((rotations[slot] + 1) & 7);
@@ -156,7 +161,7 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
     }
 
     public boolean dropItem(int slot) {
-        if (!isValidSlot(slot) || items[slot].isEmpty() || level == null) {
+        if (isDecorationLocked() || !isValidSlot(slot) || items[slot].isEmpty() || level == null) {
             return false;
         }
         Direction facing = GunPegboardSlotHelper.getSlotFacing(getBlockState(), slot);
@@ -169,7 +174,7 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
     }
 
     public boolean removeItem(int slot) {
-        if (!isValidSlot(slot) || items[slot].isEmpty()) {
+        if (isDecorationLocked() || !isValidSlot(slot) || items[slot].isEmpty()) {
             return false;
         }
         items[slot] = ItemStack.EMPTY;
@@ -180,7 +185,7 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
     }
 
     public void dropAllItems() {
-        if (level == null) {
+        if (isDecorationLocked() || level == null) {
             return;
         }
         for (int i = 0; i < SLOT_COUNT; i++) {
@@ -217,7 +222,7 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
                 if (displaySlots[slot] != null) displaySlots[slot].transformed();
                 boolean removedFace = slot >= SLOTS_PER_FACE
                         && previous.getValue(GunPegboardBlock.SHAPE) != state.getValue(GunPegboardBlock.SHAPE);
-                if (level != null && !level.isClientSide() && !items[slot].isEmpty()
+                if (!isDecorationLocked() && level != null && !level.isClientSide() && !items[slot].isEmpty()
                         && (!GunPegboardSlotHelper.isSlotActive(state, slot) || removedFace)) {
                     Block.popResource(level, worldPosition.relative(GunPegboardSlotHelper.getSlotFacing(previous, slot)), items[slot]);
                     items[slot] = ItemStack.EMPTY;

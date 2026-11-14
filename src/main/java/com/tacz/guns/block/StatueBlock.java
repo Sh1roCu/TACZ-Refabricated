@@ -1,5 +1,6 @@
 package com.tacz.guns.block;
 
+import cn.sh1rocu.tacz.api.extension.IBlockChange;
 import cn.sh1rocu.tacz.api.extension.IBlockExtension;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.block.entity.StatueBlockEntity;
@@ -11,10 +12,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -29,7 +32,7 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class StatueBlock extends BaseEntityBlock implements IBlockExtension {
+public class StatueBlock extends BaseEntityBlock implements IBlockExtension, IBlockChange {
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
@@ -37,6 +40,7 @@ public class StatueBlock extends BaseEntityBlock implements IBlockExtension {
         super(Properties.of().sound(SoundType.STONE).strength(2.0F, 3.0F).noOcclusion().pushReaction(PushReaction.DESTROY));
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(HALF, DoubleBlockHalf.LOWER)
+                .setValue(DecorationLock.LOCKED, false)
                 .setValue(FACING, Direction.NORTH)
         );
     }
@@ -49,7 +53,7 @@ public class StatueBlock extends BaseEntityBlock implements IBlockExtension {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(HALF, FACING);
+        builder.add(HALF, FACING, DecorationLock.LOCKED);
     }
 
     @Nullable
@@ -60,6 +64,9 @@ public class StatueBlock extends BaseEntityBlock implements IBlockExtension {
 
     @Override
     public InteractionResult use(BlockState pState, Level level, BlockPos pos, Player player, InteractionHand pHand, BlockHitResult pHit) {
+        if (player.getItemInHand(pHand).is(Items.DEBUG_STICK)) {
+            return InteractionResult.PASS;
+        }
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         } else {
@@ -68,7 +75,7 @@ public class StatueBlock extends BaseEntityBlock implements IBlockExtension {
             }
 
             BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof StatueBlockEntity statueBlockEntity) {
+            if (blockEntity instanceof StatueBlockEntity statueBlockEntity && !statueBlockEntity.isDecorationLocked()) {
                 ItemStack stack = player.getItemInHand(pHand);
                 if (stack.getItem() instanceof IGun) {
                     statueBlockEntity.setGun(stack);
@@ -105,6 +112,22 @@ public class StatueBlock extends BaseEntityBlock implements IBlockExtension {
             world.setBlock(above, state.setValue(HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
             world.blockUpdated(pos, Blocks.AIR);
             state.updateNeighbourShapes(world, pos, Block.UPDATE_ALL);
+        }
+    }
+
+    @Override
+    public void onBlockStateChange(LevelReader level, BlockPos pos, BlockState oldState, BlockState newState) {
+        if (!(level instanceof Level world) || world.isClientSide() || !oldState.is(this) || !newState.is(this)
+                || oldState.getValue(DecorationLock.LOCKED).equals(newState.getValue(DecorationLock.LOCKED))) {
+            return;
+        }
+        DoubleBlockHalf half = newState.getValue(HALF);
+        BlockPos otherPos = half == DoubleBlockHalf.LOWER ? pos.above() : pos.below();
+        BlockState otherState = world.getBlockState(otherPos);
+        if (otherState.is(this) && otherState.getValue(HALF) != half
+                && !otherState.getValue(DecorationLock.LOCKED).equals(newState.getValue(DecorationLock.LOCKED))) {
+            world.setBlock(otherPos, otherState.setValue(DecorationLock.LOCKED, newState.getValue(DecorationLock.LOCKED)),
+                    Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
         }
     }
 

@@ -56,6 +56,9 @@ public class GunPegboardRenderer implements BlockEntityRenderer<GunPegboardBlock
     }
 
     private static void renderPlacementPreview(GunPegboardBlockEntity blockEntity, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        if (blockEntity.isDecorationLocked()) {
+            return;
+        }
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         Level level = blockEntity.getLevel();

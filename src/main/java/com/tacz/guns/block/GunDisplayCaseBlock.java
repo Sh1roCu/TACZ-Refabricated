@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -90,6 +91,7 @@ public class GunDisplayCaseBlock extends BaseEntityBlock {
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(LOCKED, true)
+                .setValue(DecorationLock.LOCKED, false)
                 .setValue(LEFT, false)
                 .setValue(RIGHT, false)
                 .setValue(UP, false)
@@ -98,7 +100,7 @@ public class GunDisplayCaseBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, LOCKED, LEFT, RIGHT, UP, DOWN);
+        builder.add(FACING, LOCKED, LEFT, RIGHT, UP, DOWN, DecorationLock.LOCKED);
     }
 
     @Nullable
@@ -145,6 +147,9 @@ public class GunDisplayCaseBlock extends BaseEntityBlock {
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack held = player.getItemInHand(hand);
+        if (held.is(Items.DEBUG_STICK)) {
+            return InteractionResult.PASS;
+        }
         boolean holdingGun = held.getItem() instanceof IGun;
         if (player.isShiftKeyDown()) {
             if (player.getMainHandItem().getItem() instanceof IGun) {

@@ -3,6 +3,7 @@ package com.tacz.guns.client.event;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.tacz.guns.block.DecorationLock;
 import com.tacz.guns.block.GunDisplayCaseBlock;
 import com.tacz.guns.block.GunDisplayCaseSlotHelper;
 import com.tacz.guns.block.entity.GunDisplayCaseBlockEntity;
@@ -28,7 +29,7 @@ public class GunDisplayCaseHighlightEvent {
         Entity cameraEntity = context.camera().getEntity();
         Level level = cameraEntity.level();
         BlockState state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof GunDisplayCaseBlock) || state.getValue(GunDisplayCaseBlock.LOCKED)) {
+        if (!(state.getBlock() instanceof GunDisplayCaseBlock) || state.getValue(DecorationLock.LOCKED) || state.getValue(GunDisplayCaseBlock.LOCKED)) {
             return true;
         }
         BlockEntity blockEntity = level.getBlockEntity(pos);

@@ -59,7 +59,7 @@ public class GunPegboardBlock extends BaseEntityBlock {
     public GunPegboardBlock(boolean glowing) {
         super(Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(5.0F, 6.0F).noOcclusion().lightLevel(state -> glowing ? 10 : 0).pushReaction(PushReaction.DESTROY));
         this.glowing = glowing;
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(DYED, false).setValue(SHAPE, PegboardShape.STRAIGHT));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(DYED, false).setValue(DecorationLock.LOCKED, false).setValue(SHAPE, PegboardShape.STRAIGHT));
     }
 
     public boolean isGlowing() {
@@ -68,7 +68,7 @@ public class GunPegboardBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, DYED, SHAPE);
+        builder.add(FACING, DYED, SHAPE, DecorationLock.LOCKED);
     }
 
     @Nullable
@@ -128,6 +128,9 @@ public class GunPegboardBlock extends BaseEntityBlock {
 
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+        if (state.getValue(DecorationLock.LOCKED) && state.getValue(SHAPE) != PegboardShape.STRAIGHT) {
+            return state;
+        }
         return state.setValue(SHAPE, getConnectedShape(state, level, pos));
     }
 
