@@ -1,8 +1,8 @@
 package com.tacz.guns.network.message;
 
 import com.tacz.guns.GunMod;
-import com.tacz.guns.api.item.IAttachment;
 import com.tacz.guns.advancement.GunRefitTrigger;
+import com.tacz.guns.api.item.IAttachment;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.network.NetworkHandler;
@@ -27,7 +27,7 @@ public class ClientMessageSetAttachmentVariant implements FabricPacket {
     private final ResourceLocation variantId;
 
     public ClientMessageSetAttachmentVariant(FriendlyByteBuf buf) {
-        this(buf.readInt(), buf.readEnum(AttachmentType.class), buf.readResourceLocation());
+        this(buf.readInt(), buf.readEnum(AttachmentType.class), buf.readBoolean() ? buf.readResourceLocation() : null);
     }
 
     public ClientMessageSetAttachmentVariant(int gunSlotIndex, AttachmentType attachmentType, @Nullable ResourceLocation variantId) {
