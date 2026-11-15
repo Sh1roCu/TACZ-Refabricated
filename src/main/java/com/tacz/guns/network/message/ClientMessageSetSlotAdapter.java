@@ -27,7 +27,7 @@ public class ClientMessageSetSlotAdapter implements FabricPacket {
     private final ResourceLocation adapterId;
 
     public ClientMessageSetSlotAdapter(FriendlyByteBuf buf) {
-        this(buf.readInt(), buf.readEnum(AttachmentType.class), buf.readResourceLocation());
+        this(buf.readInt(), buf.readEnum(AttachmentType.class), buf.readBoolean() ? buf.readResourceLocation() : null);
     }
 
     public ClientMessageSetSlotAdapter(int gunSlotIndex, AttachmentType attachmentType, @Nullable ResourceLocation adapterId) {
