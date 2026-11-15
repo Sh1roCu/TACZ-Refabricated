@@ -14,8 +14,11 @@ import com.tacz.guns.client.resource.pojo.display.attachment.ScopeLensConfig;
 import com.tacz.guns.client.resource.pojo.display.gun.TextShow;
 import com.tacz.guns.client.resource.pojo.model.BedrockModelPOJO;
 import com.tacz.guns.client.resource.pojo.model.BedrockVersion;
+import com.tacz.guns.client.resource.pojo.model.BonesItem;
 import com.tacz.guns.compat.ar.ARCompat;
 import com.tacz.guns.compat.iris.IrisCompat;
+import com.tacz.guns.config.ClientConfig;
+import com.tacz.guns.config.client.RenderConfig;
 import com.tacz.guns.util.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -45,6 +48,7 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
     private static final String OCULAR_NODE = "ocular";
     private static final String OCULAR_SIGHT_NODE = "ocular_sight";
     private static final String OCULAR_SCOPE_NODE = "ocular_scope";
+    private static final Pattern OCULAR_PATTERN = Pattern.compile("^(" + OCULAR_NODE + "|" + OCULAR_SIGHT_NODE + "|" + OCULAR_SCOPE_NODE + ")(_(\\d+))?$");
     private static final String RANGEFINDER_IMPACT_PREDICTION_NODE = "rangefinder_impact_prediction_pos";
     private static final Pattern LASER_BEAM_PATTERN = Pattern.compile("^laser_beam(_(\\d+))?$");
 
@@ -79,11 +83,9 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             path = getPath(modelMap.get(SCOPE_VIEW_NODE + '_' + i++));
         }
         // 初始化 ocular 的 node path
-        String ocularRegex = "^(" + OCULAR_NODE + "|" + OCULAR_SIGHT_NODE + "|" + OCULAR_SCOPE_NODE + ")(_(\\d+))?$";
-        Pattern ocularPattern = Pattern.compile(ocularRegex);
         TreeMap<Integer, OcularWrapper> map = new TreeMap<>();
         for (Map.Entry<String, ModelRendererWrapper> entry : modelMap.entrySet()) {
-            Matcher matcher = ocularPattern.matcher(entry.getKey());
+            Matcher matcher = OCULAR_PATTERN.matcher(entry.getKey());
             if (matcher.matches()) {
                 int num = 1;
                 String numStr = matcher.group(3);
@@ -115,6 +117,22 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
 
         scopeBodyPath = getPath(modelMap.get(SCOPE_BODY_NODE));
         ocularRingPath = getPath(modelMap.get(OCULAR_RING_NODE));
+    }
+
+    @Override
+    protected float getExtraCubeInflate(BonesItem bone) {
+        if (ClientConfig.CLIENT_CONFIG_SPEC == null || !ClientConfig.CLIENT_CONFIG_SPEC.isLoaded()
+                || !RenderConfig.ENABLE_OCULAR_INFLATE.get()) {
+            return 0;
+        }
+        // The stencil draw includes child parts. The bone index is complete before cubes are baked.
+        for (int i = 0; bone != null && i < indexBones.size(); i++) {
+            if (OCULAR_PATTERN.matcher(bone.getName()).matches()) {
+                return RenderConfig.OCULAR_INFLATE.get().floatValue();
+            }
+            bone = indexBones.get(bone.getParent());
+        }
+        return 0;
     }
 
     @Nullable
@@ -340,7 +358,9 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         }
     }
 
-    /** Inspect geometry only; functional renderers must not run a second time for the bounds probe. */
+    /**
+     * Inspect geometry only; functional renderers must not run a second time for the bounds probe.
+     */
     private void captureLensPartBounds(PoseStack poseStack, BedrockPart part, VertexConsumer bounds) {
         poseStack.pushPose();
         part.translateAndRotateAndScale(poseStack);
@@ -349,7 +369,9 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         poseStack.popPose();
     }
 
-    /** Resolve functional readouts now, before the shared model is animated/reset for another draw. */
+    /**
+     * Resolve functional readouts now, before the shared model is animated/reset for another draw.
+     */
     private void captureLensDivision(PoseStack poseStack, ItemDisplayContext context, RenderType type,
                                      int light, int overlay, List<BedrockPart> division, MultiBufferSource buffers) {
         List<IFunctionalRenderer> previous = delegateRenderers;
@@ -365,11 +387,11 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
     }
 
     private void renderBoth(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, MultiBufferSource bufferSource) {
-		// 当加速渲染加载则使用加速渲染提供的方法进行加速
-		if (ARCompat.shouldAccelerate()) {
-			renderBothAccelerated(matrixStack, transformType, renderType, light, overlay, bufferSource);
-			return;
-		}
+        // 当加速渲染加载则使用加速渲染提供的方法进行加速
+        if (ARCompat.shouldAccelerate()) {
+            renderBothAccelerated(matrixStack, transformType, renderType, light, overlay, bufferSource);
+            return;
+        }
 
         RenderHelper.enableItemEntityStencilTest();
         // 清空模板缓冲区、准备绘制模板缓冲
@@ -400,10 +422,10 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
     }
 
     private void renderSight(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, MultiBufferSource bufferSource) {
-		if (ARCompat.shouldAccelerate()) {
-			renderSightAccelerated(matrixStack, transformType, renderType, light, overlay, bufferSource);
-			return;
-		}
+        if (ARCompat.shouldAccelerate()) {
+            renderSightAccelerated(matrixStack, transformType, renderType, light, overlay, bufferSource);
+            return;
+        }
 
         RenderHelper.enableItemEntityStencilTest();
         // 清空模板缓冲区、准备绘制模板缓冲
@@ -424,10 +446,10 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
     }
 
     private void renderScope(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, MultiBufferSource bufferSource) {
-		if (ARCompat.shouldAccelerate()) {
-			renderScopeAccelerated(matrixStack, transformType, renderType, light, overlay, bufferSource);
-			return;
-		}
+        if (ARCompat.shouldAccelerate()) {
+            renderScopeAccelerated(matrixStack, transformType, renderType, light, overlay, bufferSource);
+            return;
+        }
 
         RenderHelper.enableItemEntityStencilTest();
         // 清空模板缓冲区、准备绘制模板缓冲
@@ -455,28 +477,28 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         super.render(matrixStack, transformType, renderType, light, overlay, bufferSource);
     }
 
-	public void renderBothAccelerated(
-			PoseStack matrixStack,
-			ItemDisplayContext transformType,
-			RenderType renderType,
-			int light,
-			int overlay
-	) {
-		renderBothAccelerated(matrixStack, transformType, renderType, light, overlay, RenderHelper.getBufferSource(transformType));
-	}
+    public void renderBothAccelerated(
+            PoseStack matrixStack,
+            ItemDisplayContext transformType,
+            RenderType renderType,
+            int light,
+            int overlay
+    ) {
+        renderBothAccelerated(matrixStack, transformType, renderType, light, overlay, RenderHelper.getBufferSource(transformType));
+    }
 
-	public void renderBothAccelerated(
-			PoseStack matrixStack,
-			ItemDisplayContext transformType,
-			RenderType renderType,
-			int light,
-			int overlay,
-			MultiBufferSource bufferSource
-	) {
-		// 缓存PoseStack防止之后坐标变换出现问题
-		var poseStack = new PoseStack();
-		poseStack.last().pose().set(matrixStack.last().pose());
-		poseStack.last().normal().set(matrixStack.last().normal());
+    public void renderBothAccelerated(
+            PoseStack matrixStack,
+            ItemDisplayContext transformType,
+            RenderType renderType,
+            int light,
+            int overlay,
+            MultiBufferSource bufferSource
+    ) {
+        // 缓存PoseStack防止之后坐标变换出现问题
+        var poseStack = new PoseStack();
+        poseStack.last().pose().set(matrixStack.last().pose());
+        poseStack.last().normal().set(matrixStack.last().normal());
 
         // 获取先前的层前/层后任务, 防止覆盖
         Runnable before = ARCompat.getRenderBeforeFunction();
@@ -507,10 +529,10 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             after.run();
         });
 
-		if (ocularRingPath != null) {
-			// 渲染目镜外环
-			renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularRingPath, bufferSource);
-		}
+        if (ocularRingPath != null) {
+            // 渲染目镜外环
+            renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularRingPath, bufferSource);
+        }
 
         // 重置外环层, 还原现场, 进行下一步绘制
         ARCompat.resetRenderLayer();
@@ -534,8 +556,8 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
             BufferUploader.invalidate();
 
-			// 渲染目镜以写入模板桓冲值 (暂时只渲染 ocular_scope)
-			renderOcularStencil(poseStack, transformType, renderType, light, overlay, true, bufferSource);
+            // 渲染目镜以写入模板桓冲值 (暂时只渲染 ocular_scope)
+            renderOcularStencil(poseStack, transformType, renderType, light, overlay, true, bufferSource);
 
             // 重新绑回VAO
             GL30.glBindVertexArray(vao);
@@ -557,10 +579,10 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
             BufferUploader.invalidate();
 
-			// 渲染目镜以写入模板桓冲值 (渲染其他的目镜)
-			renderOcularStencil(poseStack, transformType, renderType, light, overlay, false, bufferSource);
-			// 渲染目镜遮罩和划分
-			renderOcularAndDivision(poseStack, transformType, renderType, light, overlay, true, bufferSource);
+            // 渲染目镜以写入模板桓冲值 (渲染其他的目镜)
+            renderOcularStencil(poseStack, transformType, renderType, light, overlay, false, bufferSource);
+            // 渲染目镜遮罩和划分
+            renderOcularAndDivision(poseStack, transformType, renderType, light, overlay, true, bufferSource);
 
             // 重新绑回VAO
             GL30.glBindVertexArray(vao);
@@ -576,10 +598,10 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             after.run();
         });
 
-		if (scopeBodyPath != null) {
-			// 渲染镜身
-			renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath, bufferSource);
-		}
+        if (scopeBodyPath != null) {
+            // 渲染镜身
+            renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath, bufferSource);
+        }
 
         // 重置镜身层, 还原现场, 进行最后一步其他部分绘制
         ARCompat.resetRenderLayer();
@@ -589,18 +611,18 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         // 设置其他的渲染层, 保证其在最后一部分渲染
         ARCompat.setRenderLayer(-943 + 2);
 
-		// 渲染其他部分
-		super.render(matrixStack, transformType, renderType, light, overlay, bufferSource);
+        // 渲染其他部分
+        super.render(matrixStack, transformType, renderType, light, overlay, bufferSource);
 
         // 重置层, 还原现场, 完成配件渲染
         ARCompat.resetRenderLayer();
     }
 
-	private void renderSightAccelerated(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, MultiBufferSource bufferSource) {
-		// 缓存PoseStack防止之后坐标变换出现问题
-		var poseStack = new PoseStack();
-		poseStack.last().pose().set(matrixStack.last().pose());
-		poseStack.last().normal().set(matrixStack.last().normal());
+    private void renderSightAccelerated(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, MultiBufferSource bufferSource) {
+        // 缓存PoseStack防止之后坐标变换出现问题
+        var poseStack = new PoseStack();
+        poseStack.last().pose().set(matrixStack.last().pose());
+        poseStack.last().normal().set(matrixStack.last().normal());
 
         // 获取先前的层前任务, 防止覆盖
         Runnable before = ARCompat.getRenderBeforeFunction();
@@ -624,10 +646,10 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
             BufferUploader.invalidate();
 
-			// 渲染目镜以写入模板桓冲值
-			renderOcularStencil(poseStack, transformType, renderType, light, overlay, false, bufferSource);
-			// 渲染划分
-			renderDivisionOnly(poseStack, transformType, renderType, light, overlay, bufferSource);
+            // 渲染目镜以写入模板桓冲值
+            renderOcularStencil(poseStack, transformType, renderType, light, overlay, false, bufferSource);
+            // 渲染划分
+            renderDivisionOnly(poseStack, transformType, renderType, light, overlay, bufferSource);
 
             // 重新绑回VAO
             GL30.glBindVertexArray(vao);
@@ -640,22 +662,22 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             RenderHelper.disableItemEntityStencilTest();
         });
 
-		// 渲染其他部分
-		if (scopeBodyPath != null) {
-			renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath, bufferSource);
-		}
-		super.render(matrixStack, transformType, renderType, light, overlay, bufferSource);
+        // 渲染其他部分
+        if (scopeBodyPath != null) {
+            renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath, bufferSource);
+        }
+        super.render(matrixStack, transformType, renderType, light, overlay, bufferSource);
 
         // 重置层, 还原现场, 完成渲染
         ARCompat.resetRenderLayer();
         ARCompat.resetRenderBeforeFunction();
     }
 
-	private void renderScopeAccelerated(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, MultiBufferSource bufferSource) {
-		// 缓存PoseStack防止之后坐标变换出现问题
-		var poseStack = new PoseStack();
-		poseStack.last().pose().set(matrixStack.last().pose());
-		poseStack.last().normal().set(matrixStack.last().normal());
+    private void renderScopeAccelerated(PoseStack matrixStack, ItemDisplayContext transformType, RenderType renderType, int light, int overlay, MultiBufferSource bufferSource) {
+        // 缓存PoseStack防止之后坐标变换出现问题
+        var poseStack = new PoseStack();
+        poseStack.last().pose().set(matrixStack.last().pose());
+        poseStack.last().normal().set(matrixStack.last().normal());
 
         // 获取先前的层前/层后任务, 防止覆盖
         Runnable before = ARCompat.getRenderBeforeFunction();
@@ -686,10 +708,10 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             after.run();
         });
 
-		// 渲染目镜外环
-		if (ocularRingPath != null) {
-			renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularRingPath, bufferSource);
-		}
+        // 渲染目镜外环
+        if (ocularRingPath != null) {
+            renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularRingPath, bufferSource);
+        }
 
         // 重置外环层, 还原现场, 进行下一步绘制
         ARCompat.resetRenderLayer();
@@ -713,8 +735,8 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
             BufferUploader.invalidate();
 
-			// 渲染目镜以写入模板桓冲值
-			renderOcularStencil(poseStack, transformType, renderType, light, overlay, false, bufferSource);
+            // 渲染目镜以写入模板桓冲值
+            renderOcularStencil(poseStack, transformType, renderType, light, overlay, false, bufferSource);
 
             // 重新绑回VAO
             GL30.glBindVertexArray(vao);
@@ -736,8 +758,8 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             // 并且需要Invalidate一下原版缓存的VAO绑定, 防止他直接认为缓存还有效导致绑定错误的VAO
             BufferUploader.invalidate();
 
-			// 渲染目镜遮罩和划分
-			renderOcularAndDivision(poseStack, transformType, renderType, light, overlay, false, bufferSource);
+            // 渲染目镜遮罩和划分
+            renderOcularAndDivision(poseStack, transformType, renderType, light, overlay, false, bufferSource);
 
             // 重新绑回VAO
             GL30.glBindVertexArray(vao);
@@ -753,10 +775,10 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
             after.run();
         });
 
-		// 渲染镜身
-		if (scopeBodyPath != null) {
-			renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath, bufferSource);
-		}
+        // 渲染镜身
+        if (scopeBodyPath != null) {
+            renderTempPart(matrixStack, transformType, renderType, light, overlay, scopeBodyPath, bufferSource);
+        }
 
         // 重置镜身层, 还原现场, 进行最后一步其他部分绘制
         ARCompat.resetRenderLayer();
@@ -766,8 +788,8 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         // 设置其他的渲染层, 保证其在最后一部分渲染
         ARCompat.setRenderLayer(-943 + 2);
 
-		// 渲染其他部分
-		super.render(matrixStack, transformType, renderType, light, overlay, bufferSource);
+        // 渲染其他部分
+        super.render(matrixStack, transformType, renderType, light, overlay, bufferSource);
 
         // 重置层, 还原现场, 完成配件渲染
         ARCompat.resetRenderLayer();
