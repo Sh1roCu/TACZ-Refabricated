@@ -1,5 +1,6 @@
 package com.tacz.guns.block;
 
+import cn.sh1rocu.tacz.api.extension.IPistonPushReaction;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.block.entity.GunDisplayCaseBlockEntity;
 import com.tacz.guns.config.util.GunPegboardItemConfigRead;
@@ -36,10 +37,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
-public class GunDisplayCaseBlock extends BaseEntityBlock {
+public class GunDisplayCaseBlock extends BaseEntityBlock implements IPistonPushReaction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LOCKED = BooleanProperty.create("locked");
     public static final BooleanProperty LEFT = BooleanProperty.create("left");
@@ -87,7 +87,7 @@ public class GunDisplayCaseBlock extends BaseEntityBlock {
     );
 
     public GunDisplayCaseBlock() {
-        super(Properties.of().mapColor(MapColor.METAL).sound(SoundType.GLASS).strength(0.5F, 1200.0F).noOcclusion().pushReaction(PushReaction.DESTROY));
+        super(Properties.of().mapColor(MapColor.METAL).sound(SoundType.GLASS).strength(0.5F, 1200.0F).noOcclusion());
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(LOCKED, true)
@@ -241,6 +241,11 @@ public class GunDisplayCaseBlock extends BaseEntityBlock {
     @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    public PushReaction getPistonPushReaction(BlockState state) {
+        return state.getValue(DecorationLock.LOCKED) ? PushReaction.BLOCK : PushReaction.DESTROY;
     }
 
     private BlockState updateConnections(LevelAccessor level, BlockPos pos, BlockState state, @Nullable Set<BlockPos> forceConnectedPositions) {

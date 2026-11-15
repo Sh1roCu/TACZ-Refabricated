@@ -65,7 +65,13 @@ public class StatueBlockEntity extends BlockEntity {
     }
 
     public void dropItem() {
-        if (!isDecorationLocked() && !gunItem.isEmpty() && level != null) {
+        if (!isDecorationLocked()) {
+            dropItemOnRemoval();
+        }
+    }
+
+    public void dropItemOnRemoval() {
+        if (!gunItem.isEmpty() && level != null) {
             Direction direction = getBlockState().getValue(FACING);
             Block.popResource(level, worldPosition.relative(direction).above(), gunItem);
             this.gunItem = ItemStack.EMPTY;

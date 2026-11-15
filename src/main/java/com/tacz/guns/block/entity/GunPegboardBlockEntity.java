@@ -185,7 +185,7 @@ public class GunPegboardBlockEntity extends BlockEntity implements GunDisplayBlo
     }
 
     public void dropAllItems() {
-        if (isDecorationLocked() || level == null) {
+        if (level == null) {
             return;
         }
         for (int i = 0; i < SLOT_COUNT; i++) {

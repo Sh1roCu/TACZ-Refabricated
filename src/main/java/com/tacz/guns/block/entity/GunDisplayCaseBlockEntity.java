@@ -131,7 +131,7 @@ public class GunDisplayCaseBlockEntity extends BlockEntity implements GunDisplay
     }
 
     public void dropAllItems() {
-        if (isDecorationLocked() || level == null) {
+        if (level == null) {
             return;
         }
         Direction facing = getBlockState().getValue(GunDisplayCaseBlock.FACING);

@@ -2,6 +2,7 @@ package com.tacz.guns.block;
 
 import cn.sh1rocu.tacz.api.extension.IBlockChange;
 import cn.sh1rocu.tacz.api.extension.IBlockExtension;
+import cn.sh1rocu.tacz.api.extension.IPistonPushReaction;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.block.entity.StatueBlockEntity;
 import com.tacz.guns.init.ModBlocks;
@@ -32,12 +33,12 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class StatueBlock extends BaseEntityBlock implements IBlockExtension, IBlockChange {
+public class StatueBlock extends BaseEntityBlock implements IBlockExtension, IBlockChange, IPistonPushReaction {
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public StatueBlock() {
-        super(Properties.of().sound(SoundType.STONE).strength(2.0F, 3.0F).noOcclusion().pushReaction(PushReaction.DESTROY));
+        super(Properties.of().sound(SoundType.STONE).strength(2.0F, 3.0F).noOcclusion());
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(HALF, DoubleBlockHalf.LOWER)
                 .setValue(DecorationLock.LOCKED, false)
@@ -152,7 +153,7 @@ public class StatueBlock extends BaseEntityBlock implements IBlockExtension, IBl
         if (!pState.is(pNewState.getBlock())) {
             BlockEntity blockentity = pLevel.getBlockEntity(pPos);
             if (blockentity instanceof StatueBlockEntity statueBlockEntity) {
-                statueBlockEntity.dropItem();
+                statueBlockEntity.dropItemOnRemoval();
             }
             super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
         }
@@ -161,6 +162,11 @@ public class StatueBlock extends BaseEntityBlock implements IBlockExtension, IBl
     @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    public PushReaction getPistonPushReaction(BlockState state) {
+        return state.getValue(DecorationLock.LOCKED) ? PushReaction.BLOCK : PushReaction.DESTROY;
     }
 
     @Override

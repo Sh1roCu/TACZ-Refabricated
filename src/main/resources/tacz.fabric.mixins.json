@@ -11,6 +11,7 @@
   "mixins": [
     "common.AbstractMinecartMixin",
     "common.ArmorStandMixin",
+    "common.BlockStateBaseMixin",
     "common.BundlePacketMixin",
     "common.ClipContextMixin",
     "common.EntityMixin",

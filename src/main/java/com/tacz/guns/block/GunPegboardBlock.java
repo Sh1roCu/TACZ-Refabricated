@@ -1,5 +1,6 @@
 package com.tacz.guns.block;
 
+import cn.sh1rocu.tacz.api.extension.IPistonPushReaction;
 import com.tacz.guns.block.entity.GunPegboardBlockEntity;
 import com.tacz.guns.config.util.GunPegboardItemConfigRead;
 import com.tacz.guns.item.GunPegboardItem;
@@ -17,12 +18,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -42,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class GunPegboardBlock extends BaseEntityBlock {
+public class GunPegboardBlock extends BaseEntityBlock implements IPistonPushReaction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty DYED = BooleanProperty.create("dyed");
     public static final EnumProperty<PegboardShape> SHAPE = EnumProperty.create("shape", PegboardShape.class);
@@ -57,7 +53,7 @@ public class GunPegboardBlock extends BaseEntityBlock {
     }
 
     public GunPegboardBlock(boolean glowing) {
-        super(Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(5.0F, 6.0F).noOcclusion().lightLevel(state -> glowing ? 10 : 0).pushReaction(PushReaction.DESTROY));
+        super(Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(5.0F, 6.0F).noOcclusion().lightLevel(state -> glowing ? 10 : 0));
         this.glowing = glowing;
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(DYED, false).setValue(DecorationLock.LOCKED, false).setValue(SHAPE, PegboardShape.STRAIGHT));
     }
@@ -249,5 +245,10 @@ public class GunPegboardBlock extends BaseEntityBlock {
             ((DyeableLeatherItem) stack.getItem()).setColor(stack, pegboard.getColor());
         }
         return stack;
+    }
+
+    @Override
+    public PushReaction getPistonPushReaction(BlockState state) {
+        return state.getValue(DecorationLock.LOCKED) ? PushReaction.BLOCK : PushReaction.DESTROY;
     }
 }
