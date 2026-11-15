@@ -19,6 +19,13 @@ public class OtherClothConfig {
                     PreLoadConfig.override.save();
                 }).build());
 
+        other.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.tacz.common.other.hide_gun_pack_compatibility_warning"),
+                        OtherConfig.HIDE_GUN_PACK_COMPATIBILITY_WARNING.get())
+                .setDefaultValue(false).setSaveConsumer(value -> {
+                    OtherConfig.HIDE_GUN_PACK_COMPATIBILITY_WARNING.set(value);
+                    OtherConfig.HIDE_GUN_PACK_COMPATIBILITY_WARNING.save();
+                }).build());
+
         other.addEntry(entryBuilder.startIntField(Component.translatable("config.tacz.common.other.target_sound_distance"), OtherConfig.TARGET_SOUND_DISTANCE.get())
                 .setMin(0).setMax(Integer.MAX_VALUE).setDefaultValue(128).setTooltip(Component.translatable("config.tacz.common.other.target_sound_distance.desc"))
                 .setSaveConsumer(value -> {

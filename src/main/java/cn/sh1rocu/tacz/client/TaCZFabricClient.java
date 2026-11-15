@@ -25,15 +25,16 @@ import com.tacz.guns.init.CommonRegistry;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.network.message.handshake.SyncedEntityDataMappingS2CPacket;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.phys.BlockHitResult;
@@ -90,7 +91,8 @@ public class TaCZFabricClient implements ClientModInitializer {
         SwapItemWithOffHand.CALLBACK.register(InventoryEvent::onPlayerSwapMainHand);
         ClientPlayConnectionEvents.DISCONNECT.register(InventoryEvent::onPlayerLoggedOut);
 
-        ClientCommandRegistrationCallback.EVENT.register(PlayerEnterWorld::registerClientCommands);
+        CommandRegistrationCallback.EVENT.register(PlayerEnterWorld::registerClientCommands);
+        ClientReceiveMessageEvents.ALLOW_GAME.register(PlayerEnterWorld::onSystemChatReceived);
         ClientPlayConnectionEvents.JOIN.register(PlayerEnterWorld::onClientPlayerEnterWorld);
         PlayerEvent.LOGGED_IN.register(PlayerEnterWorld::onPlayerEnterWorld);
 

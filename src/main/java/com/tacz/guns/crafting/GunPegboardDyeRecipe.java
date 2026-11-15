@@ -2,6 +2,7 @@ package com.tacz.guns.crafting;
 
 import com.tacz.guns.init.ModRecipe;
 import com.tacz.guns.item.GunPegboardItem;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DyedItemColor;
@@ -39,7 +40,7 @@ public class GunPegboardDyeRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput container, net.minecraft.core.HolderLookup.Provider registryAccess) {
+    public ItemStack assemble(CraftingInput container, HolderLookup.Provider registryAccess) {
         ItemStack pegboard = ItemStack.EMPTY;
         List<DyeItem> dyes = new ArrayList<>();
         for (int slot = 0; slot < container.size(); slot++) {

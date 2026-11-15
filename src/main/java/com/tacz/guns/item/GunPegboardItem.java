@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 
@@ -21,11 +22,12 @@ public class GunPegboardItem extends BlockItem {
     }
 
     public static int getColor(ItemStack stack) {
-        return stack.getOrDefault(DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(-1, false)).rgb();
+        DyedItemColor color = stack.get(DataComponents.DYED_COLOR);
+        return color == null ? -1 : color.rgb();
     }
 
     public static void setColor(ItemStack stack, int color) {
-        stack.set(DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(color, false));
+        stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color, true));
     }
 
     public GunPegboardItem(Block block, Properties properties) {
